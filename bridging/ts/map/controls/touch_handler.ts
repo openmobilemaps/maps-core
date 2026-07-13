@@ -23,6 +23,8 @@ export interface TouchInterface {
     onClickConfirmed(posScreen: Vec2F): boolean;
     onDoubleClick(posScreen: Vec2F): boolean;
     onLongPress(posScreen: Vec2F): boolean;
+    onHover(posScreen: Vec2F): boolean;
+    onHoverComplete(): boolean;
     onMove(deltaScreen: Vec2F, confirmed: boolean, doubleClick: boolean): boolean;
     onMoveComplete(): boolean;
     onOneFingerDoubleClickMoveComplete(): boolean;
@@ -45,6 +47,8 @@ export enum TouchAction {
     UP = 2,
     SCROLL = 3,
     CANCEL = 4,
+    HOVER = 5,
+    HOVER_EXIT = 6,
 }
 
 export interface TouchHandler_statics {

@@ -15,6 +15,8 @@
 
 class MapCamera3dInterface;
 class MapInterface;
+class TrackedCoordinateCallbackInterface;
+class TrackedCoordinateInterface;
 
 class MapCameraInterface {
 public:
@@ -86,6 +88,8 @@ public:
     virtual ::Vec2F screenPosFromCoord(const ::Coord & coord) = 0;
 
     virtual ::Vec2F screenPosFromCoordZoom(const ::Coord & coord, float zoom) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<TrackedCoordinateInterface> createTrackedCoordinate(const ::Coord & coordinate, const /*not-null*/ std::shared_ptr<TrackedCoordinateCallbackInterface> & callback) = 0;
 
     virtual double mapUnitsFromPixels(double distancePx) = 0;
 

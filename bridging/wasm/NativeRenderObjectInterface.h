@@ -27,6 +27,7 @@ struct NativeRenderObjectInterface : ::djinni::JsInterface<::RenderObjectInterfa
     static bool hasCustomModelMatrix(const CppType& self);
     static bool isScreenSpaceCoords(const CppType& self);
     static em::val getCustomModelMatrix(const CppType& self);
+    static em::val getMaskingObject(const CppType& self);
     static void setHidden(const CppType& self, bool w_hidden);
     static bool isHidden(const CppType& self);
 

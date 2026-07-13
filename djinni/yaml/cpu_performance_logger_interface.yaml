@@ -8,7 +8,11 @@ cpp:
   typename: '::CpuPerformanceLoggerInterface'
   header: '"CpuPerformanceLoggerInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCCpuPerformanceLoggerInterface'
   pointer: true
   hash: '%s.hash'

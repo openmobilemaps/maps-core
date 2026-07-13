@@ -8,7 +8,11 @@ cpp:
   typename: '::ShaderProgramInterface'
   header: '"ShaderProgramInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCShaderProgramInterface'
   pointer: true
   hash: '%s.hash'

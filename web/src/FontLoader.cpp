@@ -20,7 +20,7 @@ FontLoaderResult FontLoader::loadFont(const Font &font) {
 
 static FontLoaderResult loadFontFromUrls(LoaderInterface &loader, const std::string &fontManifestUrl, const std::string &fontTextureUrl) {
   //return FontLoaderResult(nullptr, std::nullopt, LoaderStatus::ERROR_OTHER);
-    LogInfo << "Loading font data from " << fontManifestUrl << " / " <<= fontTextureUrl;
+    // LogInfo << "Loading font data from " << fontManifestUrl << " / " <<= fontTextureUrl;
     auto futManifest = loader.loadDataAsync(fontManifestUrl, std::nullopt).then([&](auto future) -> FontLoaderResult {
         auto loaderResult = future.get();
         if(loaderResult.status != LoaderStatus::OK) {

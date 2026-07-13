@@ -8,6 +8,9 @@ cpp:
   typename: '::SymbolPitchAlignment'
   header: '"SymbolPitchAlignment.h"'
   byValue: true
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCSymbolPitchAlignment'
   pointer: false

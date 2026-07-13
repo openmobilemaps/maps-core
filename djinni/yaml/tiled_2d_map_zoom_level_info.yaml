@@ -8,7 +8,11 @@ cpp:
   typename: '::Tiled2dMapZoomLevelInfo'
   header: '"Tiled2dMapZoomLevelInfo.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCTiled2dMapZoomLevelInfo'
   pointer: true
   hash: '%s.hash'

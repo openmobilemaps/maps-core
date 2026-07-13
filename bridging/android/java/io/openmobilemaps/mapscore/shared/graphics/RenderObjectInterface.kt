@@ -16,6 +16,8 @@ abstract class RenderObjectInterface {
 
     abstract fun getCustomModelMatrix(): ArrayList<Float>
 
+    abstract fun getMaskingObject(): io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?
+
     abstract fun setHidden(hidden: Boolean)
 
     abstract fun isHidden(): Boolean
@@ -58,6 +60,12 @@ abstract class RenderObjectInterface {
             return native_getCustomModelMatrix(this.nativeRef)
         }
         private external fun native_getCustomModelMatrix(_nativeRef: Long): ArrayList<Float>
+
+        override fun getMaskingObject(): io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMaskingObject(this.nativeRef)
+        }
+        private external fun native_getMaskingObject(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?
 
         override fun setHidden(hidden: Boolean) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

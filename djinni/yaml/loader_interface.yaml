@@ -8,7 +8,11 @@ cpp:
   typename: '::LoaderInterface'
   header: '"LoaderInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCLoaderInterface'
   pointer: true
   hash: '%s.hash'

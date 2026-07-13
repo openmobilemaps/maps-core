@@ -28,6 +28,8 @@ struct NativeTouchInterface : ::djinni::JsInterface<::TouchInterface, NativeTouc
     static bool onClickConfirmed(const CppType& self, const em::val& w_posScreen);
     static bool onDoubleClick(const CppType& self, const em::val& w_posScreen);
     static bool onLongPress(const CppType& self, const em::val& w_posScreen);
+    static bool onHover(const CppType& self, const em::val& w_posScreen);
+    static bool onHoverComplete(const CppType& self);
     static bool onMove(const CppType& self, const em::val& w_deltaScreen,bool w_confirmed,bool w_doubleClick);
     static bool onMoveComplete(const CppType& self);
     static bool onOneFingerDoubleClickMoveComplete(const CppType& self);

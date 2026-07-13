@@ -69,8 +69,10 @@ public:
     style(style) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
-        return std::make_unique<BackgroundVectorLayerDescription>(identifier, style, renderPassIndex,
-                                                                  interactable ? interactable->clone() : nullptr);
+        auto cloned = std::make_unique<BackgroundVectorLayerDescription>(identifier, style, renderPassIndex,
+                                                                         interactable ? interactable->clone() : nullptr);
+        copyRenderPassOptionsTo(*cloned);
+        return cloned;
     }
 
     virtual UsedKeysCollection getUsedKeys() const override {

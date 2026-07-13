@@ -8,6 +8,9 @@ cpp:
   typename: '::Tiled2dVectorSettings'
   header: '"Tiled2dVectorSettings.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCTiled2dVectorSettings'
   pointer: true

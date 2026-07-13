@@ -40,6 +40,10 @@ class IconInfo : public IconInfoInterface {
 
     virtual ::BlendMode getBlendMode() override;
 
+    virtual void setRotation(double angle) override;
+
+    virtual double getRotation() override;
+
   private:
     std::mutex dataMutex;
     std::string identifier;
@@ -49,4 +53,5 @@ class IconInfo : public IconInfoInterface {
     IconType type;
     Vec2F anchor;
     BlendMode blendMode;
+    double rotation = 0.0;
 };

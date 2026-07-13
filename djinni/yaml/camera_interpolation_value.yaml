@@ -8,7 +8,11 @@ cpp:
   typename: '::CameraInterpolationValue'
   header: '"CameraInterpolationValue.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCCameraInterpolationValue'
   pointer: true
   hash: '%s.hash'

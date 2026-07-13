@@ -4,7 +4,9 @@
 #pragma once
 
 #include "GraphicsObjectInterface.h"
+#include "MaskingObjectInterface.h"
 #include <memory>
+#include <optional>
 #include <vector>
 
 class RenderObjectInterface {
@@ -18,6 +20,8 @@ public:
     virtual bool isScreenSpaceCoords() = 0;
 
     virtual std::vector<float> getCustomModelMatrix() = 0;
+
+    virtual /*nullable*/ std::shared_ptr<::MaskingObjectInterface> getMaskingObject() = 0;
 
     virtual void setHidden(bool hidden) = 0;
 

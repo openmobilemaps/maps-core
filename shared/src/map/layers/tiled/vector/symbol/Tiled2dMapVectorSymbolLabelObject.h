@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "SymbolLineGeometryCache.h"
 #include "Vec2F.h"
 #include "RectD.h"
 #include "CircleD.h"
@@ -31,16 +32,6 @@
 
 class SymbolAnimationCoordinator;
 
-struct DistanceIndex {
-    int index;
-    double percentage;
-
-    DistanceIndex(int index_, double percentage_)
-    : index(std::move(index_))
-    , percentage(std::move(percentage_))
-    {}
-};
-
 class Tiled2dMapVectorSymbolLabelObject {
 public:
     Tiled2dMapVectorSymbolLabelObject(const std::shared_ptr<CoordinateConversionHelperInterface> &converter,
@@ -49,11 +40,10 @@ public:
                                       const std::vector<FormattedStringEntry> &text,
                                       const std::string &fullText,
                                       const ::Vec2D &coordinate,
-                                      const std::optional<std::vector<Vec2D>> &lineCoordinates,
+                                      const std::shared_ptr<SymbolLineGeometryCache> &lineGeometryCache,
                                       const Anchor &textAnchor,
                                       const TextJustify &textJustify,
                                       const std::shared_ptr<FontLoaderResult> fontResult,
-                                      const Vec2F &offset,
                                       const double radialOffset,
                                       const double lineHeight,
                                       const double letterSpacing,
@@ -81,6 +71,8 @@ public:
 
     void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription);
 
+    void invalidateLayoutCaches();
+
     std::optional<CollisionRectD> boundingBoxViewportAligned = std::nullopt;
     std::optional<std::vector<CircleD>> boundingBoxCircles = std::nullopt;
 
@@ -102,86 +94,66 @@ private:
     void updatePropertiesPoint(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, int &countOffset, float alphaFactor, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
     double updatePropertiesLine(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, int &countOffset, float alphaFactor, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize);
 
+    struct PointLabelLayoutCache {
+        float angle = 0;
+        float fontSize = 0;
+        Vec2D textOffset = Vec2D(0.0, 0.0);
+        float textPadding = 0;
+        Vec2I viewportSize = Vec2I(0, 0);
+        bool valid = false;
+
+        bool matches(float angle_, float fontSize_, const Vec2D &textOffset_, float textPadding_,
+                     const Vec2I &viewportSize_, bool is3d) const {
+            return valid && angle == angle_ && fontSize == fontSize_ && textOffset == textOffset_ &&
+                   textPadding == textPadding_ && (!is3d || viewportSize == viewportSize_);
+        }
+        void invalidate() { valid = false; }
+    };
+
+    PointLabelLayoutCache pointLabelLayoutCache;
+
+    struct LineLabelLayoutCache {
+        float fontSize = 0;
+        float rotation = 0;
+        bool wasReversed = false;
+        float appliedTextOffsetY = 0;
+        float scaledTextPadding = 0;
+        bool valid = false;
+
+        bool matches(float fontSize_, bool wasReversed_, float rotation_, float appliedTextOffsetY_,
+                     float scaledTextPadding_) const {
+            return valid && fontSize == fontSize_ && wasReversed == wasReversed_ && rotation == rotation_ &&
+                   appliedTextOffsetY == appliedTextOffsetY_ && scaledTextPadding == scaledTextPadding_;
+        }
+        void invalidate() { valid = false; }
+    };
+
+    LineLabelLayoutCache lineLabelLayoutCache;
+
     bool isStyleStateDependant = true;
     double lastZoomEvaluation = -1;
     void evaluateStyleProperties(const double zoomIdentifier);
 
-    DistanceIndex findReferencePointIndices();
-
-    inline Vec2D pointAtIndex(const DistanceIndex &index, bool useRender) {
-        const auto &s = useRender ? renderLineCoordinates[index.index] : Vec2DHelper::toVec3D((*lineCoordinates)[index.index]);
-        const auto &e = useRender ?  renderLineCoordinates[index.index + 1 < renderLineCoordinatesCount ? (index.index + 1) : index.index] : Vec2DHelper::toVec3D((*lineCoordinates)[index.index + 1 < renderLineCoordinatesCount ? (index.index + 1) : index.index]);
-        return Vec2D(s.x + (e.x - s.x) * index.percentage,
-                     s.y + (e.y - s.y) * index.percentage);
+    LineSegmentIndex findReferencePointIndices() {
+        const auto &point = is3d ? referencePointScreen : referencePoint;
+        return lineGeometryCache->findReferencePoint(point, wasReversed);
     }
 
-    inline Vec2D screenPointAtIndex(const DistanceIndex &index) {
-        const auto &s = screenLineCoordinates[index.index];
-        const auto &e = screenLineCoordinates[index.index + 1 < renderLineCoordinatesCount ? (index.index + 1) : index.index];
-        return Vec2D(s.x + (e.x - s.x) * index.percentage, s.y + (e.y - s.y) * index.percentage);
+    inline Vec2D pointAtIndex(const LineSegmentIndex &index, bool useRender) {
+        return useRender ? lineGeometryCache->renderPointAt(index.index, index.percentage, wasReversed)
+                         : lineGeometryCache->tilePointAt(index.index, index.percentage, wasReversed);
     }
 
-    Vec2D pointForIndex(const DistanceIndex &index, const std::optional<Vec2D> &indexCoord) {
+    inline Vec2D screenPointAtIndex(const LineSegmentIndex &index) {
+        return lineGeometryCache->screenPointAt(index.index, index.percentage, wasReversed);
+    }
+
+    Vec2D pointForIndex(const LineSegmentIndex &index, const std::optional<Vec2D> &indexCoord) {
         return is3d ? screenPointAtIndex(index) : (indexCoord ? *indexCoord : pointAtIndex(index, true));
     }
 
-    inline void indexAtDistance(const DistanceIndex &index, const Vec2D& currentPoint, double distance, DistanceIndex& result) {
-        auto dist = std::abs(distance);
-        auto current = currentPoint;
-
-        int currentI = index.index;
-        double currentPercentage = index.percentage;
-
-        if(distance >= 0) {
-            auto start = std::min(index.index + 1, (int)renderLineCoordinatesCount - 1);
-
-            for(int i = start; i < renderLineCoordinatesCount; i++) {
-                const auto &next = screenLineCoordinates[i];
-
-                const double d = Vec2DHelper::distance(current, Vec2D(next.x, next.y));
-
-                if(dist > d) {
-                    dist -= d;
-                    current.x = next.x;
-                    current.y = next.y;
-                    currentI = i;
-                    currentPercentage = 0;
-                } else {
-                    result.index = currentI;
-                    result.percentage = currentPercentage + dist / d * (1.0 - currentPercentage);
-                    return;
-                }
-            }
-        } else {
-            auto start = index.index;
-
-            for(int i = start; i >= 0; i--) {
-                const auto &next = screenLineCoordinates[i];
-
-                const auto d = Vec2DHelper::distance(current, Vec2D(next.x, next.y));
-
-                if(dist > d) {
-                    dist -= d;
-                    current.x = next.x;
-                    current.y = next.y;
-
-                    currentI = i;
-                    currentPercentage = 0.0;
-                } else {
-                    if(i == currentI) {
-                        result.index = i;
-                        result.percentage = currentPercentage - currentPercentage * dist / d;
-                        return;
-                    } else {
-                        result.index = i;
-                        result.percentage = 1.0 - dist / d;
-                        return;
-                    }
-                }
-            }
-        }
-
-        result = DistanceIndex(currentI, currentPercentage);
+    inline void indexAtDistance(const LineSegmentIndex &index, const Vec2D &currentPoint, double distance, LineSegmentIndex &result) {
+        lineGeometryCache->indexAtDistance(index, currentPoint, distance, wasReversed, result);
     }
 
     std::shared_ptr<SymbolVectorLayerDescription> description;
@@ -190,7 +162,6 @@ private:
     const SymbolAlignment rotationAlignment;
     TextJustify textJustify;
     const Anchor textAnchor;
-    const Vec2F offset;
     const double radialOffset;
 
     float spaceAdvance = 0.0f;
@@ -205,9 +176,8 @@ private:
     Vec3D cartesianReferencePoint = Vec3D(0.0, 0.0, 0.0);
     Vec3D referencePointScreen = Vec3D(0.0, 0.0, 0);
 
-
-    std::vector<Vec2D> centerPositions;
-    std::vector<size_t> lineEndIndices;
+    std::shared_ptr<SymbolLineGeometryCache> lineGeometryCache;
+    LineSegmentIndex currentReferencePointIndex;
 
     struct SplitInfo {
         SplitInfo(int g, float s) : glyphIndex(g), scale(s) {};
@@ -222,14 +192,11 @@ private:
 
     const std::string fullText;
 
-    size_t renderLineCoordinatesCount;
-    std::vector<Vec3D> renderLineCoordinates;
-    std::vector<Vec3D> screenLineCoordinates;
-    std::vector<Vec3D> cartesianRenderLineCoordinates;
-    std::optional<std::vector<Vec2D>> lineCoordinates;
-    DistanceIndex currentReferencePointIndex = DistanceIndex(0, 0.0);
+    std::vector<Vec2D> centerPositions;
+    std::vector<size_t> lineEndIndices;
 
     FeatureValueEvaluationResult<double> textSize = 0.0;
+    FeatureValueEvaluationResult<Vec2F> textOffset = Vec2F(0.0, 0.0);
     FeatureValueEvaluationResult<double> textRotate = 0.0;
     FeatureValueEvaluationResult<double> textPadding = 0.0;
     FeatureValueEvaluationResult<SymbolAlignment> textAlignment = SymbolAlignment::AUTO;

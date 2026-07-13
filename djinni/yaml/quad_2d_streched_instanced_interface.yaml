@@ -8,6 +8,9 @@ cpp:
   typename: '::Quad2dStrechedInstancedInterface'
   header: '"Quad2dStrechedInstancedInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCQuad2dStrechedInstancedInterface'
   pointer: true

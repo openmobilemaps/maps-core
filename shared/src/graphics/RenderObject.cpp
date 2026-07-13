@@ -13,6 +13,11 @@
 RenderObject::RenderObject(std::shared_ptr<::GraphicsObjectInterface> graphicsObject)
     : graphicsObject(graphicsObject) {}
 
+RenderObject::RenderObject(std::shared_ptr<::GraphicsObjectInterface> graphicsObject,
+                           std::shared_ptr<::MaskingObjectInterface> maskingObject)
+    : graphicsObject(graphicsObject)
+    , maskingObject(maskingObject) {}
+
 RenderObject::RenderObject(const std::shared_ptr<::GraphicsObjectInterface> graphicsObject, bool isScreenSpace): graphicsObject(graphicsObject), screenSpaceCoords(isScreenSpace) {}
 
 RenderObject::RenderObject(std::shared_ptr<::GraphicsObjectInterface> graphicsObject, std::vector<float> modelMatrix)
@@ -21,6 +26,8 @@ RenderObject::RenderObject(std::shared_ptr<::GraphicsObjectInterface> graphicsOb
     , modelMatrix(modelMatrix) {}
 
 std::shared_ptr<::GraphicsObjectInterface> RenderObject::getGraphicsObject() { return graphicsObject; }
+
+std::shared_ptr<::MaskingObjectInterface> RenderObject::getMaskingObject() { return maskingObject; }
 
 bool RenderObject::hasCustomModelMatrix() { return setCustomModelMatrix; }
 

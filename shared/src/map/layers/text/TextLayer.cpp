@@ -164,9 +164,7 @@ void TextLayer::clear() {
 
 void TextLayer::clearSync(const std::unordered_map<std::shared_ptr<TextInfoInterface>, std::shared_ptr<TextLayerObject>> &textsToClear) {
     for (auto &text : textsToClear) {
-        if (text.second->getTextGraphicsObject()->isReady())
         text.second->getTextGraphicsObject()->clear();
-        text.second->getTextObject()->removeTexture();
     }
 }
 
@@ -184,13 +182,13 @@ void TextLayer::generateRenderPasses() {
     for (auto const &textTuple : texts) {
         for (auto config : textTuple.second->getRenderConfig()) {
 
-            renderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+            renderPassObjectMap[config->getRenderIndex()].push_back(std::make_shared<RenderObject>(config->getGraphicsObject(), config->getMaskingObject()));
         }
     }
 
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
-        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget), passEntry.second);
+        std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none), passEntry.second);
         newRenderPasses.push_back(renderPass);
     }
 

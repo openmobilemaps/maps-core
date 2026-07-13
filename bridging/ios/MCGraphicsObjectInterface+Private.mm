@@ -53,6 +53,18 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)pause {
+    try {
+        _cppRefHandle.get()->pause();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)resume:(nullable id<MCRenderingContextInterface>)context {
+    try {
+        _cppRefHandle.get()->resume(::djinni_generated::RenderingContextInterface::toCpp(context));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)setIsInverseMasked:(BOOL)inversed {
     try {
         _cppRefHandle.get()->setIsInverseMasked(::djinni::Bool::toCpp(inversed));
@@ -111,6 +123,18 @@ public:
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() clear];
+        }
+    }
+    void pause() override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() pause];
+        }
+    }
+    void resume(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() resume:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))];
         }
     }
     void setIsInverseMasked(bool c_inversed) override

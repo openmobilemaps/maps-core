@@ -11,7 +11,6 @@
 import Foundation
 import MapCoreSharedModule
 @preconcurrency import Metal
-import UIKit
 import simd
 
 final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
@@ -23,6 +22,7 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
     private var indicesCount: Int = 0
 
     private var texture: MTLTexture?
+    private var lookupTexture: MTLTexture?
 
     private var shader: MCShaderProgramInterface
 
@@ -61,7 +61,8 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
         ss2.stencilFailureOperation = .zero
         ss2.depthFailureOperation = .keep
         ss2.depthStencilPassOperation = .keep
-        ss2.readMask = 0b1111_1111
+        // Masked draw passes only read the geometry-mask bits prepared by mask objects.
+        ss2.readMask = 0b1100_0000
         ss2.writeMask = 0b0000_0000
 
         let s2 = MTLDepthStencilDescriptor()
@@ -115,15 +116,14 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
         #endif
 
         if isMasked {
-            if stencilState == nil {
-                setupStencilStates()
-            }
-            encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0b1100_0000)
-        } else if let mask = context.mask, renderAsMask {
-            encoder.setDepthStencilState(mask)
-            encoder.setStencilReferenceValue(0b1100_0000)
+            // Raster and quad models compare against the mask value chosen by the renderer.
+            // Inverse reads target the cleared stencil value, which represents the outside area.
+            encoder.setDepthStencilState(maskStencilState(for: renderPass))
+            encoder.setStencilReferenceValue(maskStencilReference(for: renderPass))
+        } else if renderAsMask {
+            applyMaskWriteState(context: context, renderPass: renderPass)
         } else if renderPass.isPassMasked {
+            // Self-masked passes use the low stencil bit independently of geometry-mask reads.
             if renderPassStencilState == nil {
                 renderPassStencilState = self.renderPassMaskStencilState()
             }
@@ -134,18 +134,19 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
             encoder.setDepthStencilState(context.defaultMask)
         }
 
-        shader.setupProgram(context)
+        if renderAsMask {
+            shader.setupMaskProgram(context)
+        } else {
+            shader.setupProgram(context)
+        }
+        defer {
+            if renderAsMask {
+                shader.finishMaskProgram()
+            }
+        }
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents()
-                .copyMemory(
-                    from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         if shader.usesModelMatrix() {
             if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
@@ -174,6 +175,11 @@ final class Quad2d: BaseGraphicsObject, @unchecked Sendable {
         if let texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
+        if let lookupTexture {
+            encoder.setFragmentTexture(lookupTexture, index: 1)
+        } else if let texture {
+            encoder.setFragmentTexture(texture, index: 1)
+        }
 
         encoder.drawIndexedPrimitives(
             type: .triangle,
@@ -200,6 +206,7 @@ extension Quad2d: MCMaskingObjectInterface {
         else { return }
 
         renderAsMask = true
+        defer { renderAsMask = false }
 
         render(
             encoder: encoder,
@@ -390,12 +397,39 @@ extension Quad2d: MCQuad2dInterface {
         }
         lock.withCritical {
             texture = textureHolder.texture
+            lookupTexture = nil
         }
+    }
+
+    func loadDualTexture(
+        _ context: MCRenderingContextInterface?,
+        textureHolder: MCTextureHolderInterface?,
+        elevationHolder: MCTextureHolderInterface?
+    ) {
+        guard let textureHolder = textureHolder as? TextureHolder else {
+            fatalError("unexpected TextureHolder")
+        }
+        let lookupHolder = elevationHolder as? TextureHolder
+        lock.withCritical {
+            texture = textureHolder.texture
+            lookupTexture = lookupHolder?.texture
+        }
+    }
+
+    func loadTextures(
+        _ context: MCRenderingContextInterface?,
+        textureHolder: MCTextureHolderInterface?,
+        lookupHolder: MCTextureHolderInterface?,
+        elevationHolder: MCTextureHolderInterface?
+    ) {
+        // The flat quad has no elevation stage; the lookup sprite is the only secondary texture.
+        loadDualTexture(context, textureHolder: textureHolder, elevationHolder: lookupHolder)
     }
 
     func removeTexture() {
         lock.withCritical {
             texture = nil
+            lookupTexture = nil
         }
     }
 

@@ -8,6 +8,9 @@ cpp:
   typename: '::SharedGraphicsObjectInterface'
   header: '"SharedGraphicsObjectInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCSharedGraphicsObjectInterface'
   pointer: true

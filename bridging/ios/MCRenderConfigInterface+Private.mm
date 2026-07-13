@@ -7,6 +7,7 @@
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
+#import "MCMaskingObjectInterface+Private.h"
 #include <exception>
 #include <stdexcept>
 #include <utility>
@@ -35,6 +36,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     try {
         auto objcpp_result_ = _cppRefHandle.get()->getGraphicsObject();
         return ::djinni_generated::GraphicsObjectInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCMaskingObjectInterface>)getMaskingObject {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getMaskingObject();
+        return ::djinni::Optional<std::optional, ::djinni_generated::MaskingObjectInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

@@ -46,6 +46,8 @@ public:
 
     virtual void resume() = 0;
 
+    virtual void clear() = 0;
+
     virtual void setAlpha(float alpha) = 0;
 
     virtual void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);

@@ -10,7 +10,7 @@ abstract class Tiled2dMapSourceInterface {
 
     abstract fun onVisibleBoundsChanged(visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, curT: Int, zoom: Double)
 
-    abstract fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float)
+    abstract fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float, cameraPosition: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D?, cameraMode: io.openmobilemaps.mapscore.shared.map.MapCamera3dMode)
 
     abstract fun setMinZoomLevelIdentifier(value: Int?)
 
@@ -20,9 +20,14 @@ abstract class Tiled2dMapSourceInterface {
 
     abstract fun getMaxZoomLevelIdentifier(): Int?
 
+    abstract fun setZoomLevelScaleFactor(value: Float)
+
     abstract fun pause()
 
     abstract fun resume()
+
+    /** Debug helper: pauses tile selection/loading independently of the pause()/resume() lifecycle state. */
+    abstract fun setTileLoadingPaused(paused: Boolean)
 
     abstract fun isReadyToRenderOffscreen(): io.openmobilemaps.mapscore.shared.map.LayerReadyState
 
@@ -53,11 +58,11 @@ abstract class Tiled2dMapSourceInterface {
         }
         private external fun native_onVisibleBoundsChanged(_nativeRef: Long, visibleBounds: io.openmobilemaps.mapscore.shared.map.coordinates.RectCoord, curT: Int, zoom: Double)
 
-        override fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float) {
+        override fun onCameraChange(viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float, cameraPosition: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D?, cameraMode: io.openmobilemaps.mapscore.shared.map.MapCamera3dMode) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
-            native_onCameraChange(this.nativeRef, viewMatrix, projectionMatrix, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition, zoom)
+            native_onCameraChange(this.nativeRef, viewMatrix, projectionMatrix, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition, zoom, cameraPosition, cameraMode)
         }
-        private external fun native_onCameraChange(_nativeRef: Long, viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float)
+        private external fun native_onCameraChange(_nativeRef: Long, viewMatrix: ArrayList<Float>, projectionMatrix: ArrayList<Float>, origin: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D, verticalFov: Float, horizontalFov: Float, width: Float, height: Float, focusPointAltitude: Float, focusPointPosition: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float, cameraPosition: io.openmobilemaps.mapscore.shared.graphics.common.Vec3D?, cameraMode: io.openmobilemaps.mapscore.shared.map.MapCamera3dMode)
 
         override fun setMinZoomLevelIdentifier(value: Int?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
@@ -83,6 +88,12 @@ abstract class Tiled2dMapSourceInterface {
         }
         private external fun native_getMaxZoomLevelIdentifier(_nativeRef: Long): Int?
 
+        override fun setZoomLevelScaleFactor(value: Float) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setZoomLevelScaleFactor(this.nativeRef, value)
+        }
+        private external fun native_setZoomLevelScaleFactor(_nativeRef: Long, value: Float)
+
         override fun pause() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_pause(this.nativeRef)
@@ -94,6 +105,12 @@ abstract class Tiled2dMapSourceInterface {
             native_resume(this.nativeRef)
         }
         private external fun native_resume(_nativeRef: Long)
+
+        override fun setTileLoadingPaused(paused: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setTileLoadingPaused(this.nativeRef, paused)
+        }
+        private external fun native_setTileLoadingPaused(_nativeRef: Long, paused: Boolean)
 
         override fun isReadyToRenderOffscreen(): io.openmobilemaps.mapscore.shared.map.LayerReadyState {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

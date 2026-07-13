@@ -10,11 +10,14 @@
 
 #pragma once
 
+#include "RenderPassStencilOptions.h"
 #include "Value.h"
-#include <vector>
+#include <memory>
+#include <optional>
+#include <string>
 
 enum VectorLayerType {
- background, raster, line, polygon, symbol, custom
+ background, raster, line, polygon, circle, symbol, custom
 };
 
 class VectorLayerDescription {
@@ -28,6 +31,12 @@ public:
     int sourceMaxZoom;
     std::shared_ptr<Value> filter;
     std::optional<int32_t> renderPassIndex;
+    RenderPassStencilOptions renderPassStencilOptions;
+    std::optional<std::string> maskSource;
+    std::optional<std::string> maskSourceLayer;
+    std::optional<std::string> maskLayerIdentifier;
+    bool maskInverseRead = false;
+    std::optional<std::string> maskTargetLayerIdentifier;
     bool multiselect;
     bool selfMasked;
 
@@ -83,4 +92,13 @@ public:
     virtual ~VectorLayerDescription() = default;
 
     virtual std::unique_ptr<VectorLayerDescription> clone() = 0;
+
+    void copyRenderPassOptionsTo(VectorLayerDescription &layerDescription) const {
+        layerDescription.renderPassStencilOptions = renderPassStencilOptions;
+        layerDescription.maskSource = maskSource;
+        layerDescription.maskSourceLayer = maskSourceLayer;
+        layerDescription.maskLayerIdentifier = maskLayerIdentifier;
+        layerDescription.maskInverseRead = maskInverseRead;
+        layerDescription.maskTargetLayerIdentifier = maskTargetLayerIdentifier;
+    }
 };

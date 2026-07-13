@@ -51,6 +51,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
++ (int32_t)EPSG4326System2D {
+    try {
+        auto objcpp_result_ = ::CoordinateSystemIdentifiers::EPSG4326System2D();
+        return ::djinni::I32::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 + (int32_t)EPSG2056 {
     try {
         auto objcpp_result_ = ::CoordinateSystemIdentifiers::EPSG2056();

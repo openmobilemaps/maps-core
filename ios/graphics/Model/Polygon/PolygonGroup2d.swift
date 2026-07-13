@@ -13,7 +13,7 @@ import MapCoreSharedModule
 @preconcurrency import Metal
 import simd
 
-final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
+final class PolygonGroup2d: BaseGraphicsObject, MCPolygonGroup2dInterface, MCMaskingObjectInterface, @unchecked Sendable {
     private var shader: PolygonGroupShader
 
     private var verticesBuffer: MTLBuffer?
@@ -65,14 +65,15 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
         #endif
 
         if isMasked {
-            if stencilState == nil {
-                stencilState = self.maskStencilState()
-            }
-            encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0b1100_0000)
+            // Masked draw passes read the high stencil bits prepared by an earlier mask pass.
+            // They do not update stencil themselves, so grouped polygons stay regular color draws.
+            encoder.setDepthStencilState(maskStencilState(for: pass))
+            encoder.setStencilReferenceValue(maskStencilReference(for: pass))
         }
 
         if pass.isPassMasked {
+            // Self-masked passes use the low stencil bit to suppress overdraw inside this render pass
+            // without interfering with the high bits reserved for geometry masks.
             if renderPassStencilState == nil {
                 renderPassStencilState = self.renderPassMaskStencilState()
             }
@@ -89,12 +90,6 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
@@ -123,7 +118,7 @@ final class PolygonGroup2d: BaseGraphicsObject, @unchecked Sendable {
     }
 }
 
-extension PolygonGroup2d: MCPolygonGroup2dInterface {
+extension PolygonGroup2d {
     func setVertices(_ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D) {
         guard vertices.elementCount > 0 else {
             lock.withCritical {
@@ -168,4 +163,71 @@ extension PolygonGroup2d: MCPolygonGroup2dInterface {
     }
 
     func asGraphicsObject() -> MCGraphicsObjectInterface? { self }
+
+    func asMaskingObject() -> MCMaskingObjectInterface? { self }
+}
+
+extension PolygonGroup2d {
+    func render(
+        asMask context: MCRenderingContextInterface?,
+        renderPass: MCRenderPassConfig,
+        vpMatrix _: Int64,
+        mMatrix _: Int64,
+        origin: MCVec3D,
+        screenPixelAsRealMeterFactor: Double,
+        isScreenSpaceCoords: Bool
+    ) {
+        lock.lock()
+        defer {
+            lock.unlock()
+        }
+
+        guard isReady(),
+            let context = context as? RenderingContext,
+            let encoder = context.encoder,
+            let verticesBuffer,
+            let indicesBuffer,
+            shader.polygonStyleBuffer != nil
+        else { return }
+
+        #if DEBUG
+            encoder.pushDebugGroup("\(label)Mask")
+            defer {
+                encoder.popDebugGroup()
+            }
+        #endif
+
+        applyMaskWriteState(context: context, renderPass: renderPass)
+
+        shader.setupMaskProgram(context)
+        defer { shader.finishMaskProgram() }
+        shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
+
+        encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
+
+        let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
+        if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
+            bufferPointer.pointee.x = Float(originOffset.x - origin.x)
+            bufferPointer.pointee.y = Float(originOffset.y - origin.y)
+            bufferPointer.pointee.z = Float(originOffset.z - origin.z)
+        } else {
+            fatalError()
+        }
+        encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 2)
+
+        if self.shader.isStriped {
+            encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
+
+            let p = Float(screenPixelAsRealMeterFactor)
+            var scaleFactors = SIMD2<Float>([p, pow(2.0, ceil(log2(p)))])
+            encoder.setFragmentBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 2)
+        }
+
+        encoder.drawIndexedPrimitives(
+            type: .triangle,
+            indexCount: indicesCount,
+            indexType: .uint16,
+            indexBuffer: indicesBuffer,
+            indexBufferOffset: 0)
+    }
 }

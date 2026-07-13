@@ -24,6 +24,15 @@ em::val NativeSkySphereLayerInterface::create() {
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeSkySphereLayerInterface>::handleNativeException(e);
     }
 }
+em::val NativeSkySphereLayerInterface::createWithLocal() {
+    try {
+        auto r = ::SkySphereLayerInterface::createWithLocal();
+        return ::djinni_generated::NativeSkySphereLayerInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeSkySphereLayerInterface>::handleNativeException(e);
+    }
+}
 em::val NativeSkySphereLayerInterface::asLayerInterface(const CppType& self) {
     try {
         auto r = self->asLayerInterface();
@@ -47,6 +56,7 @@ EMSCRIPTEN_BINDINGS(_sky_sphere_layer_interface) {
         .smart_ptr<std::shared_ptr<::SkySphereLayerInterface>>("SkySphereLayerInterface")
         .function("nativeDestroy", &NativeSkySphereLayerInterface::nativeDestroy)
         .class_function("create", NativeSkySphereLayerInterface::create)
+        .class_function("createWithLocal", NativeSkySphereLayerInterface::createWithLocal)
         .function("asLayerInterface", NativeSkySphereLayerInterface::asLayerInterface)
         .function("setTexture", NativeSkySphereLayerInterface::setTexture)
         ;

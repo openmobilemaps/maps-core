@@ -19,10 +19,16 @@ abstract class CoordinateSystemFactory {
         external fun getEpsg4326System(): MapCoordinateSystem
 
         @JvmStatic
+        external fun getEpsg4326System2d(): MapCoordinateSystem
+
+        @JvmStatic
         external fun getEpsg21781System(): MapCoordinateSystem
 
         @JvmStatic
         external fun getUnitSphereSystem(): MapCoordinateSystem
+
+        @JvmStatic
+        external fun getSystemFor(identifier: Int): MapCoordinateSystem
     }
 
     public class CppProxy : CoordinateSystemFactory {

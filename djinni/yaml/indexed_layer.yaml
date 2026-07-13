@@ -8,6 +8,9 @@ cpp:
   typename: '::IndexedLayer'
   header: '"IndexedLayer.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCIndexedLayer'
   pointer: true

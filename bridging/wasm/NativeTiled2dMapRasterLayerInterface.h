@@ -26,6 +26,7 @@ struct NativeTiled2dMapRasterLayerInterface : ::djinni::JsInterface<::Tiled2dMap
     static em::val createWithMask(const em::val& w_layerConfig,const em::val& w_loaders,const em::val& w_mask);
     static em::val createWithShader(const em::val& w_layerConfig,const em::val& w_loaders,const em::val& w_shader);
     static em::val create(const em::val& w_layerConfig,const em::val& w_loaders);
+    static em::val createDisplaced(const em::val& w_layerConfig,const em::val& w_elevationConfig,const em::val& w_loaders);
     static em::val asLayerInterface(const CppType& self);
     static void setCallbackHandler(const CppType& self, const em::val& w_handler);
     static em::val getCallbackHandler(const CppType& self);
@@ -35,6 +36,9 @@ struct NativeTiled2dMapRasterLayerInterface : ::djinni::JsInterface<::Tiled2dMap
     static void setStyle(const CppType& self, const em::val& w_style);
     static em::val getStyle(const CppType& self);
     static void setMinMagFilter(const CppType& self, int32_t w_filterType);
+    static void setUseMaskTileGeometry(const CppType& self, bool w_enabled);
+    static void setTileLoadingPaused(const CppType& self, bool w_paused);
+    static void setZoomLevelScaleFactor(const CppType& self, float w_value);
     static void setMinZoomLevelIdentifier(const CppType& self, const em::val& w_value);
     static em::val getMinZoomLevelIdentifier(const CppType& self);
     static void setMaxZoomLevelIdentifier(const CppType& self, const em::val& w_value);

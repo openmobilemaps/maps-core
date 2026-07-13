@@ -136,6 +136,7 @@ void IconLayerObject::update() {
     if(type == IconType::ROTATION_INVARIANT || type == IconType::INVARIANT) {
         angle = camera->getRotation();
     }
+    angle += icon->getRotation();
 
     iconRotations[0] = angle;
 

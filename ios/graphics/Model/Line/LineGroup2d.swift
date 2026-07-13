@@ -49,7 +49,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         mMatrix: Int64,
         origin: MCVec3D,
         isMasked: Bool,
-        screenPixelAsRealMeterFactor: Double,
+        screenPixelAsRealMeterFactor _: Double,
         isScreenSpaceCoords: Bool
     ) {
         lock.lock()
@@ -70,15 +70,8 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
         #endif
 
         if isMasked {
-            if stencilState == nil {
-                stencilState = self.maskStencilState()
-            }
-            encoder.setDepthStencilState(stencilState)
-            if maskInverse {
-                encoder.setStencilReferenceValue(0b0000_0000)
-            } else {
-                encoder.setStencilReferenceValue(0b1100_0000)
-            }
+            encoder.setDepthStencilState(maskStencilState(for: pass))
+            encoder.setStencilReferenceValue(maskStencilReference(for: pass))
         }
 
         if pass.isPassMasked {
@@ -94,18 +87,10 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
             }
         }
 
-        shader.screenPixelAsRealMeterFactor = Float(screenPixelAsRealMeterFactor)
-
         shader.setupProgram(context)
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(lineVerticesBuffer, offset: 0, index: 0)
-
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         let originOffsetBuffer = originOffsetBuffers.getNextBuffer(context)
         if let bufferPointer = originOffsetBuffer?.contents().assumingMemoryBound(to: simd_float4.self) {
@@ -127,7 +112,7 @@ final class LineGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
 extension LineGroup2d: MCLineGroup2dInterface {
 
-    func setLines(_ lines: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, is3d: Bool) {
+    func setLines(_ lines: MCOwnedBytes, indices: MCOwnedBytes, origin: MCVec3D, is3d: Bool) {
         guard lines.elementCount != 0 else {
             lock.withCritical {
                 lineVerticesBuffer = nil
@@ -146,8 +131,8 @@ extension LineGroup2d: MCLineGroup2dInterface {
             } else {
                 fatalError()
             }
-            self.lineVerticesBuffer.copyOrCreate(from: lines, device: device)
-            self.lineIndicesBuffer.copyOrCreate(from: indices, device: device)
+            self.lineVerticesBuffer = device.makeBuffer(from: lines)
+            self.lineIndicesBuffer = device.makeBuffer(from: indices)
             if self.lineVerticesBuffer != nil, self.lineIndicesBuffer != nil {
                 self.lineVerticesBuffer?.label = "LineGroup2d.verticesBuffer"
                 self.lineIndicesBuffer?.label = "LineGroup2d.indicesBuffer"

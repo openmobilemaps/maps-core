@@ -64,3 +64,13 @@ BlendMode IconInfo::getBlendMode() {
     // Immutable
     return blendMode;
 }
+
+void IconInfo::setRotation(double angle) {
+    std::lock_guard<std::mutex> dataLock(dataMutex);
+    this->rotation = angle;
+}
+
+double IconInfo::getRotation() {
+    std::lock_guard<std::mutex> dataLock(dataMutex);
+    return rotation;
+}

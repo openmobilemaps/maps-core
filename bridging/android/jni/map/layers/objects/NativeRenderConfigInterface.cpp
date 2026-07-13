@@ -4,6 +4,7 @@
 #include "NativeRenderConfigInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeGraphicsObjectInterface.h"
+#include "NativeMaskingObjectInterface.h"
 
 namespace djinni_generated {
 
@@ -25,6 +26,15 @@ CJNIEXPORT ::djinni_generated::NativeGraphicsObjectInterface::JniType JNICALL Ja
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderConfigInterface>(nativeRef);
         auto r = ref->getGraphicsObject();
         return ::djinni::release(::djinni_generated::NativeGraphicsObjectInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeMaskingObjectInterface::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_objects_RenderConfigInterface_00024CppProxy_native_1getMaskingObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderConfigInterface>(nativeRef);
+        auto r = ref->getMaskingObject();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

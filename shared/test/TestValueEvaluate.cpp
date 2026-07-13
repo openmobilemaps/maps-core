@@ -250,8 +250,9 @@ TEST_CASE("PropertyCompareValue Test", "[PropertyCompareValue]") {
 
 TEST_CASE("InFilter Test", "[InFilter]") {
     StringInterner stringTable = ValueKeys::newStringInterner();
-    auto key = stringTable.add("key");
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{{key, "value"}}, 0);
+    auto internedStringKey = stringTable.add("key");
+    auto key = std::make_shared<MaybeGetPropertyValue>(internedStringKey, "key");
+    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{{internedStringKey, "value"}}, 0);
     EvaluationContext context = EvaluationContext(0, 0, featureContext, nullptr);
 
     std::unordered_set<ValueVariant> values = {ValueVariant("value")};
@@ -263,8 +264,9 @@ TEST_CASE("InFilter Test", "[InFilter]") {
 
 TEST_CASE("NotInFilter Test", "[NotInFilter]") {
     StringInterner stringTable = ValueKeys::newStringInterner();
-    auto key = stringTable.add("key");
-    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{{key, "value"}}, 0);
+    auto internedStringKey = stringTable.add("key");
+    auto key = std::make_shared<MaybeGetPropertyValue>(internedStringKey, "key");
+    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{{internedStringKey, "value"}}, 0);
     EvaluationContext context = EvaluationContext(0, 0, featureContext, nullptr);
 
     std::unordered_set<ValueVariant> values = {ValueVariant("other")};
@@ -335,4 +337,172 @@ TEST_CASE("ArrayValue Test", "[ArrayValue]") {
     REQUIRE(result.size() == 2);
     REQUIRE(result[0] == "value1");
     REQUIRE(result[1] == "value2");
+}
+
+namespace {
+std::shared_ptr<MatchValue> makePropertyMatch(InternedString propertyKey,
+                                              const std::vector<std::pair<std::string, double>> &branches,
+                                              double defaultValue) {
+    auto compareValue = std::make_shared<GetPropertyValue>(propertyKey);
+    std::vector<std::pair<ValueVariant, std::shared_ptr<Value>>> mapping;
+    mapping.reserve(branches.size());
+    for (const auto &[branchKey, branchValue] : branches) {
+        mapping.emplace_back(branchKey, std::make_shared<StaticValue>(branchValue));
+    }
+    return std::make_shared<MatchValue>(compareValue, mapping, std::make_shared<StaticValue>(defaultValue));
+}
+} // namespace
+
+TEST_CASE("InterpolatedTransposedMatchValue Test", "[InterpolatedTransposedMatchValue]") {
+    StringInterner stringTable = ValueKeys::newStringInterner();
+    auto subclassKey = stringTable.add("subclass");
+    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
+    EvaluationContext context(11.0, 0, featureContext, nullptr);
+
+    const auto grassMatch10 = makePropertyMatch(subclassKey, { { "grass", 1.0 } }, 0.0);
+    const auto grassMatch12 = makePropertyMatch(subclassKey, { { "grass", 3.0 }, { "wood", 5.0 } }, 0.0);
+
+    std::vector<std::pair<double, std::shared_ptr<Value>>> steps = {
+        { 10.0, grassMatch10 },
+        { 12.0, grassMatch12 },
+    };
+
+    const auto value = InterpolatedTransposedMatchValue::tryCreate(1.0, steps);
+    REQUIRE(value != nullptr);
+
+    SECTION("Known subclass interpolates branch values") {
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("grass") } };
+        REQUIRE_THAT(std::get<double>(value->evaluate(context)), Catch::Matchers::WithinAbs(2.0, 1e-9));
+    }
+
+    SECTION("Subclass missing from one match stop uses that stop's default") {
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("wood") } };
+        REQUIRE_THAT(std::get<double>(value->evaluate(context)), Catch::Matchers::WithinAbs(2.5, 1e-9));
+    }
+
+    SECTION("Unmentioned subclass uses default interpolator") {
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("sand") } };
+        REQUIRE_THAT(std::get<double>(value->evaluate(context)), Catch::Matchers::WithinAbs(0.0, 1e-9));
+    }
+
+    SECTION("Mixed literal and match stops apply literal to all subclasses") {
+        std::vector<std::pair<double, std::shared_ptr<Value>>> mixedSteps = {
+            { 10.0, grassMatch10 },
+            { 12.0, std::make_shared<StaticValue>(10.0) },
+        };
+
+        const auto mixedValue = InterpolatedTransposedMatchValue::tryCreate(1.0, mixedSteps);
+        REQUIRE(mixedValue != nullptr);
+
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("grass") } };
+        REQUIRE_THAT(std::get<double>(mixedValue->evaluate(context)), Catch::Matchers::WithinAbs(5.5, 1e-9));
+
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("sand") } };
+        REQUIRE_THAT(std::get<double>(mixedValue->evaluate(context)), Catch::Matchers::WithinAbs(5.0, 1e-9));
+    }
+
+    SECTION("All literal stops do not use transposed fast path") {
+        std::vector<std::pair<double, std::shared_ptr<Value>>> literalSteps = {
+            { 10.0, std::make_shared<StaticValue>(1.0) },
+            { 12.0, std::make_shared<StaticValue>(3.0) },
+        };
+        REQUIRE(InterpolatedTransposedMatchValue::tryCreate(1.0, literalSteps) == nullptr);
+    }
+
+    SECTION("isEqual compares branch keys and interpolators") {
+        const auto grassMatch10Other = makePropertyMatch(subclassKey, { { "grass", 9.0 } }, 0.0);
+        const auto otherValue = InterpolatedTransposedMatchValue::tryCreate(1.0, {
+            { 10.0, grassMatch10Other },
+            { 12.0, grassMatch12 },
+        });
+        REQUIRE(otherValue != nullptr);
+        REQUIRE_FALSE(value->isEqual(otherValue));
+        REQUIRE(value->isEqual(value));
+    }
+
+    SECTION("clone preserves evaluation") {
+        const auto cloned = std::shared_ptr<Value>(value->clone());
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("grass") } };
+        REQUIRE_THAT(std::get<double>(cloned->evaluate(context)), Catch::Matchers::WithinAbs(2.0, 1e-9));
+        REQUIRE(value->isEqual(cloned));
+    }
+}
+
+TEST_CASE("StepTransposedMatchValue Test", "[StepTransposedMatchValue]") {
+    StringInterner stringTable = ValueKeys::newStringInterner();
+    auto subclassKey = stringTable.add("subclass");
+    auto featureContext = std::make_shared<FeatureContext>(vtzero::GeomType::POINT, FeatureContext::mapType{}, 0);
+    EvaluationContext context(11.0, 0, featureContext, nullptr);
+
+    const auto defaultMatch = makePropertyMatch(subclassKey, {}, 0.0);
+    const auto grassMatch10 = makePropertyMatch(subclassKey, { { "grass", 1.0 } }, 0.0);
+    const auto grassMatch12 = makePropertyMatch(subclassKey, { { "grass", 3.0 }, { "wood", 5.0 } }, 0.0);
+
+    std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> stops = {
+        { std::make_shared<StaticValue>(10.0), grassMatch10 },
+        { std::make_shared<StaticValue>(12.0), grassMatch12 },
+    };
+
+    const auto value = StepTransposedMatchValue::tryCreate(std::make_shared<ZoomValue>(), defaultMatch, stops);
+    REQUIRE(value != nullptr);
+
+    SECTION("Known subclass uses stepped branch values") {
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("grass") } };
+        REQUIRE_THAT(std::get<double>(value->evaluate(context)), Catch::Matchers::WithinAbs(1.0, 1e-9));
+    }
+
+    SECTION("Subclass missing from one match stop uses that stop's default") {
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("wood") } };
+        REQUIRE_THAT(std::get<double>(value->evaluate(context)), Catch::Matchers::WithinAbs(0.0, 1e-9));
+    }
+
+    SECTION("Unmentioned subclass uses default stepper") {
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("sand") } };
+        REQUIRE_THAT(std::get<double>(value->evaluate(context)), Catch::Matchers::WithinAbs(0.0, 1e-9));
+    }
+
+    SECTION("Higher zoom uses later stop") {
+        EvaluationContext highZoomContext(13.0, 0, featureContext, nullptr);
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("grass") } };
+        REQUIRE_THAT(std::get<double>(value->evaluate(highZoomContext)), Catch::Matchers::WithinAbs(3.0, 1e-9));
+
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("wood") } };
+        REQUIRE_THAT(std::get<double>(value->evaluate(highZoomContext)), Catch::Matchers::WithinAbs(5.0, 1e-9));
+    }
+
+    SECTION("Mixed literal and match stops apply literal to all subclasses") {
+        std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> mixedStops = {
+            { std::make_shared<StaticValue>(10.0), grassMatch10 },
+            { std::make_shared<StaticValue>(12.0), std::make_shared<StaticValue>(10.0) },
+        };
+
+        const auto mixedValue = StepTransposedMatchValue::tryCreate(std::make_shared<ZoomValue>(),
+                                                                    std::make_shared<StaticValue>(0.0),
+                                                                    mixedStops);
+        REQUIRE(mixedValue != nullptr);
+
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("grass") } };
+        REQUIRE_THAT(std::get<double>(mixedValue->evaluate(context)), Catch::Matchers::WithinAbs(1.0, 1e-9));
+
+        EvaluationContext highZoomContext(13.0, 0, featureContext, nullptr);
+        REQUIRE_THAT(std::get<double>(mixedValue->evaluate(highZoomContext)), Catch::Matchers::WithinAbs(10.0, 1e-9));
+    }
+
+    SECTION("isEqual compares branch keys and steppers") {
+        const auto grassMatch10Other = makePropertyMatch(subclassKey, { { "grass", 9.0 } }, 0.0);
+        const auto otherValue = StepTransposedMatchValue::tryCreate(std::make_shared<ZoomValue>(), defaultMatch, {
+            { std::make_shared<StaticValue>(10.0), grassMatch10Other },
+            { std::make_shared<StaticValue>(12.0), grassMatch12 },
+        });
+        REQUIRE(otherValue != nullptr);
+        REQUIRE_FALSE(value->isEqual(otherValue));
+        REQUIRE(value->isEqual(value));
+    }
+
+    SECTION("clone preserves evaluation") {
+        const auto cloned = std::shared_ptr<Value>(value->clone());
+        featureContext->propertiesMap = FeatureContext::mapType{ { subclassKey, std::string("grass") } };
+        REQUIRE_THAT(std::get<double>(cloned->evaluate(context)), Catch::Matchers::WithinAbs(1.0, 1e-9));
+        REQUIRE(value->isEqual(cloned));
+    }
 }

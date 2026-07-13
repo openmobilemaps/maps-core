@@ -38,6 +38,15 @@ int32_t NativeCoordinateSystemIdentifiers::EPSG4326() {
         return ::djinni::ExceptionHandlingTraits<::djinni::I32>::handleNativeException(e);
     }
 }
+int32_t NativeCoordinateSystemIdentifiers::EPSG4326System2D() {
+    try {
+        auto r = ::CoordinateSystemIdentifiers::EPSG4326System2D();
+        return ::djinni::I32::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::I32>::handleNativeException(e);
+    }
+}
 int32_t NativeCoordinateSystemIdentifiers::EPSG2056() {
     try {
         auto r = ::CoordinateSystemIdentifiers::EPSG2056();
@@ -91,6 +100,7 @@ EMSCRIPTEN_BINDINGS(_coordinate_system_identifiers) {
         .class_function("RENDERSYSTEM", NativeCoordinateSystemIdentifiers::RENDERSYSTEM)
         .class_function("EPSG3857", NativeCoordinateSystemIdentifiers::EPSG3857)
         .class_function("EPSG4326", NativeCoordinateSystemIdentifiers::EPSG4326)
+        .class_function("EPSG4326System2D", NativeCoordinateSystemIdentifiers::EPSG4326System2D)
         .class_function("EPSG2056", NativeCoordinateSystemIdentifiers::EPSG2056)
         .class_function("EPSG21781", NativeCoordinateSystemIdentifiers::EPSG21781)
         .class_function("UnitSphere", NativeCoordinateSystemIdentifiers::UnitSphere)

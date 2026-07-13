@@ -9,8 +9,12 @@
  */
 
 #include "Tiled2dMapLayer.h"
+#include "MapCamera3dInterface.h"
 #include "MapCameraInterface.h"
 #include "CoordinateSystemIdentifiers.h"
+#include "LambdaTask.h"
+#include "TaskConfig.h"
+#include "ExecutionEnvironment.h"
 
 Tiled2dMapLayer::Tiled2dMapLayer()
     : curT(0) {}
@@ -43,7 +47,18 @@ void Tiled2dMapLayer::onAdded(const std::shared_ptr<::MapInterface> &mapInterfac
     auto camera = std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera());
     if (camera) {
         camera->addListener(shared_from_this());
-        camera->notifyListenerBoundsChange();
+        auto scheduler = mapInterface->getScheduler();
+        if (scheduler) {
+            // TODO: Replace ExecutionEnvironment::GRAPHICS with a dedicated UI thread execution environment
+            scheduler->addTask(std::make_shared<LambdaTask>(
+                TaskConfig("Tiled2dMapLayer::notifyListenerBoundsChange", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
+                [camera]() {
+                    camera->notifyListenerBoundsChange();
+                }
+            ));
+        } else {
+            camera->notifyListenerBoundsChange();
+        }
     }
 }
 
@@ -115,10 +130,19 @@ void Tiled2dMapLayer::onVisibleBoundsChanged(const ::RectCoord &visibleBounds, d
 
 void Tiled2dMapLayer::onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) {
     std::lock_guard<std::recursive_mutex> lock(sourcesMutex);
+    auto camera = mapInterface ? std::dynamic_pointer_cast<MapCameraInterface>(mapInterface->getCamera()) : nullptr;
+    auto cameraPosition = camera ? camera->getLastCameraPosition() : std::nullopt;
+    ::MapCamera3dMode cameraMode = ::MapCamera3dMode::ORBIT;
+    if (camera) {
+        auto camera3d = camera->asMapCamera3d();
+        if (camera3d) {
+            cameraMode = camera3d->getCameraMode();
+        }
+    }
 
     for (const auto &sourceInterface: sourceInterfaces) {
         sourceInterface.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapSourceInterface::onCameraChange),
-                                viewMatrix, projectionMatrix, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition, zoom);
+                                viewMatrix, projectionMatrix, origin, verticalFov, horizontalFov, width, height, focusPointAltitude, focusPointPosition, zoom, cameraPosition, cameraMode);
     }
 }
 

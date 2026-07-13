@@ -109,10 +109,11 @@ open class MapView @JvmOverloads constructor(context: Context, attrs: AttributeS
 			prepare()
 
 			getRenderingContext().let { context ->
-				context.asOpenGlRenderingContext()?.getRenderTargets()?.forEach { renderTarget ->
-					renderTarget.bindFramebuffer(context)
-					drawOffscreenFrame(renderTarget.asRenderTargetInterface())
-					renderTarget.unbindFramebuffer()
+				context.getOffscreenRenderTargets().forEach { renderTarget ->
+					val openGlRenderTarget = renderTarget.asGlRenderTargetInterface() ?: return@forEach
+					openGlRenderTarget.bindFramebuffer(context)
+					drawOffscreenFrame(renderTarget)
+					openGlRenderTarget.unbindFramebuffer()
 				}
 			}
 

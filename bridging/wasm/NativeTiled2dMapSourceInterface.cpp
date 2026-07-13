@@ -5,6 +5,7 @@
 #include "NativeCoord.h"
 #include "NativeErrorManager.h"
 #include "NativeLayerReadyState.h"
+#include "NativeMapCamera3dMode.h"
 #include "NativeRectCoord.h"
 #include "NativeVec3D.h"
 
@@ -18,8 +19,10 @@ em::val NativeTiled2dMapSourceInterface::cppProxyMethods() {
         "getMinZoomLevelIdentifier",
         "setMaxZoomLevelIdentifier",
         "getMaxZoomLevelIdentifier",
+        "setZoomLevelScaleFactor",
         "pause",
         "resume",
+        "setTileLoadingPaused",
         "isReadyToRenderOffscreen",
         "setErrorManager",
         "forceReload",
@@ -38,7 +41,7 @@ void NativeTiled2dMapSourceInterface::onVisibleBoundsChanged(const CppType& self
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
     }
 }
-void NativeTiled2dMapSourceInterface::onCameraChange(const CppType& self, const em::val& w_viewMatrix,const em::val& w_projectionMatrix,const em::val& w_origin,float w_verticalFov,float w_horizontalFov,float w_width,float w_height,float w_focusPointAltitude,const em::val& w_focusPointPosition,float w_zoom) {
+void NativeTiled2dMapSourceInterface::onCameraChange(const CppType& self, const em::val& w_viewMatrix,const em::val& w_projectionMatrix,const em::val& w_origin,float w_verticalFov,float w_horizontalFov,float w_width,float w_height,float w_focusPointAltitude,const em::val& w_focusPointPosition,float w_zoom,const em::val& w_cameraPosition,int32_t w_cameraMode) {
     try {
         self->onCameraChange(::djinni::List<::djinni::F32>::toCpp(w_viewMatrix),
                        ::djinni::List<::djinni::F32>::toCpp(w_projectionMatrix),
@@ -49,7 +52,9 @@ void NativeTiled2dMapSourceInterface::onCameraChange(const CppType& self, const 
                        ::djinni::F32::toCpp(w_height),
                        ::djinni::F32::toCpp(w_focusPointAltitude),
                        ::djinni_generated::NativeCoord::toCpp(w_focusPointPosition),
-                       ::djinni::F32::toCpp(w_zoom));
+                       ::djinni::F32::toCpp(w_zoom),
+                       ::djinni::Optional<std::optional, ::djinni_generated::NativeVec3D>::toCpp(w_cameraPosition),
+                       ::djinni_generated::NativeMapCamera3dMode::toCpp(w_cameraMode));
     }
     catch(const std::exception& e) {
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
@@ -89,6 +94,14 @@ em::val NativeTiled2dMapSourceInterface::getMaxZoomLevelIdentifier(const CppType
         return ::djinni::ExceptionHandlingTraits<::djinni::Optional<std::optional, ::djinni::I32>>::handleNativeException(e);
     }
 }
+void NativeTiled2dMapSourceInterface::setZoomLevelScaleFactor(const CppType& self, float w_value) {
+    try {
+        self->setZoomLevelScaleFactor(::djinni::F32::toCpp(w_value));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
 void NativeTiled2dMapSourceInterface::pause(const CppType& self) {
     try {
         self->pause();
@@ -100,6 +113,14 @@ void NativeTiled2dMapSourceInterface::pause(const CppType& self) {
 void NativeTiled2dMapSourceInterface::resume(const CppType& self) {
     try {
         self->resume();
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeTiled2dMapSourceInterface::setTileLoadingPaused(const CppType& self, bool w_paused) {
+    try {
+        self->setTileLoadingPaused(::djinni::Bool::toCpp(w_paused));
     }
     catch(const std::exception& e) {
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
@@ -149,8 +170,10 @@ EMSCRIPTEN_BINDINGS(_tiled_2d_map_source_interface) {
         .function("getMinZoomLevelIdentifier", NativeTiled2dMapSourceInterface::getMinZoomLevelIdentifier)
         .function("setMaxZoomLevelIdentifier", NativeTiled2dMapSourceInterface::setMaxZoomLevelIdentifier)
         .function("getMaxZoomLevelIdentifier", NativeTiled2dMapSourceInterface::getMaxZoomLevelIdentifier)
+        .function("setZoomLevelScaleFactor", NativeTiled2dMapSourceInterface::setZoomLevelScaleFactor)
         .function("pause", NativeTiled2dMapSourceInterface::pause)
         .function("resume", NativeTiled2dMapSourceInterface::resume)
+        .function("setTileLoadingPaused", NativeTiled2dMapSourceInterface::setTileLoadingPaused)
         .function("isReadyToRenderOffscreen", NativeTiled2dMapSourceInterface::isReadyToRenderOffscreen)
         .function("setErrorManager", NativeTiled2dMapSourceInterface::setErrorManager)
         .function("forceReload", NativeTiled2dMapSourceInterface::forceReload)

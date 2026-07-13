@@ -28,7 +28,7 @@ class ColorShader: BaseShader, @unchecked Sendable {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline else { return }
+        guard let pipeline = activePipeline else { return }
         context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
     }

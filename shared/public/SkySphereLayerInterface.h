@@ -13,6 +13,8 @@ public:
 
     static /*not-null*/ std::shared_ptr<SkySphereLayerInterface> create();
 
+    static /*not-null*/ std::shared_ptr<SkySphereLayerInterface> createWithLocal();
+
     virtual /*not-null*/ std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
     /** Expects a texture with x: right ascension (longitude), y: declination (latitude) */

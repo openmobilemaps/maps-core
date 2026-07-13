@@ -122,26 +122,34 @@ void WebLoader::processDataLoadRequest(std::unique_ptr<DataLoadRequest> dataLoad
         delete loadRequest;
     };
     attr.onerror = [](emscripten_fetch_t *fetch) {
-        const bool cancelled = (fetch->status == (unsigned short)-1); // undocumented, see emscripten_fetch.c emscripten_fetch_close
+        if (fetch->userData == 0) {
+            // cancelled: everything already done in cancelDataLoad
+            return;
+        }
 
         auto loadRequest = reinterpret_cast<DataLoadRequest *>(fetch->userData);
-
-        if(!cancelled) {
-            auto loader = loadRequest->loader.lock();
-            if(loader) {
-                loader->ongoingDataLoads.erase(loadRequest->url);
-            }
+        auto loader = loadRequest->loader.lock();
+        if(loader) {
+            loader->ongoingDataLoads.erase(loadRequest->url);
         }
         loadRequest->promise.setValue(
             DataLoaderResult({}, "", LoaderStatus::ERROR_OTHER, "Failed with status: " + std::to_string(fetch->status)));
-        if(!cancelled) { // important! otherwise inifinite recursion
-            emscripten_fetch_close(fetch);
-        }
+        emscripten_fetch_close(fetch);
         delete loadRequest;
     };
 
     emscripten_fetch_t *fetch = emscripten_fetch(&attr, loadRequest->url.c_str());
     ongoingDataLoads[loadRequest->url] = fetch;
+}
+
+static void cancelDataLoad(emscripten_fetch_t* fetch) {
+    // apparently fetch.onerror is not called reliably when cancelling a request with emscripten_fetch_close,
+    // we handle everything here instead:
+    auto loadRequest = reinterpret_cast<DataLoadRequest *>(fetch->userData);
+    loadRequest->promise.setValue(DataLoaderResult({}, "", LoaderStatus::ERROR_OTHER, "Cancelled"));
+    delete loadRequest;
+    fetch->userData = 0;
+    emscripten_fetch_close(fetch);
 }
 
 std::shared_ptr<LoaderInterface> WebLoader::asLoaderInterface() {
@@ -161,8 +169,7 @@ void WebLoader::processLoadRequests() {
         // cancel data load
         auto it = ongoingDataLoads.find(url);
         if(it != ongoingDataLoads.end()) {
-            // calls onerror unless already done.
-            emscripten_fetch_close(it->second);
+            cancelDataLoad(it->second);
             ongoingDataLoads.erase(it);
         }
         // cancel texture load
@@ -201,21 +208,44 @@ djinni::Future<TextureLoaderResult> WebLoader::loadTextureAsync(const std::strin
 
 // Cancel an ongoing fetch request by URL
 void WebLoader::cancel(const std::string &url) {
-    std::lock_guard<std::mutex> lock(mutex);
-    // remove it if still queued
-    dataLoadQueue.erase(std::remove_if(
-            dataLoadQueue.begin(),
-            dataLoadQueue.end(),
-            [&url](const std::unique_ptr<DataLoadRequest> &r) { return r->url == url; }),
-        dataLoadQueue.end());
-    textureLoadQueue.erase(std::remove_if(
-            textureLoadQueue.begin(),
-            textureLoadQueue.end(),
-            [&url](const std::unique_ptr<TextureLoadRequest> &r) { return r->url == url; }),
-        textureLoadQueue.end());
 
-    // queue for cancellation on next process call on main thread.
-    cancellationQueue.push_back(url);
+    std::vector<std::unique_ptr<DataLoadRequest>> cancelledDataLoads;
+    std::vector<std::unique_ptr<TextureLoadRequest>> cancelledTextureLoads;
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        // remove it if still queued
+        for (auto &loadRequest : dataLoadQueue) {
+            if (loadRequest->url == url) {
+                cancelledDataLoads.emplace_back(std::move(loadRequest));
+            }
+        }
+        dataLoadQueue.erase(std::remove_if(
+                dataLoadQueue.begin(),
+                dataLoadQueue.end(),
+                [](const std::unique_ptr<DataLoadRequest> &r) { return r == nullptr; }),
+            dataLoadQueue.end());
+
+        for (auto &loadRequest : textureLoadQueue) {
+            if (loadRequest->url == url) {
+                cancelledTextureLoads.emplace_back(std::move(loadRequest));
+            }
+        }
+        textureLoadQueue.erase(std::remove_if(
+                textureLoadQueue.begin(),
+                textureLoadQueue.end(),
+                [](const std::unique_ptr<TextureLoadRequest> &r) { return r == nullptr; }),
+            textureLoadQueue.end());
+
+        // queue for cancellation on next process call on main thread.
+        cancellationQueue.push_back(url);
+    }
+
+    for (auto &loadRequest : cancelledDataLoads) {
+        loadRequest->promise.setValue(DataLoaderResult({}, "", LoaderStatus::ERROR_OTHER, "Cancelled"));
+    }
+    for (auto &loadRequest : cancelledTextureLoads) {
+        loadRequest->promise.setValue(TextureLoaderResult(nullptr, "", LoaderStatus::ERROR_OTHER, "Cancelled"));
+    }
 }
 
 EMSCRIPTEN_BINDINGS(_web_extras_loader) {

@@ -8,16 +8,17 @@
 import Foundation
 
 @MainActor
+@available(*, unavailable, message: "CapabilitiesResource was removed. Use MCWmtsCapabilitiesResource.from(xmlString:), MCWmtsCapabilitiesResource.from(url:), and MCWmtsCapabilitiesResource.rasterLayer(identifier:tileLoaders:) instead.")
 public class CapabilitiesResource {
     public init(xmlString: String) throws {
-        resource = try MCWmtsCapabilitiesResource.create(xmlString) !! Errors.capabilitiesLoadFailed
+        resource = (try MCWmtsCapabilitiesResource.create(xmlString) !! Errors.capabilitiesLoadFailed)
     }
 
     @available(iOS 15.0, *)
     public init(url: URL) async throws {
         let (data, _) = try await URLSession.shared.data(from: url)
         let xml = try String(data: data, encoding: .utf8) !! Errors.stringDecodeFailed
-        resource = try MCWmtsCapabilitiesResource.create(xml) !! Errors.capabilitiesLoadFailed
+        resource = (try MCWmtsCapabilitiesResource.create(xml) !! Errors.capabilitiesLoadFailed)
     }
 
     public func createLayer(identifier: String, tileLoaders: [MCLoaderInterface] = [MCTextureLoader()]) throws -> TiledRasterLayer {

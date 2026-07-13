@@ -25,10 +25,14 @@ private:
     friend ::djinni::JniClass<NativeRenderPassConfig>;
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/RenderPassConfig") };
-    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(IZLio/openmobilemaps/mapscore/shared/graphics/RenderTargetInterface;)V") };
+    const jmethodID jconstructor { ::djinni::jniGetMethodID(clazz.get(), "<init>", "(IZLio/openmobilemaps/mapscore/shared/graphics/RenderTargetInterface;IIII)V") };
     const jfieldID field_renderPassIndex { ::djinni::jniGetFieldID(clazz.get(), "renderPassIndex", "I") };
     const jfieldID field_isPassMasked { ::djinni::jniGetFieldID(clazz.get(), "isPassMasked", "Z") };
     const jfieldID field_renderTarget { ::djinni::jniGetFieldID(clazz.get(), "renderTarget", "Lio/openmobilemaps/mapscore/shared/graphics/RenderTargetInterface;") };
+    const jfieldID field_stencilReadMask { ::djinni::jniGetFieldID(clazz.get(), "stencilReadMask", "I") };
+    const jfieldID field_stencilReadReference { ::djinni::jniGetFieldID(clazz.get(), "stencilReadReference", "I") };
+    const jfieldID field_stencilWriteMask { ::djinni::jniGetFieldID(clazz.get(), "stencilWriteMask", "I") };
+    const jfieldID field_stencilWriteReference { ::djinni::jniGetFieldID(clazz.get(), "stencilWriteReference", "I") };
 };
 
 } // namespace djinni_generated

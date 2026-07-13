@@ -217,11 +217,18 @@ class GLThread constructor(
 	}
 
 	private fun destroySurface() {
-		if (eglSurface != null && eglSurface !== EGL10.EGL_NO_SURFACE) {
-			egl?.eglMakeCurrent(eglDisplay, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT)
-			egl?.eglDestroySurface(eglDisplay, eglSurface)
-			eglSurface = null
+		val egl = egl
+		val display = eglDisplay
+		val surface = eglSurface
+
+		if (egl != null && display != null && display !== EGL10.EGL_NO_DISPLAY &&
+			surface != null && surface !== EGL10.EGL_NO_SURFACE
+		) {
+			egl.eglMakeCurrent(display, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_SURFACE, EGL10.EGL_NO_CONTEXT)
+			egl.eglDestroySurface(display, surface)
 		}
+
+		eglSurface = null
 	}
 
 	/**
@@ -326,9 +333,22 @@ class GLThread constructor(
 	}
 
 	private fun finishGL() {
-		egl?.eglDestroyContext(eglDisplay, eglContext)
-		egl?.eglTerminate(eglDisplay)
-		egl?.eglDestroySurface(eglDisplay, eglSurface)
+		destroySurface()
+
+		val egl = egl
+		val display = eglDisplay
+		val context = eglContext
+		if (egl != null && display != null && context != null && context !== EGL10.EGL_NO_CONTEXT) {
+			egl.eglDestroyContext(display, context)
+		}
+		if (egl != null && display != null && display !== EGL10.EGL_NO_DISPLAY) {
+			egl.eglTerminate(display)
+		}
+
+		eglSurface = null
+		eglContext = null
+		eglDisplay = null
+		this.egl = null
 		surface?.release()
 		surface = null
 	}

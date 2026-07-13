@@ -161,10 +161,26 @@ std::string ColorLineGroup2dShaderOpenGl::getLineStylesUBODefinition(bool isSimp
                     float capType; // 7
                 };
 
+                // Note: we use vec4 instead of SimpleLineStyle for the lineValues in uLineStyles
+                // because having structs in uniforms leads to _very_ slow shader compilation in some WebGL implementations (notably Firefox on MacOS, blocking for many seconds).
                 layout (std140) uniform LineStyleCollection {
-                    SimpleLineStyle lineValues[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
+                    vec4 lineValues[2 * ) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
                     lowp int numStyles;
                 } uLineStyles;
+
+                SimpleLineStyle getSimpleLineStyle(int index) {
+                    return SimpleLineStyle(
+                        uLineStyles.lineValues[2*index+0].x,
+                        uLineStyles.lineValues[2*index+0].y,
+                        uLineStyles.lineValues[2*index+0].z,
+                        uLineStyles.lineValues[2*index+0].w,
+                        uLineStyles.lineValues[2*index+1].x,
+                        uLineStyles.lineValues[2*index+1].y,
+                        uLineStyles.lineValues[2*index+1].z,
+                        uLineStyles.lineValues[2*index+1].w
+                    );
+                }
+
         );
     } else {
         return OMMShaderCode(
@@ -194,10 +210,39 @@ std::string ColorLineGroup2dShaderOpenGl::getLineStylesUBODefinition(bool isSimp
                     float dottedSkew; // 22
                 };
 
+                // Note: vec4, not struct, see comment above
                 layout (std140) uniform LineStyleCollection {
-                    LineStyle lineValues[) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
+                    vec4 lineValues[6 * ) + std::to_string(MAX_NUM_STYLES) + OMMShaderCode(];
                     lowp int numStyles;
                 } uLineStyles;
+
+                LineStyle getLineStyle(int index) {
+                    return LineStyle(
+                        uLineStyles.lineValues[6*index+0].x,
+                        uLineStyles.lineValues[6*index+0].y,
+                        uLineStyles.lineValues[6*index+0].z,
+                        uLineStyles.lineValues[6*index+0].w,
+                        uLineStyles.lineValues[6*index+1].x,
+                        uLineStyles.lineValues[6*index+1].y,
+                        uLineStyles.lineValues[6*index+1].z,
+                        uLineStyles.lineValues[6*index+1].w,
+                        uLineStyles.lineValues[6*index+2].x,
+                        uLineStyles.lineValues[6*index+2].y,
+                        uLineStyles.lineValues[6*index+2].z,
+                        uLineStyles.lineValues[6*index+2].w,
+                        uLineStyles.lineValues[6*index+3].x,
+                        uLineStyles.lineValues[6*index+3].y,
+                        uLineStyles.lineValues[6*index+3].z,
+                        uLineStyles.lineValues[6*index+3].w,
+                        uLineStyles.lineValues[6*index+4].x,
+                        uLineStyles.lineValues[6*index+4].y,
+                        uLineStyles.lineValues[6*index+4].z,
+                        uLineStyles.lineValues[6*index+4].w,
+                        uLineStyles.lineValues[6*index+5].x,
+                        uLineStyles.lineValues[6*index+5].y,
+                        uLineStyles.lineValues[6*index+5].z
+                    );
+                }
         );
     }
 }
@@ -222,7 +267,6 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
         )) +
 
         OMMShaderCode(
-            in float lineSide;
             in float lengthPrefix;
             in float lengthCorrection;
             in float stylingIndex;
@@ -241,14 +285,22 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
 
         + OMMShaderCode(
             void main() {
-                float fStylingIndex = mod(stylingIndex, 256.0);
-                int index = clamp(int(floor(fStylingIndex + 0.5)), 0, uLineStyles.numStyles);
-                float width = uLineStyles.lineValues[index].width / 2.0 * uFrameUniforms.frameSpecs.x;
+                // stylingIndex packs styleIndex * 100 + side (see LineGeometryBuilder::pushLineVertex).
+                float styleGroup = floor(stylingIndex / 100.0 + 0.5);
+                float lineSide = stylingIndex - styleGroup * 100.0;
+                int index = clamp(int(styleGroup) & 255, 0, uLineStyles.numStyles);
+                ) +
+                (isSimple ? OMMShaderCode(
+                    SimpleLineStyle style = getSimpleLineStyle(index);
+                ) : OMMShaderCode(
+                    LineStyle style = getLineStyle(index);
+                )) + OMMShaderCode(
+                float width = style.width / 2.0 * uFrameUniforms.frameSpecs.x;
                 ) +
                 (isSimple ? OMMShaderCode(
                     float blur = blurRadiusPx * uFrameUniforms.frameSpecs.x;
                 ) : OMMShaderCode(
-                    float blur = max(blurRadiusPx, uLineStyles.lineValues[index].blur) * uFrameUniforms.frameSpecs.x;
+                    float blur = max(blurRadiusPx, style.blur) * uFrameUniforms.frameSpecs.x;
                 )) +
                 (is3d ? OMMShaderCode(
                     vec4 extendedPosition = vec4(position + extrude * (width + blur), 1.0) + originOffset;
@@ -265,10 +317,10 @@ std::string ColorLineGroup2dShaderOpenGl::getVertexShader() {
                 OMMShaderCode(
                     outLineSide = lineSide;
                     outStylingIndex = index;
-                    outColor = vec4(uLineStyles.lineValues[index].colorR,
-                                    uLineStyles.lineValues[index].colorG,
-                                    uLineStyles.lineValues[index].colorB,
-                                    uLineStyles.lineValues[index].colorA);
+                    outColor = vec4(style.colorR,
+                                    style.colorG,
+                                    style.colorB,
+                                    style.colorA);
 
                     gl_Position = uFrameUniforms.vpMatrix * extendedPosition;
                 }
@@ -290,7 +342,7 @@ std::string ColorLineGroup2dShaderOpenGl::getSimpleLineFragmentShader() {
            out vec4 fragmentColor;
 
            void main() {
-               SimpleLineStyle style = uLineStyles.lineValues[outStylingIndex];
+               SimpleLineStyle style = getSimpleLineStyle(outStylingIndex);
                float a = outColor.a * style.opacity;
                a *= lineBlurAlpha(outLineSide, style.width, 0.0, uFrameUniforms.frameSpecs.x);
                fragmentColor = vec4(outColor.rgb, 1.0) * a;
@@ -315,8 +367,7 @@ std::string ColorLineGroup2dShaderOpenGl::getLineFragmentShader() {
                    out vec4 fragmentColor;
 
                    void main() {
-                       LineStyle style = uLineStyles.lineValues[outStylingIndex];
-
+                       LineStyle style = getLineStyle(outStylingIndex);
                        float opacity = style.opacity;
 
                        if(opacity == 0.0) {

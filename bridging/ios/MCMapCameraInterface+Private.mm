@@ -12,6 +12,8 @@
 #import "MCMapCameraListenerInterface+Private.h"
 #import "MCMapInterface+Private.h"
 #import "MCRectCoord+Private.h"
+#import "MCTrackedCoordinateCallbackInterface+Private.h"
+#import "MCTrackedCoordinateInterface+Private.h"
 #import "MCVec2F+Private.h"
 #import "MCVec3D+Private.h"
 #include <exception>
@@ -279,6 +281,15 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
         auto objcpp_result_ = _cppRefHandle.get()->screenPosFromCoordZoom(::djinni_generated::Coord::toCpp(coord),
                                                                           ::djinni::F32::toCpp(zoom));
         return ::djinni_generated::Vec2F::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCTrackedCoordinateInterface>)createTrackedCoordinate:(nonnull MCCoord *)coordinate
+                                                            callback:(nullable id<MCTrackedCoordinateCallbackInterface>)callback {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->createTrackedCoordinate(::djinni_generated::Coord::toCpp(coordinate),
+                                                                           ::djinni_generated::TrackedCoordinateCallbackInterface::toCpp(callback));
+        return ::djinni_generated::TrackedCoordinateInterface::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

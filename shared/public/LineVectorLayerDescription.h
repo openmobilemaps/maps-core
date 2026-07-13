@@ -24,11 +24,14 @@ class LineVectorStyle {
                     std::shared_ptr<Value> lineBlur = nullptr, std::shared_ptr<Value> lineCap = nullptr,
                     std::shared_ptr<Value> lineJoin = nullptr, std::shared_ptr<Value> lineOffset = nullptr,
                     std::shared_ptr<Value> blendMode = nullptr, std::shared_ptr<Value> lineDotted = nullptr,
-                    std::shared_ptr<Value> lineDottedSkew = nullptr)
+                    std::shared_ptr<Value> lineDottedSkew = nullptr, std::shared_ptr<Value> lineDashFade = nullptr,
+                    std::shared_ptr<Value> lineDashAnimationSpeed = nullptr)
         : lineColorEvaluator(lineColor)
         , lineOpacityEvaluator(lineOpacity)
         , lineWidthEvaluator(lineWidth)
         , lineDashArrayEvaluator(lineDashArray)
+        , lineDashFadeEvaluator(lineDashFade)
+        , lineDashAnimationSpeedEvaluator(lineDashAnimationSpeed)
         , lineBlurEvaluator(lineBlur)
         , lineCapEvaluator(lineCap)
         , lineJoinEvaluator(lineJoin)
@@ -42,6 +45,8 @@ class LineVectorStyle {
         , lineOpacityEvaluator(style.lineOpacityEvaluator)
         , lineWidthEvaluator(style.lineWidthEvaluator)
         , lineDashArrayEvaluator(style.lineDashArrayEvaluator)
+        , lineDashFadeEvaluator(style.lineDashFadeEvaluator)
+        , lineDashAnimationSpeedEvaluator(style.lineDashAnimationSpeedEvaluator)
         , lineBlurEvaluator(style.lineBlurEvaluator)
         , lineCapEvaluator(style.lineCapEvaluator)
         , lineJoinEvaluator(style.lineJoinEvaluator)
@@ -54,7 +59,8 @@ class LineVectorStyle {
         UsedKeysCollection usedKeys;
         std::shared_ptr<Value> values[] = {
             lineColorEvaluator.getValue(), lineOpacityEvaluator.getValue(),   lineWidthEvaluator.getValue(),
-            lineBlurEvaluator.getValue(),  lineDashArrayEvaluator.getValue(), lineCapEvaluator.getValue(), lineJoinEvaluator.getValue(),
+            lineBlurEvaluator.getValue(),  lineDashArrayEvaluator.getValue(), lineDashFadeEvaluator.getValue(),
+            lineDashAnimationSpeedEvaluator.getValue(), lineCapEvaluator.getValue(), lineJoinEvaluator.getValue(),
             blendModeEvaluator.getValue(), lineDottedEvaluator.getValue(),    lineDottedSkewEvaluator.getValue()};
 
         for (auto const &value : values) {
@@ -99,6 +105,16 @@ class LineVectorStyle {
         return lineDashArrayEvaluator.getResult(context, defaultValue).value;
     }
 
+    double getLineDashFade(const EvaluationContext &context) {
+        static const double defaultValue = 0.0;
+        return lineDashFadeEvaluator.getResult(context, defaultValue).value;
+    }
+
+    double getLineDashAnimationSpeed(const EvaluationContext &context) {
+        static const double defaultValue = 0.0;
+        return lineDashAnimationSpeedEvaluator.getResult(context, defaultValue).value;
+    }
+
     LineCapType getLineCap(const EvaluationContext &context) {
         static const LineCapType defaultValue = LineCapType::BUTT;
         return lineCapEvaluator.getResult(context, defaultValue).value;
@@ -127,6 +143,7 @@ class LineVectorStyle {
 
     bool isSimpleLine() {
         return lineBlurEvaluator.getValue() == nullptr && lineDashArrayEvaluator.getValue() == nullptr &&
+               lineDashFadeEvaluator.getValue() == nullptr && lineDashAnimationSpeedEvaluator.getValue() == nullptr &&
                lineOffsetEvaluator.getValue() == nullptr && lineDottedEvaluator.getValue() == nullptr &&
                lineDottedSkewEvaluator.getValue() == nullptr;
     }
@@ -136,6 +153,8 @@ class LineVectorStyle {
     FeatureValueEvaluator<double> lineBlurEvaluator;
     FeatureValueEvaluator<double> lineWidthEvaluator;
     FeatureValueEvaluator<std::vector<float>> lineDashArrayEvaluator;
+    FeatureValueEvaluator<double> lineDashFadeEvaluator;
+    FeatureValueEvaluator<double> lineDashAnimationSpeedEvaluator;
     FeatureValueEvaluator<LineCapType> lineCapEvaluator;
     FeatureValueEvaluator<LineJoinType> lineJoinEvaluator;
     FeatureValueEvaluator<double> lineOffsetEvaluator;
@@ -160,9 +179,11 @@ class LineVectorLayerDescription : public VectorLayerDescription {
         , selectionSizeFactor(selectionSizeFactor) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
-        return std::make_unique<LineVectorLayerDescription>(
+        auto cloned = std::make_unique<LineVectorLayerDescription>(
             identifier, source, sourceLayer, minZoom, maxZoom, sourceMinZoom, sourceMaxZoom, filter ? filter->clone() : nullptr,
             style, renderPassIndex, interactable ? interactable->clone() : nullptr, multiselect, selfMasked, selectionSizeFactor);
+        copyRenderPassOptionsTo(*cloned);
+        return cloned;
     }
 
     virtual UsedKeysCollection getUsedKeys() const override {

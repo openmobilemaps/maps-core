@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "BaseGraphicsObjectOpenGl.h"
 #include "GraphicsObjectInterface.h"
 #include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
@@ -19,7 +20,7 @@
 #include "BaseShaderProgramOpenGl.h"
 #include <mutex>
 
-class IcosahedronOpenGl : public GraphicsObjectInterface,
+class IcosahedronOpenGl : public BaseGraphicsObjectOpenGl,
                           public IcosahedronInterface,
                           public std::enable_shared_from_this<IcosahedronOpenGl> {
 public:

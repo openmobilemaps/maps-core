@@ -113,6 +113,8 @@ void IcosahedronOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inv
 void IcosahedronOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                                double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
+    disableDepthTest();
+
     if (!ready)
         return;
 
@@ -122,15 +124,21 @@ void IcosahedronOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     GLuint validTarget = 0;
     GLenum zpass = GL_KEEP;
     if (isMasked) {
-        stencilMask += 128;
-        validTarget = isMaskInversed ? 0 : 128;
+        if (renderPass.stencilReadMask != 0) {
+            stencilMask = static_cast<GLuint>(renderPass.stencilReadMask);
+            validTarget = static_cast<GLuint>(renderPass.stencilReadReference);
+        } else {
+            stencilMask += 128;
+            validTarget = isMaskInversed ? 0 : 128;
+        }
     }
     if (renderPass.isPassMasked) {
-        stencilMask += 127;
+        stencilMask |= 127;
         zpass = GL_INCR;
     }
 
     if (stencilMask != 0) {
+        glStencilMask(0xFF);
         glStencilFunc(GL_EQUAL, validTarget, stencilMask);
         glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }

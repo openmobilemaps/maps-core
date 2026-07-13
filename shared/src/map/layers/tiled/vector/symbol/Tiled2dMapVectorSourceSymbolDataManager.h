@@ -73,6 +73,8 @@ public:
 
     virtual void resume() override;
 
+    virtual void clear() override;
+
     virtual void setAlpha(float alpha) override;
 
     void onVectorTilesUpdated(const std::string &sourceName, VectorSet<Tiled2dMapVectorTileInfo> currentTileInfos) override;

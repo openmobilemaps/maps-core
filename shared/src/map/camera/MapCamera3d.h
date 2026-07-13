@@ -15,9 +15,11 @@
 #include "CameraInterpolation.h"
 #include "Coord.h"
 #include "CoordAnimation.h"
+#include "CoordinateSystemIdentifiers.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "DoubleAnimation.h"
 #include "MapCamera3dInterface.h"
+#include "MapCamera3dMode.h"
 #include "MapCameraInterface.h"
 #include "MapCameraListenerInterface.h"
 #include "MapCameraInertia.h"
@@ -27,9 +29,15 @@
 #include "Vec2I.h"
 #include "Vec3D.h"
 #include "Vec4D.h"
+#include <cstdint>
 #include <mutex>
 #include <optional>
 #include <set>
+#include <vector>
+
+class TrackedCoordinate;
+class TrackedCoordinateCallbackInterface;
+class TrackedCoordinateInterface;
 
 class MapCamera3d : public MapCameraInterface,
                     public MapCamera3dInterface,
@@ -150,6 +158,10 @@ class MapCamera3d : public MapCameraInterface,
 
     virtual ::Vec2F screenPosFromCoordZoom(const ::Coord &coord, float zoom) override;
 
+    virtual std::shared_ptr<TrackedCoordinateInterface> createTrackedCoordinate(
+        const ::Coord &coordinate,
+        const std::shared_ptr<TrackedCoordinateCallbackInterface> &callback) override;
+
     bool coordIsVisibleOnScreen(const ::Coord &coord, float paddingPc) override;
 
     bool gluInvertMatrix(const std::vector<double> &m, std::vector<double> &invOut);
@@ -173,6 +185,25 @@ class MapCamera3d : public MapCameraInterface,
 
     Camera3dConfig getCameraConfig() override;
 
+    ::MapCamera3dMode getCameraMode() override;
+
+    void setCameraMode(::MapCamera3dMode mode) override;
+
+    bool isPoseCameraActive() override;
+
+    void setPoseCamera(const ::Coord &position, float yawDegrees, float pitchDegrees, float rollDegrees, float verticalFovDegrees,
+                       float nearPlaneMeters, float farPlaneMeters) override;
+
+    void clearPoseCamera() override;
+
+    void setCustomViewMatrix(const std::vector<float> &viewMatrix) override;
+
+    void clearCustomViewMatrix() override;
+
+    void setCustomProjectionMatrix(const std::vector<float> &projectionMatrix) override;
+
+    void clearCustomProjectionMatrix() override;
+
     void notifyListenerBoundsChange() override;
 
     void computeEllipseCoefficients(std::vector<double>& coefficients);
@@ -181,7 +212,34 @@ class MapCamera3d : public MapCameraInterface,
 
     Vec2F screenPosFromCartesianCoord(const Vec3D &coord, const Vec2I &sizeViewport);
 
-  protected:
+    struct PoseCameraState {
+        Coord position = Coord(CoordinateSystemIdentifiers::EPSG4326(), 0.0, 0.0, 0.0);
+        float yawDegrees = 0.0f;
+        float pitchDegrees = 0.0f;
+        float rollDegrees = 0.0f;
+        float verticalFovDegrees = 60.0f;
+        float nearPlaneMeters = 0.5f;
+        float farPlaneMeters = 50000.0f;
+    };
+
+    Coord getPoseSurfacePosition() const;
+
+    Coord getPoseCenterPosition(const Vec2I &sizeViewport);
+
+    double getPoseDerivedZoom(const Vec2I &sizeViewport);
+
+    RectCoord getPoseRectFromViewport(const Vec2I &sizeViewport, float insetLeft, float insetTop, float insetRight, float insetBottom);
+
+    Vec3D cartesianFromCoord(const Coord &coord) const;
+
+    Vec3D rotateVectorAroundAxis(const Vec3D &vector, const Vec3D &axis, double degrees) const;
+
+    void getPoseBasis(const Coord &coord, Vec3D &east, Vec3D &north, Vec3D &up) const;
+    
+    Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen, const Vec3D &origin,
+                                  double sphereRadius);
+
+    protected:
     virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen);
 
     virtual ::Coord coordFromScreenPosition(const std::vector<double> &inverseVPMatrix, const ::Vec2F &posScreen,
@@ -204,6 +262,8 @@ class MapCamera3d : public MapCameraInterface,
 
     std::recursive_mutex listenerMutex;
     std::set<std::shared_ptr<MapCameraListenerInterface>> listeners;
+    std::recursive_mutex trackedCoordinateMutex;
+    std::vector<std::weak_ptr<TrackedCoordinate>> trackedCoordinates;
 
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
@@ -262,6 +322,7 @@ class MapCamera3d : public MapCameraInterface,
     enum ListenerType { BOUNDS = 1, ROTATION = 1 << 1, MAP_INTERACTION = 1 << 2 };
 
     void notifyListeners(const int &listenerType);
+    void notifyTrackedCoordinates();
 
     float valueForZoom(const CameraInterpolation &interpolator, double zoom);
 
@@ -296,6 +357,14 @@ class MapCamera3d : public MapCameraInterface,
     std::vector<double> inverseVPMatrix = std::vector<double>(16, 0.0);
     std::vector<float> viewMatrix = std::vector<float>(16, 0.0);
     std::vector<float> projectionMatrix = std::vector<float>(16, 0.0);
+
+    ::MapCamera3dMode cameraMode = ::MapCamera3dMode::ORBIT;
+    PoseCameraState poseCameraState;
+
+    bool customViewMatrixEnabled = false;
+    std::vector<double> customViewMatrix = std::vector<double>(16, 0.0);
+    bool customProjectionMatrixEnabled = false;
+    std::vector<double> customProjectionMatrix = std::vector<double>(16, 0.0);
     Vec3D cameraPosition = Vec3D(0.0, 0.0, 0.0);
     Vec3D origin;
     float verticalFov;

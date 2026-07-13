@@ -50,6 +50,7 @@ export interface ShaderFactoryInterface {
     createIcosahedronColorShader(): ColorShaderInterface;
     createSphereEffectShader(): SphereEffectShaderInterface;
     createSkySphereShader(): SkySphereShaderInterface;
+    createSkySphereLocalShader(): SkySphereShaderInterface;
     createElevationInterpolationShader(): ElevationInterpolationShaderInterface;
 }
 
@@ -138,6 +139,7 @@ export interface LineGroupShaderInterface {
 
 export interface ColorCircleShaderInterface {
     setColor(red: number, green: number, blue: number, alpha: number): void;
+    setCircleStyle(fillRed: number, fillGreen: number, fillBlue: number, fillAlpha: number, strokeRed: number, strokeGreen: number, strokeBlue: number, strokeAlpha: number, innerRadius: number): void;
     asShaderProgramInterface(): ShaderProgramInterface;
 }
 

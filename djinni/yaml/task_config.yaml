@@ -8,7 +8,11 @@ cpp:
   typename: '::TaskConfig'
   header: '"TaskConfig.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCTaskConfig'
   pointer: true
   hash: '%s.hash'

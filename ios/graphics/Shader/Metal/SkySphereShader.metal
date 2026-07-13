@@ -40,3 +40,43 @@ skySphereFragmentShader(VertexOut in [[stage_in]],
     // Sample the texture
     return texture0.sample(textureSampler, texCoords);
 }
+
+fragment half4
+skySphereLocalFragmentShader(VertexOut in [[stage_in]],
+                        constant const float4 *alpha [[buffer(0)]],
+                        constant float4 &cameraPosition [[buffer(1)]],
+                        constant float4x4 &inverseVPMatrix [[buffer(2)]],
+                        texture2d<half> texture0 [[ texture(0)]],
+                        sampler textureSampler [[sampler(0)]])
+{
+    // Transform screen position to Cartesian coordinates
+    float4 posCart = inverseVPMatrix * float4(in.uv.x, -in.uv.y, 1.0, 1.0);
+    posCart /= posCart.w;
+
+    // Compute direction relative to the camera
+    float3 dirCamera = normalize(posCart.xyz - cameraPosition.xyz);
+
+    // Align the panorama with the local tangent frame at the current globe position.
+    float3 localUp = normalize(cameraPosition.xyz);
+    float3 referenceNorth = abs(localUp.y) > 0.99 ? float3(1.0, 0.0, 0.0) : float3(0.0, 1.0, 0.0);
+    float3 localEast = normalize(cross(referenceNorth, localUp));
+    float3 localNorth = normalize(cross(localUp, localEast));
+    float3 dirLocal = float3(
+        dot(dirCamera, localEast),
+        dot(dirCamera, localUp),
+        dot(dirCamera, localNorth)
+    );
+
+    // Calculate spherical coordinates (right ascension and declination)
+    float rasc = atan2(dirLocal.z, dirLocal.x) + M_PI_F;
+    float decl = asin(dirLocal.y);
+
+    // Texture coordinates
+    float2 texCoords = float2(
+        -(rasc / (2.0 * M_PI_F)) + 1.0,
+        -decl / M_PI_F + 0.5
+    );
+
+    // Sample the texture
+    return texture0.sample(textureSampler, texCoords);
+}

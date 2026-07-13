@@ -8,7 +8,11 @@ cpp:
   typename: '::TouchEvent'
   header: '"TouchEvent.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCTouchEvent'
   pointer: true
   hash: '%s.hash'

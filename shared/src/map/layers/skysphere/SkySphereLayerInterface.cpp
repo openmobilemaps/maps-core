@@ -12,5 +12,9 @@
 #include "SkySphereLayer.h"
 
 std::shared_ptr<SkySphereLayerInterface> SkySphereLayerInterface::create() {
-    return std::make_shared<SkySphereLayer>();
+    return std::make_shared<SkySphereLayer>(false);
+}
+
+std::shared_ptr<SkySphereLayerInterface> SkySphereLayerInterface::createWithLocal() {
+    return std::make_shared<SkySphereLayer>(true);
 }

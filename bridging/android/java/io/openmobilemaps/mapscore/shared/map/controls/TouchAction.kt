@@ -9,4 +9,6 @@ enum class TouchAction {
     UP,
     SCROLL,
     CANCEL,
+    HOVER,
+    HOVER_EXIT,
 }

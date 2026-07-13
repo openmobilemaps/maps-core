@@ -26,8 +26,10 @@ struct NativeCoordinateSystemFactory : ::djinni::JsInterface<::CoordinateSystemF
     static em::val getEpsg2056System();
     static em::val getEpsg3857System();
     static em::val getEpsg4326System();
+    static em::val getEpsg4326System2d();
     static em::val getEpsg21781System();
     static em::val getUnitSphereSystem();
+    static em::val getSystemFor(int32_t w_identifier);
 
 };
 

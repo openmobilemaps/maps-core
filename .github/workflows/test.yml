@@ -24,7 +24,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -DBUILD_JVM=OFF -DBUILD_STANDALONE=OFF -B build-debug
+          cmake -G Ninja -DCMAKE_CXX_COMPILER_LAUNCHER=ccache -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_BUILD_TYPE=Debug -B build-debug -S shared/test/
           cmake --build build-debug -- tests
       - name: Test
         run: |
@@ -32,7 +32,7 @@ jobs:
           # Run tests. 
           # We dont care about benchmark results, but still run the benchmark
           # tests as quickly as possible to catch when something breaks.
-          build-debug/shared/test/tests \
+          build-debug/tests \
             --benchmark-warmup-time 0 \
             --benchmark-samples 1 \
             --benchmark-no-analysis \

@@ -17,6 +17,7 @@
 #include <chrono>
 #include <opengl_wrapper.h>
 #include <memory>
+#include <mutex>
 #include <string>
 #include <unordered_map>
 
@@ -45,7 +46,17 @@ public:
 
     virtual void postRenderStencilMask() override;
 
+    virtual void clearStencilMask(int32_t clearMask) override;
+
+    virtual void setupStencilWriteMask(int32_t writeMask, int32_t reference) override;
+
     virtual void applyScissorRect(const std::optional<::RectI> &scissorRect) override;
+
+    virtual /*not-null*/ std::shared_ptr<RenderTargetInterface> getCreateOffscreenRenderTarget(const std::string &name) override;
+
+    virtual void deleteOffscreenRenderTarget(const std::string &name) override;
+
+    virtual std::vector</*not-null*/ std::shared_ptr<RenderTargetInterface>> getOffscreenRenderTargets() override;
 
     virtual std::shared_ptr<OpenGlRenderingContextInterface> asOpenGlRenderingContext() override;
 

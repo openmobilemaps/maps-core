@@ -1,12 +1,28 @@
 // swift-tools-version:6.1
 
+import Foundation
 import PackageDescription
+
+let djinniLocalRelative = "external/djinni"
+let manifestDir = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+let djinniManifest =
+    manifestDir
+    .appendingPathComponent(djinniLocalRelative)
+    .appendingPathComponent("Package.swift")
+
+let djinniDependency: Package.Dependency =
+    FileManager.default
+        .fileExists(atPath: djinniManifest.path)
+    ? .package(name: "djinni", path: djinniLocalRelative)
+    : .package(
+        url: "https://github.com/UbiqueInnovation/djinni.git",
+        .upToNextMinor(from: "1.0.9"))
 
 let package = Package(
     name: "MapCore",
     platforms: [
         .iOS(.v14),
-        .macOS(.v10_14),
+        .macOS(.v12),
     ],
     products: [
         .library(
@@ -23,7 +39,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/UbiqueInnovation/djinni.git", .upToNextMinor(from: "1.0.9")),
+        djinniDependency,
         .package(url: "https://github.com/apple/swift-atomics.git", from: "1.3.0"),
     ],
     targets: [
@@ -164,6 +180,7 @@ let package = Package(
                 .headerSearchPath("src/map/layers/tiled/vector/geojson"),
                 .headerSearchPath("src/map/layers/tiled/vector/geojson/geojsonvt"),
                 .headerSearchPath("src/map/layers/tiled/vector/tiles"),
+                .headerSearchPath("src/map/layers/tiled/vector/tiles/circle"),
                 .headerSearchPath("src/map/layers/tiled/vector/tiles/raster"),
                 .headerSearchPath("src/map/layers/tiled/vector/tiles/polygon"),
                 .headerSearchPath("src/map/layers/tiled/vector/tiles/line"),

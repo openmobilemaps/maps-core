@@ -30,3 +30,5 @@
 #endif
 // Metal wireframe overlay is controlled by Swift build settings in:
 // maps-core/Package.swift (swiftSettings). Define HARDWARE_TESSELLATION_WIREFRAME_METAL.
+
+#define RASTER_TILE_RENDER_OVERLAP_FACTOR 1.0 / 512.0

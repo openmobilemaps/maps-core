@@ -5,7 +5,9 @@
 
 #include "Coord.h"
 #include <optional>
+#include <vector>
 
+enum class MapCamera3dMode;
 struct Camera3dConfig;
 
 class MapCamera3dInterface {
@@ -15,4 +17,22 @@ public:
     virtual Camera3dConfig getCameraConfig() = 0;
 
     virtual void setCameraConfig(const Camera3dConfig & config, std::optional<float> durationSeconds, std::optional<float> targetZoom, const std::optional<::Coord> & targetCoordinate) = 0;
+
+    virtual MapCamera3dMode getCameraMode() = 0;
+
+    virtual void setCameraMode(MapCamera3dMode mode) = 0;
+
+    virtual bool isPoseCameraActive() = 0;
+
+    virtual void setPoseCamera(const ::Coord & position, float yawDegrees, float pitchDegrees, float rollDegrees, float verticalFovDegrees, float nearPlaneMeters, float farPlaneMeters) = 0;
+
+    virtual void clearPoseCamera() = 0;
+
+    virtual void setCustomViewMatrix(const std::vector<float> & viewMatrix) = 0;
+
+    virtual void clearCustomViewMatrix() = 0;
+
+    virtual void setCustomProjectionMatrix(const std::vector<float> & projectionMatrix) = 0;
+
+    virtual void clearCustomProjectionMatrix() = 0;
 };

@@ -8,6 +8,9 @@ cpp:
   typename: '::TextureLoaderStatus'
   header: '"TextureLoaderStatus.h"'
   byValue: true
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCTextureLoaderStatus'
   pointer: false

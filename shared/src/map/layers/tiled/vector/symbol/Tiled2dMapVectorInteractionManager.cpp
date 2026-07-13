@@ -60,6 +60,14 @@ bool Tiled2dMapVectorInteractionManager::onLongPress(const Vec2F &posScreen) {
     return callInReverseOrder(lambda);
 }
 
+bool Tiled2dMapVectorInteractionManager::onHover(const Vec2F &posScreen) {
+    return false;
+}
+
+bool Tiled2dMapVectorInteractionManager::onHoverComplete() {
+    return false;
+}
+
 bool Tiled2dMapVectorInteractionManager::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {
     return false;
 }

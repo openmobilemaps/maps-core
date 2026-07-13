@@ -41,7 +41,12 @@ private:
         void setupDrawFrame(int64_t vpMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor) override;
         void preRenderStencilMask() override;
         void postRenderStencilMask() override;
+        void clearStencilMask(int32_t clearMask) override;
+        void setupStencilWriteMask(int32_t writeMask, int32_t reference) override;
         void applyScissorRect(const std::optional<::RectI> & scissorRect) override;
+        /*not-null*/ std::shared_ptr<::RenderTargetInterface> getCreateOffscreenRenderTarget(const std::string & name) override;
+        void deleteOffscreenRenderTarget(const std::string & name) override;
+        std::vector</*not-null*/ std::shared_ptr<::RenderTargetInterface>> getOffscreenRenderTargets() override;
         /*nullable*/ std::shared_ptr<::OpenGlRenderingContextInterface> asOpenGlRenderingContext() override;
 
     private:
@@ -57,7 +62,12 @@ private:
     const jmethodID method_setupDrawFrame { ::djinni::jniGetMethodID(clazz.get(), "setupDrawFrame", "(JLio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;D)V") };
     const jmethodID method_preRenderStencilMask { ::djinni::jniGetMethodID(clazz.get(), "preRenderStencilMask", "()V") };
     const jmethodID method_postRenderStencilMask { ::djinni::jniGetMethodID(clazz.get(), "postRenderStencilMask", "()V") };
+    const jmethodID method_clearStencilMask { ::djinni::jniGetMethodID(clazz.get(), "clearStencilMask", "(I)V") };
+    const jmethodID method_setupStencilWriteMask { ::djinni::jniGetMethodID(clazz.get(), "setupStencilWriteMask", "(II)V") };
     const jmethodID method_applyScissorRect { ::djinni::jniGetMethodID(clazz.get(), "applyScissorRect", "(Lio/openmobilemaps/mapscore/shared/graphics/common/RectI;)V") };
+    const jmethodID method_getCreateOffscreenRenderTarget { ::djinni::jniGetMethodID(clazz.get(), "getCreateOffscreenRenderTarget", "(Ljava/lang/String;)Lio/openmobilemaps/mapscore/shared/graphics/RenderTargetInterface;") };
+    const jmethodID method_deleteOffscreenRenderTarget { ::djinni::jniGetMethodID(clazz.get(), "deleteOffscreenRenderTarget", "(Ljava/lang/String;)V") };
+    const jmethodID method_getOffscreenRenderTargets { ::djinni::jniGetMethodID(clazz.get(), "getOffscreenRenderTargets", "()Ljava/util/ArrayList;") };
     const jmethodID method_asOpenGlRenderingContext { ::djinni::jniGetMethodID(clazz.get(), "asOpenGlRenderingContext", "()Lio/openmobilemaps/mapscore/shared/graphics/OpenGlRenderingContextInterface;") };
 };
 

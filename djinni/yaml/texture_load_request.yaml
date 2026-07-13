@@ -8,6 +8,9 @@ cpp:
   typename: '::TextureLoadRequest'
   header: '"TextureLoadRequest.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCTextureLoadRequest'
   pointer: true

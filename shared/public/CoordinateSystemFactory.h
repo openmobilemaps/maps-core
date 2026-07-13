@@ -3,6 +3,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 struct MapCoordinateSystem;
 
 class CoordinateSystemFactory {
@@ -15,7 +17,11 @@ public:
 
     static MapCoordinateSystem getEpsg4326System();
 
+    static MapCoordinateSystem getEpsg4326System2d();
+
     static MapCoordinateSystem getEpsg21781System();
 
     static MapCoordinateSystem getUnitSphereSystem();
+
+    static MapCoordinateSystem getSystemFor(int32_t identifier);
 };

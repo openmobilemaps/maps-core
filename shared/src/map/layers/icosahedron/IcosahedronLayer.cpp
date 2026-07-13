@@ -35,7 +35,7 @@ void IcosahedronLayer::onAdded(const std::shared_ptr<MapInterface> & mapInterfac
     object = mapInterface->getGraphicsObjectFactory()->createIcosahedronObject(shader->asShaderProgramInterface());
 
     auto renderObject =  std::make_shared<RenderObject>(object->asGraphicsObject());
-    std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, false, renderTarget), std::vector<std::shared_ptr<::RenderObjectInterface>>{ renderObject });
+    std::shared_ptr<RenderPass> renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none), std::vector<std::shared_ptr<::RenderObjectInterface>>{ renderObject });
 
     renderPasses = { renderPass };
 

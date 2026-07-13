@@ -110,4 +110,21 @@ CJNIEXPORT ::djinni_generated::NativeBlendMode::JniType JNICALL Java_io_openmobi
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconInfoInterface_00024CppProxy_native_1setRotation(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jdouble j_angle)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::IconInfoInterface>(nativeRef);
+        ref->setRotation(::djinni::F64::toCpp(jniEnv, j_angle));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jdouble JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_icon_IconInfoInterface_00024CppProxy_native_1getRotation(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::IconInfoInterface>(nativeRef);
+        auto r = ref->getRotation();
+        return ::djinni::release(::djinni::F64::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 } // namespace djinni_generated

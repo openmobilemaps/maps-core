@@ -17,6 +17,7 @@
 #include "MapInterface.h"
 #include "Quad2dInterface.h"
 #include "QuadCoord.h"
+#include "PolygonCoord.h"
 #include "RectCoord.h"
 #include "RenderConfig.h"
 #include "RenderConfigInterface.h"
@@ -26,6 +27,7 @@
 #include "RasterShaderInterface.h"
 #include "AnimationInterface.h"
 #include "RasterShaderStyle.h"
+#include "TexturedPolygonInterface.h"
 
 class Textured2dLayerObject : public LayerObjectInterface, public std::enable_shared_from_this<Textured2dLayerObject> {
   public:
@@ -43,6 +45,20 @@ class Textured2dLayerObject : public LayerObjectInterface, public std::enable_sh
                           const std::shared_ptr<MapInterface> &mapInterface,
                           bool is3d = false);
 
+    Textured2dLayerObject(std::shared_ptr<TexturedPolygonInterface> texturedPolygon,
+                          const std::shared_ptr<AlphaShaderInterface> &shader,
+                          const std::shared_ptr<MapInterface> &mapInterface,
+                          bool is3d = false);
+
+    Textured2dLayerObject(std::shared_ptr<TexturedPolygonInterface> texturedPolygon,
+                          const std::shared_ptr<RasterShaderInterface> &rasterShader,
+                          const std::shared_ptr<MapInterface> &mapInterface,
+                          bool is3d = false);
+
+    Textured2dLayerObject(std::shared_ptr<TexturedPolygonInterface> texturedPolygon,
+                          const std::shared_ptr<MapInterface> &mapInterface,
+                          bool is3d = false);
+
     virtual ~Textured2dLayerObject() override {}
 
     virtual void update() override;
@@ -54,12 +70,33 @@ class Textured2dLayerObject : public LayerObjectInterface, public std::enable_sh
     void setPositions(const ::QuadCoord &coords);
 
     void setRectCoord(const ::RectCoord &rectCoord);
+    void setRectCoord(const ::RectCoord &rectCoord, double overlapFactor);
+    void setPolygons(const std::vector<::PolygonCoord> &polygons, const ::RectCoord &textureBounds);
+    void setPolygons(const std::vector<::PolygonCoord> &polygons, const ::RectCoord &textureBounds, double overlapFactor);
 
     void setAlpha(float alpha);
     
     void setStyle(const RasterShaderStyle &style);
 
     std::shared_ptr<Quad2dInterface> getQuadObject();
+
+    void setSubdivisionFactor(int32_t factor);
+
+    void setMinMagFilter(TextureFilterType filterType);
+
+    void loadTexture(const std::shared_ptr<RenderingContextInterface> &context,
+                     const std::shared_ptr<TextureHolderInterface> &textureHolder);
+
+    void loadDualTexture(const std::shared_ptr<RenderingContextInterface> &context,
+                         const std::shared_ptr<TextureHolderInterface> &textureHolder,
+                         const std::shared_ptr<TextureHolderInterface> &elevationHolder);
+
+    void loadTextures(const std::shared_ptr<RenderingContextInterface> &context,
+                      const std::shared_ptr<TextureHolderInterface> &textureHolder,
+                      const std::shared_ptr<TextureHolderInterface> &lookupHolder,
+                      const std::shared_ptr<TextureHolderInterface> &elevationHolder);
+
+    void removeTexture();
 
     std::shared_ptr<GraphicsObjectInterface> getGraphicsObject();
     
@@ -76,6 +113,7 @@ class Textured2dLayerObject : public LayerObjectInterface, public std::enable_sh
 
   private:
     std::shared_ptr<Quad2dInterface> quad;
+    std::shared_ptr<TexturedPolygonInterface> texturedPolygon;
     std::shared_ptr<AlphaShaderInterface> shader;
     std::shared_ptr<GraphicsObjectInterface> graphicsObject;
     std::shared_ptr<RenderObjectInterface> renderObject;

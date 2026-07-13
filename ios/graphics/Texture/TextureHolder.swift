@@ -12,6 +12,12 @@ import Foundation
 import MapCoreSharedModule
 @preconcurrency import MetalKit
 
+#if canImport(UIKit)
+    import UIKit
+#elseif canImport(AppKit) && !canImport(UIKit)
+    import AppKit
+#endif
+
 enum TextureHolderError: Error {
     case emptyData
 }
@@ -56,13 +62,17 @@ public class TextureHolder: NSObject, @unchecked Sendable {
 
             self.init(texture)
         } catch {
-            guard let fixedImage = UIImage(cgImage: cgImage).ub_metalFixMe().cgImage else {
+            #if canImport(UIKit)
+                guard let fixedImage = UIImage(cgImage: cgImage).ub_metalFixMe().cgImage else {
+                    throw error
+                }
+
+                let texture = try MetalContext.current.textureLoader.newTexture(cgImage: fixedImage, options: options)
+
+                self.init(texture)
+            #else
                 throw error
-            }
-
-            let texture = try MetalContext.current.textureLoader.newTexture(cgImage: fixedImage, options: options)
-
-            self.init(texture)
+            #endif
         }
     }
 
@@ -79,10 +89,218 @@ public class TextureHolder: NSObject, @unchecked Sendable {
             throw TextureHolderError.emptyData
         }
         let options: [MTKTextureLoader.Option: Any] = [
-            MTKTextureLoader.Option.SRGB: NSNumber(booleanLiteral: false)
+            MTKTextureLoader.Option.SRGB: false
         ]
         let texture = try MetalContext.current.textureLoader.newTexture(data: data, options: options)
         self.init(texture, textureUsableSize: textureUsableSize)
+    }
+
+    public convenience init(premultipliedData data: Data, textureUsableSize: TextureUsableSize?) throws {
+        guard !data.isEmpty else {
+            throw TextureHolderError.emptyData
+        }
+        let texture = try TextureHolder.makePremultipliedTexture(from: data)
+        self.init(texture, textureUsableSize: textureUsableSize)
+    }
+
+    public convenience init(_ data: Data, textureUsableSize: TextureUsableSize? = nil, premultipliedData: Bool) throws {
+        guard !data.isEmpty else {
+            throw TextureHolderError.emptyData
+        }
+        let texture: MTLTexture
+        if premultipliedData {
+            texture = try TextureHolder.makePremultipliedTexture(from: data)
+        } else {
+            texture = try TextureHolder.makeNonPremultipliedTexture(from: data)
+        }
+        self.init(texture, textureUsableSize: textureUsableSize)
+    }
+
+    private static func makePremultipliedTexture(from data: Data) throws -> MTLTexture {
+        guard let cgImage = TextureHolder.makeCGImage(from: data) else {
+            let options: [MTKTextureLoader.Option: Any] = [
+                MTKTextureLoader.Option.SRGB: false
+            ]
+            return try MetalContext.current.textureLoader.newTexture(data: data, options: options)
+        }
+        return try TextureHolder.makePremultipliedTexture(from: cgImage)
+    }
+
+    private static func makePremultipliedTexture(from cgImage: CGImage) throws -> MTLTexture {
+        let width = cgImage.width
+        let height = cgImage.height
+        let bytesPerPixel = 4
+        let bytesPerRow = bytesPerPixel * width
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo: UInt32 =
+            CGImageAlphaInfo.premultipliedLast.rawValue
+            | CGBitmapInfo.byteOrder32Big.rawValue
+        guard
+            let context = CGContext(
+                data: nil,
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bytesPerRow: bytesPerRow,
+                space: colorSpace,
+                bitmapInfo: bitmapInfo
+            )
+        else {
+            throw TextureHolderError.emptyData
+        }
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        guard let bytes = context.data else {
+            throw TextureHolderError.emptyData
+        }
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .rgba8Unorm,
+            width: width,
+            height: height,
+            mipmapped: false
+        )
+        descriptor.usage = [.shaderRead]
+        descriptor.storageMode = .shared
+        guard let texture = MetalContext.current.device.makeTexture(descriptor: descriptor) else {
+            throw TextureHolderError.emptyData
+        }
+        texture.replace(
+            region: MTLRegionMake2D(0, 0, width, height),
+            mipmapLevel: 0,
+            withBytes: bytes,
+            bytesPerRow: bytesPerRow
+        )
+        return texture
+    }
+
+    private static func makeNonPremultipliedTexture(from data: Data) throws -> MTLTexture {
+        guard let cgImage = TextureHolder.makeCGImage(from: data) else {
+            let options: [MTKTextureLoader.Option: Any] = [
+                MTKTextureLoader.Option.SRGB: false
+            ]
+            return try MetalContext.current.textureLoader.newTexture(data: data, options: options)
+        }
+        return try TextureHolder.makeNonPremultipliedTexture(from: cgImage)
+    }
+
+    private static func makeCGImage(from data: Data) -> CGImage? {
+        #if canImport(UIKit)
+            return UIImage(data: data)?.cgImage
+        #elseif canImport(AppKit) && !canImport(UIKit)
+            return NSImage(data: data)?.mcCgImage
+        #else
+            return nil
+        #endif
+    }
+
+    private static func makeNonPremultipliedTexture(from cgImage: CGImage) throws -> MTLTexture {
+        let width = cgImage.width
+        let height = cgImage.height
+        let bytesPerPixel = 4
+        let bytesPerRow = bytesPerPixel * width
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo: UInt32 =
+            CGImageAlphaInfo.premultipliedLast.rawValue
+            | CGBitmapInfo.byteOrder32Big.rawValue
+        guard
+            let context = CGContext(
+                data: nil,
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bytesPerRow: bytesPerRow,
+                space: colorSpace,
+                bitmapInfo: bitmapInfo
+            )
+        else {
+            throw TextureHolderError.emptyData
+        }
+        context.draw(cgImage, in: CGRect(x: 0, y: 0, width: width, height: height))
+        guard let bytes = context.data else {
+            throw TextureHolderError.emptyData
+        }
+        TextureHolder.unpremultiplyAlpha(pixels: bytes.assumingMemoryBound(to: UInt8.self), totalPixels: width * height)
+        let descriptor = MTLTextureDescriptor.texture2DDescriptor(
+            pixelFormat: .rgba8Unorm,
+            width: width,
+            height: height,
+            mipmapped: false
+        )
+        descriptor.usage = [.shaderRead]
+        descriptor.storageMode = .shared
+        guard let texture = MetalContext.current.device.makeTexture(descriptor: descriptor) else {
+            throw TextureHolderError.emptyData
+        }
+        texture.replace(
+            region: MTLRegionMake2D(0, 0, width, height),
+            mipmapLevel: 0,
+            withBytes: bytes,
+            bytesPerRow: bytesPerRow
+        )
+        return texture
+    }
+
+    private static func unpremultiplyAlpha(pixels: UnsafeMutablePointer<UInt8>, totalPixels: Int) {
+        for pixelIndex in 0..<totalPixels {
+            let byteOffset = pixelIndex * 4
+            let alpha = pixels[byteOffset + 3]
+            if alpha != 0 && alpha != 255 {
+                let multiplier = 255.0 / Float(alpha)
+                pixels[byteOffset] = UInt8(min(255.0, Float(pixels[byteOffset]) * multiplier))
+                pixels[byteOffset + 1] = UInt8(min(255.0, Float(pixels[byteOffset + 1]) * multiplier))
+                pixels[byteOffset + 2] = UInt8(min(255.0, Float(pixels[byteOffset + 2]) * multiplier))
+            }
+        }
+    }
+
+    // Non-throwing failable wrapper exposed to Kotlin/Native's swiftPMImport so KMP callers
+    // (e.g. fluid-meteogram's animation bitmap decoding) can construct a TextureHolder without
+    // going through an Obj-C bridge class. Swallows the throw and returns `nil` on failure.
+    @objc(initWithData:)
+    public convenience init?(data: Data) {
+        do {
+            try self.init(data, textureUsableSize: nil)
+        } catch {
+            return nil
+        }
+    }
+
+    @objc(initWithPremultipliedData:)
+    public convenience init?(premultipliedData data: Data) {
+        do {
+            try self.init(premultipliedData: data, textureUsableSize: nil)
+        } catch {
+            return nil
+        }
+    }
+
+    @objc(initWithBitmapData:width:height:)
+    public convenience init?(bitmapData data: Data, width: Int, height: Int) {
+        let bitmapInfo = CGBitmapInfo(
+            rawValue: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue
+        )
+        guard
+            let provider = CGDataProvider(data: data as CFData),
+            let cgImage = CGImage(
+                width: width,
+                height: height,
+                bitsPerComponent: 8,
+                bitsPerPixel: 32,
+                bytesPerRow: width * 4,
+                space: CGColorSpaceCreateDeviceRGB(),
+                bitmapInfo: bitmapInfo,
+                provider: provider,
+                decode: nil,
+                shouldInterpolate: false,
+                intent: .defaultIntent
+            )
+        else {
+            return nil
+        }
+        do {
+            try self.init(cgImage)
+        } catch {
+            return nil
+        }
     }
 
     public convenience init(_ size: CGSize, drawCallback: (CGContext) -> Void) throws {
@@ -120,9 +338,19 @@ public class TextureHolder: NSObject, @unchecked Sendable {
         context.translateBy(x: 0, y: size.height)
         context.scaleBy(x: 1.0, y: -1.0)
 
-        UIGraphicsPushContext(context)
-        drawCallback(context)
-        UIGraphicsPopContext()
+        #if canImport(UIKit)
+            UIGraphicsPushContext(context)
+            drawCallback(context)
+            UIGraphicsPopContext()
+        #elseif canImport(AppKit) && !canImport(UIKit)
+            let graphicsContext = NSGraphicsContext(cgContext: context, flipped: false)
+            NSGraphicsContext.saveGraphicsState()
+            NSGraphicsContext.current = graphicsContext
+            drawCallback(context)
+            NSGraphicsContext.restoreGraphicsState()
+        #else
+            drawCallback(context)
+        #endif
 
         let region = MTLRegionMake2D(0, 0, width, height)
         texture.replace(region: region, mipmapLevel: 0, withBytes: data.bytes, bytesPerRow: bytesPerRow)

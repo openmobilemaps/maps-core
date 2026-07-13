@@ -9,6 +9,8 @@
 #include "NativeMapCameraListenerInterface.h"
 #include "NativeMapInterface.h"
 #include "NativeRectCoord.h"
+#include "NativeTrackedCoordinateCallbackInterface.h"
+#include "NativeTrackedCoordinateInterface.h"
 #include "NativeVec2F.h"
 #include "NativeVec3D.h"
 
@@ -317,6 +319,16 @@ CJNIEXPORT ::djinni_generated::NativeVec2F::JniType JNICALL Java_io_openmobilema
         auto r = ref->screenPosFromCoordZoom(::djinni_generated::NativeCoord::toCpp(jniEnv, j_coord),
                                              ::djinni::F32::toCpp(jniEnv, j_zoom));
         return ::djinni::release(::djinni_generated::NativeVec2F::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_MapCameraInterface_00024CppProxy_native_1createTrackedCoordinate(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeCoord::JniType j_coordinate, jobject j_callback)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::MapCameraInterface>(nativeRef);
+        auto r = ref->createTrackedCoordinate(::djinni_generated::NativeCoord::toCpp(jniEnv, j_coordinate),
+                                              ::djinni_generated::NativeTrackedCoordinateCallbackInterface::toCpp(jniEnv, j_callback));
+        return ::djinni::release(::djinni_generated::NativeTrackedCoordinateInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

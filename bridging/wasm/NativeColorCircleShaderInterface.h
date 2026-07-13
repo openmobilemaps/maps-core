@@ -24,6 +24,7 @@ struct NativeColorCircleShaderInterface : ::djinni::JsInterface<::ColorCircleSha
     static em::val cppProxyMethods();
 
     static void setColor(const CppType& self, float w_red,float w_green,float w_blue,float w_alpha);
+    static void setCircleStyle(const CppType& self, float w_fillRed,float w_fillGreen,float w_fillBlue,float w_fillAlpha,float w_strokeRed,float w_strokeGreen,float w_strokeBlue,float w_strokeAlpha,float w_innerRadius);
     static em::val asShaderProgramInterface(const CppType& self);
 
 };

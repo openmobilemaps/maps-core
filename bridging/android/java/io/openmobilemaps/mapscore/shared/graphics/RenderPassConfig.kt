@@ -7,4 +7,8 @@ data class RenderPassConfig(
     val renderPassIndex: Int,
     val isPassMasked: Boolean,
     val renderTarget: RenderTargetInterface?,
+    val stencilReadMask: Int,
+    val stencilReadReference: Int,
+    val stencilWriteMask: Int,
+    val stencilWriteReference: Int,
 )

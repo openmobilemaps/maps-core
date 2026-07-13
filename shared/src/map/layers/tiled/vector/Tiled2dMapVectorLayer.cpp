@@ -19,13 +19,13 @@
 #include "BackgroundVectorLayerDescription.h"
 #include "VectorTileGeometryHandler.h"
 #include "Tiled2dMapVectorBackgroundSubLayer.h"
-#include "Tiled2dMapVectorRasterSubLayerConfig.h"
 #include "Polygon2dInterface.h"
 #include "MapCameraInterface.h"
 #include "QuadMaskObject.h"
 #include "PolygonMaskObject.h"
 #include "CoordinatesUtil.h"
 #include "RenderPass.h"
+#include "RenderObject.h"
 #include "DataLoaderResult.h"
 #include "TextureLoaderResult.h"
 #include "PolygonCompare.h"
@@ -45,9 +45,75 @@
 #include "Tiled2dMapVectorReadyManager.h"
 #include "Tiled2dVectorGeoJsonSource.h"
 #include "Tiled2dMapVectorStyleParser.h"
-#include "Tiled2dMapVectorGeoJSONLayerConfig.h"
 #include "GeoJsonVTFactory.h"
 #include "VectorLayerFeatureCoordInfo.h"
+
+#include "Epsg2056Tiled2dMapLayerConfig.h"
+#include "Epsg21781Tiled2dMapLayerConfig.h"
+#include "Epsg3857Tiled2dMapLayerConfig.h"
+#include "Epsg4326Tiled2dMapLayerConfig.h"
+#include <algorithm>
+#include <cassert>
+#include <optional>
+
+namespace {
+
+constexpr double TILE_COVERAGE_EPSILON = 1e-9;
+
+struct TileCoverageRect {
+    double minX;
+    double maxX;
+    double minY;
+    double maxY;
+};
+
+bool hasArea(const TileCoverageRect &rect) {
+    return rect.maxX - rect.minX > TILE_COVERAGE_EPSILON && rect.maxY - rect.minY > TILE_COVERAGE_EPSILON;
+}
+
+TileCoverageRect coverageRect(const Tiled2dMapTileInfo &tile) {
+    return {
+        std::min(tile.bounds.topLeft.x, tile.bounds.bottomRight.x),
+        std::max(tile.bounds.topLeft.x, tile.bounds.bottomRight.x),
+        std::min(tile.bounds.topLeft.y, tile.bounds.bottomRight.y),
+        std::max(tile.bounds.topLeft.y, tile.bounds.bottomRight.y)
+    };
+}
+
+std::optional<TileCoverageRect> intersection(const TileCoverageRect &a, const TileCoverageRect &b) {
+    TileCoverageRect result {
+        std::max(a.minX, b.minX),
+        std::min(a.maxX, b.maxX),
+        std::max(a.minY, b.minY),
+        std::min(a.maxY, b.maxY)
+    };
+    if (!hasArea(result)) {
+        return std::nullopt;
+    }
+    return result;
+}
+
+void appendIfCoveredArea(std::vector<TileCoverageRect> &rects, const TileCoverageRect &rect) {
+    if (hasArea(rect)) {
+        rects.push_back(rect);
+    }
+}
+
+std::vector<TileCoverageRect> subtractRect(const TileCoverageRect &uncovered, const TileCoverageRect &covered) {
+    const auto overlap = intersection(uncovered, covered);
+    if (!overlap) {
+        return {uncovered};
+    }
+
+    std::vector<TileCoverageRect> result;
+    appendIfCoveredArea(result, {uncovered.minX, overlap->minX, uncovered.minY, uncovered.maxY});
+    appendIfCoveredArea(result, {overlap->maxX, uncovered.maxX, uncovered.minY, uncovered.maxY});
+    appendIfCoveredArea(result, {overlap->minX, overlap->maxX, uncovered.minY, overlap->minY});
+    appendIfCoveredArea(result, {overlap->minX, overlap->maxX, overlap->maxY, uncovered.maxY});
+    return result;
+}
+
+}
 
 Tiled2dMapVectorLayer::Tiled2dMapVectorLayer(const std::string &layerName,
                                              const std::optional<std::string> &remoteStyleJsonUrl,
@@ -237,14 +303,26 @@ Tiled2dMapVectorLayer::getLayerConfig(const std::shared_ptr<VectorMapSourceDescr
     if (!mapInterface) {
         return nullptr;
     }
-    return customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorLayerConfig>(source, *customZoomInfo)
-                                      : std::make_shared<Tiled2dMapVectorLayerConfig>(source, mapInterface->is3d());
+    const std::optional<int32_t> crs = source->coordinateReferenceSystem;
+    const auto &zoomInfo = customZoomInfo.has_value() ? *customZoomInfo : source->getZoomInfo(mapInterface->is3d());
+    if(!crs.has_value() || *crs == CoordinateSystemIdentifiers::EPSG3857()) {
+        return std::make_shared<Epsg3857Tiled2dMapLayerConfig>(source->identifier, source->vectorUrl, source->bounds, zoomInfo, source->getZoomLevels());
+    } else if(*crs == CoordinateSystemIdentifiers::EPSG4326()){
+        return std::make_shared<Epsg4326Tiled2dMapLayerConfig>(source->identifier, source->vectorUrl, source->bounds, zoomInfo, source->getZoomLevels());
+    } else if(*crs == CoordinateSystemIdentifiers::EPSG2056()){
+        return std::static_pointer_cast<Tiled2dMapVectorLayerConfig>(std::make_shared<Epsg2056Tiled2dMapLayerConfig>(source->identifier, source->vectorUrl, source->bounds, zoomInfo, source->getZoomLevels()));
+    } else if(*crs == CoordinateSystemIdentifiers::EPSG21781()){
+        return std::make_shared<Epsg21781Tiled2dMapLayerConfig>(source->identifier, source->vectorUrl, source->bounds, zoomInfo, source->getZoomLevels());
+	}
+	// layer will be ignored
+    return nullptr;
 }
 
 std::shared_ptr<Tiled2dMapVectorLayerConfig>
 Tiled2dMapVectorLayer::getGeoJSONLayerConfig(const std::string &sourceName, const std::shared_ptr<GeoJSONVTInterface> &source) {
-    return customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorGeoJSONLayerConfig>(sourceName, source, *customZoomInfo)
-                                      : std::make_shared<Tiled2dMapVectorGeoJSONLayerConfig>(sourceName, source);
+	  const auto levels = Tiled2dMapVectorLayerConfig::generateLevelsFromMinMax(source->getMinZoom(), source->getMaxZoom());
+    auto zoomInfo = customZoomInfo.has_value() ? *customZoomInfo : Tiled2dMapZoomInfo(1.0, 0, 0, false, true, false, true);
+   	return std::make_shared<Epsg3857Tiled2dMapLayerConfig>(sourceName, "", std::nullopt, zoomInfo, levels);
 }
 
 void Tiled2dMapVectorLayer::setMapDescription(const std::shared_ptr<VectorMapDescription> &mapDescription) {
@@ -296,7 +374,6 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
     if (!mapInterface) {
         return;
     }
-    bool is3d = mapInterface->is3d();
     
     std::shared_ptr<Mailbox> selfMailbox = mailbox;
     if (!mailbox) {
@@ -332,10 +409,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
                 break;
             }
             case raster: {
-                auto rasterSubLayerConfig = customZoomInfo.has_value() ? std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
-                        std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), is3d,*customZoomInfo)
-                                                                       : std::make_shared<Tiled2dMapVectorRasterSubLayerConfig>(
-                                std::static_pointer_cast<RasterVectorLayerDescription>(layerDesc), is3d);
+                auto rasterSubLayerConfig = getLayerConfig(std::dynamic_pointer_cast<RasterVectorLayerDescription>(layerDesc)->source);
 
                 auto sourceMailbox = std::make_shared<Mailbox>(mapInterface->getScheduler());
                 auto sourceActor = Actor<Tiled2dMapRasterSource>(sourceMailbox,
@@ -373,6 +447,7 @@ void Tiled2dMapVectorLayer::initializeVectorLayer() {
             }
             case line:
             case polygon:
+            case circle:
             case custom: {
                 layersToDecode[layerDesc->source].insert(layerDesc->sourceLayer);
                 break;
@@ -626,18 +701,24 @@ void Tiled2dMapVectorLayer::update() {
     double newZoom = camera->getZoom();
     auto now = DateHelper::currentTimeMillis();
     bool newIsAnimating = false;
+    bool newTilesRequireInvalidate = false;
     bool tilesChanged = !tilesStillValid.test_and_set();
     double zoomChange = std::abs(newZoom-lastDataManagerZoom) / std::max(newZoom, 1.0);
     double timeDiff = now - lastDataManagerUpdate;
     bool is3d = mapInterface->is3d();
     const auto origin = mapInterface->getCamera()->asCameraInterface()->getOrigin();
 
-    if (zoomChange > 0.001 || isAnimating || tilesChanged) {
+    if (zoomChange > 0.001 || isAnimating || tilesRequireInvalidate || tilesChanged) {
         for (const auto &[source, sourceDataManager]: sourceDataManagers) {
-            sourceDataManager.syncAccess([](const auto &manager) {
-                manager->update();
+            bool sourceNeedsRenderFrame = sourceDataManager.syncAccess([](const auto &manager) {
+                return manager->update();
             });
+            newTilesRequireInvalidate |= sourceNeedsRenderFrame;
         }
+    }
+    tilesRequireInvalidate = newTilesRequireInvalidate;
+    if (animationsEnabled && tilesRequireInvalidate) {
+        mapInterface->invalidate();
     }
 
     if (collisionManager) {
@@ -679,15 +760,110 @@ std::vector<std::shared_ptr<::RenderPassInterface>> Tiled2dMapVectorLayer::build
     return currentRenderPasses;
 }
 
-void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool isSymbol, const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription) {
+void Tiled2dMapVectorLayer::onRenderPassUpdate(const std::string &source, bool isSymbol,
+                                               const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription,
+                                               std::unordered_set<Tiled2dMapTileInfo> readyTiles) {
     if (isSymbol) {
         sourceRenderDescriptionMap[source].symbolRenderDescriptions = renderDescription;
     } else {
         sourceRenderDescriptionMap[source].renderDescriptions = renderDescription;
+        sourceRenderDescriptionMap[source].readyTiles = std::move(readyTiles);
     }
     pregenerateRenderPasses();
     updateReadyStateListenerIfNeeded();
     prevCollisionStillValid.clear();
+}
+
+bool Tiled2dMapVectorLayer::isCoveredByReadyTiles(const Tiled2dMapTileInfo &tile,
+                                                  const std::unordered_set<Tiled2dMapTileInfo> &readyTiles) {
+    if (readyTiles.count(tile) > 0) {
+        return true;
+    }
+
+    // Mask sources can use a different zoom level than their raster target. The target tile is
+    // renderable only once currently ready mask-source tiles cover the whole target bounds.
+    const int32_t systemIdentifier = tile.bounds.topLeft.systemIdentifier;
+
+    std::vector<TileCoverageRect> uncovered {coverageRect(tile)};
+    for (const auto &readyTile : readyTiles) {
+        if (readyTile.bounds.topLeft.systemIdentifier != systemIdentifier) {
+            continue;
+        }
+
+        std::vector<TileCoverageRect> nextUncovered;
+        const auto readyRect = coverageRect(readyTile);
+        for (const auto &uncoveredRect : uncovered) {
+            auto remainingRects = subtractRect(uncoveredRect, readyRect);
+            nextUncovered.insert(nextUncovered.end(), remainingRects.begin(), remainingRects.end());
+        }
+
+        uncovered = std::move(nextUncovered);
+        if (uncovered.empty()) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Tiled2dMapVectorLayer::hasSatisfiedMaskDependency(const std::shared_ptr<TileRenderDescription> &description) const {
+    if (!description->maskSource) {
+        return true;
+    }
+
+    const auto sourceIt = sourceRenderDescriptionMap.find(*description->maskSource);
+    if (sourceIt == sourceRenderDescriptionMap.end()) {
+        return false;
+    }
+
+    return isCoveredByReadyTiles(description->tileInfo, sourceIt->second.readyTiles);
+}
+
+std::vector<std::shared_ptr<::RenderObjectInterface>> Tiled2dMapVectorLayer::getRasterMaskRenderObjects(
+        const std::unordered_map<std::string, std::vector<std::shared_ptr<TileRenderDescription>>> &rasterMaskRenderDescriptions,
+        const std::string &targetLayerIdentifier) {
+    std::vector<std::shared_ptr<::RenderObjectInterface>> maskRenderObjects;
+    const auto maskDescriptionsIt = rasterMaskRenderDescriptions.find(targetLayerIdentifier);
+    if (maskDescriptionsIt == rasterMaskRenderDescriptions.end()) {
+        return maskRenderObjects;
+    }
+
+    for (const auto &maskDescription : maskDescriptionsIt->second) {
+        for (const auto &renderObject : maskDescription->renderObjects) {
+            if (!renderObject->isHidden()) {
+                maskRenderObjects.push_back(renderObject);
+            }
+        }
+    }
+    return maskRenderObjects;
+}
+
+void Tiled2dMapVectorLayer::addRenderPass(std::vector<std::shared_ptr<RenderPassInterface>> &passes,
+                                          const RenderPassConfig &config,
+                                          const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects,
+                                          const std::shared_ptr<MaskingObjectInterface> &maskingObject,
+                                          const RenderPassStencilOptions &stencilOptions) {
+    auto pass = std::make_shared<RenderPass>(config, renderObjects, maskingObject);
+    pass->setStencilOptions(stencilOptions);
+    passes.emplace_back(pass);
+}
+
+void Tiled2dMapVectorLayer::flushRenderObjects(std::vector<std::shared_ptr<RenderPassInterface>> &passes,
+                                               std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects,
+                                               std::shared_ptr<MaskingObjectInterface> &lastMask,
+                                               int32_t &lastRenderPassIndex,
+                                               RenderPassStencilOptions &lastStencilOptions,
+                                               const std::shared_ptr<RenderTargetInterface> &renderTarget) {
+    if (renderObjects.empty()) {
+        return;
+    }
+
+    addRenderPass(passes, RenderPassConfig(lastRenderPassIndex, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none),
+                  renderObjects, lastMask, lastStencilOptions);
+    renderObjects.clear();
+    lastMask = nullptr;
+    lastRenderPassIndex = 0;
+    lastStencilOptions = RenderPassStencilOptions();
 }
 
 void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
@@ -699,9 +875,20 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
         newPasses.insert(newPasses.end(), backgroundLayerPasses.begin(), backgroundLayerPasses.end());
     }
 
+    std::unordered_map<std::string, std::vector<std::shared_ptr<TileRenderDescription>>> rasterMaskRenderDescriptions;
     std::vector<std::shared_ptr<TileRenderDescription>> orderedRenderDescriptions;
     for (const auto &[source, indexPasses] : sourceRenderDescriptionMap) {
-        orderedRenderDescriptions.insert(orderedRenderDescriptions.end(), indexPasses.renderDescriptions.begin(), indexPasses.renderDescriptions.end());
+        for (const auto &description : indexPasses.renderDescriptions) {
+            if (description->maskTargetLayerIdentifier) {
+                // Mask-source layers provide geometry for another style layer and are rendered only
+                // through stencil write passes, not as visible map content.
+                rasterMaskRenderDescriptions[*description->maskTargetLayerIdentifier].push_back(description);
+                continue;
+            }
+            if (description->maskLayerIdentifier || hasSatisfiedMaskDependency(description)) {
+                orderedRenderDescriptions.push_back(description);
+            }
+        }
         orderedRenderDescriptions.insert(orderedRenderDescriptions.end(), indexPasses.symbolRenderDescriptions.begin(), indexPasses.symbolRenderDescriptions.end());
     }
 
@@ -728,36 +915,182 @@ void Tiled2dMapVectorLayer::pregenerateRenderPasses() {
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
     std::shared_ptr<MaskingObjectInterface> lastMask = nullptr;
     int32_t lastRenderPassIndex = 0;
+    RenderPassStencilOptions lastStencilOptions;
 
-    for (const auto &description : orderedRenderDescriptions) {
+    for (auto descriptionIt = orderedRenderDescriptions.begin(); descriptionIt != orderedRenderDescriptions.end();) {
+        const auto &description = *descriptionIt;
         if (description->renderObjects.empty()) {
+            ++descriptionIt;
             continue;
         }
-        if ((description->renderPassIndex != lastRenderPassIndex || description->maskingObject != lastMask) && !renderObjects.empty()) {
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false, renderTarget), renderObjects, lastMask));
-            renderObjects.clear();
-            lastMask = nullptr;
-            lastRenderPassIndex = 0;
+        if (description->maskLayerIdentifier) {
+            flushRenderObjects(newPasses, renderObjects, lastMask, lastRenderPassIndex, lastStencilOptions, renderTarget);
+
+            std::vector<std::shared_ptr<::RenderObjectInterface>> maskedRenderObjects;
+            std::vector<std::shared_ptr<TileRenderDescription>> maskedDescriptions;
+            const auto maskLayerIdentifier = description->maskLayerIdentifier;
+            const auto layerIdentifier = description->layerIdentifier;
+            const auto renderPassIndex = description->renderPassIndex;
+            const auto maskingObject = description->maskingObject;
+            const bool hasMaskingObject = maskingObject != nullptr;
+            const auto maskInverseRead = description->maskInverseRead;
+
+            // Raster mask reads are batched per style layer so one stencil mask can clip all
+            // matching raster tiles in the same render pass index.
+            while (descriptionIt != orderedRenderDescriptions.end()) {
+                const auto &nextDescription = *descriptionIt;
+                if (nextDescription->maskLayerIdentifier != maskLayerIdentifier ||
+                    nextDescription->layerIdentifier != layerIdentifier ||
+                    nextDescription->renderPassIndex != renderPassIndex ||
+                    (nextDescription->maskingObject != nullptr) != hasMaskingObject ||
+                    nextDescription->maskInverseRead != maskInverseRead) {
+                    break;
+                }
+
+                for (const auto &renderObject : nextDescription->renderObjects) {
+                    if (!renderObject->isHidden()) {
+                        maskedRenderObjects.push_back(renderObject);
+                    }
+                }
+                maskedDescriptions.push_back(nextDescription);
+                ++descriptionIt;
+            }
+
+            if (maskedRenderObjects.empty()) {
+                continue;
+            }
+
+            const auto maskRenderObjects = getRasterMaskRenderObjects(rasterMaskRenderDescriptions, description->layerIdentifier);
+            if (maskRenderObjects.empty()) {
+                if (description->maskInverseRead) {
+                    // With no vector mask geometry, inverse vector clipping covers the cleared stencil area.
+                    for (size_t i = 0; i < maskedDescriptions.size(); i++) {
+                        const auto &maskedDescription = maskedDescriptions[i];
+                        std::vector<std::shared_ptr<::RenderObjectInterface>> visibleObjects;
+                        for (const auto &renderObject : maskedDescription->renderObjects) {
+                            if (!renderObject->isHidden()) {
+                                visibleObjects.push_back(renderObject);
+                            }
+                        }
+                        if (visibleObjects.empty()) {
+                            continue;
+                        }
+                        if (!maskedDescription->maskingObject) {
+                            addRenderPass(newPasses, RenderPassConfig(maskedDescription->renderPassIndex, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none),
+                                          visibleObjects, nullptr, RenderPassStencilOptions());
+                            continue;
+                        }
+
+                        RenderPassStencilOptions tileWriteOptions;
+                        tileWriteOptions.clearBefore.clearMask = StencilBits::tileBoundary;
+                        tileWriteOptions.write.writeMask = StencilBits::tileBoundary;
+                        tileWriteOptions.write.reference = StencilBits::tileBoundary;
+                        std::vector<std::shared_ptr<::RenderObjectInterface>> tileMaskRenderObjects {
+                            std::make_shared<RenderObject>(maskedDescription->maskingObject->asGraphicsObject(),
+                                                           maskedDescription->maskingObject)
+                        };
+                        addRenderPass(newPasses, RenderPassConfig(maskedDescription->renderPassIndex, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none),
+                                      tileMaskRenderObjects, nullptr, tileWriteOptions);
+
+                        RenderPassStencilOptions tileReadOptions;
+                        tileReadOptions.read.readMask = StencilBits::tileBoundary;
+                        tileReadOptions.read.reference = StencilBits::tileBoundary;
+                        tileReadOptions.clearAfter.clearMask = StencilBits::tileBoundary;
+                        addRenderPass(newPasses, RenderPassConfig(maskedDescription->renderPassIndex, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none),
+                                      visibleObjects, nullptr, tileReadOptions);
+                    }
+                }
+                continue;
+            }
+
+            // The stencil write pass keeps its contents alive for the immediately following read pass.
+            RenderPassStencilOptions writeStencilOptions;
+            writeStencilOptions.clearBefore.clearMask = StencilBits::vectorClip | StencilBits::tileBoundary;
+            writeStencilOptions.write.writeMask = StencilBits::vectorClip;
+            writeStencilOptions.write.reference = StencilBits::vectorClip;
+            addRenderPass(newPasses, RenderPassConfig(description->renderPassIndex, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none),
+                          maskRenderObjects, nullptr, writeStencilOptions);
+
+            if (maskingObject) {
+                auto hasVisibleRenderObjects = [](const std::shared_ptr<TileRenderDescription> &maskedDescription) {
+                    for (const auto &renderObject : maskedDescription->renderObjects) {
+                        if (!renderObject->isHidden()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                };
+                size_t lastVisibleMaskedDescriptionIndex = maskedDescriptions.size();
+                for (size_t i = 0; i < maskedDescriptions.size(); i++) {
+                    if (hasVisibleRenderObjects(maskedDescriptions[i])) {
+                        lastVisibleMaskedDescriptionIndex = i;
+                    }
+                }
+
+                for (size_t i = 0; i < maskedDescriptions.size(); i++) {
+                    const auto &maskedDescription = maskedDescriptions[i];
+                    std::vector<std::shared_ptr<::RenderObjectInterface>> visibleObjects;
+                    for (const auto &renderObject : maskedDescription->renderObjects) {
+                        if (!renderObject->isHidden()) {
+                            visibleObjects.push_back(renderObject);
+                        }
+                    }
+                    if (visibleObjects.empty()) {
+                        continue;
+                    }
+
+                    RenderPassStencilOptions tileWriteOptions;
+                    tileWriteOptions.clearBefore.clearMask = StencilBits::tileBoundary;
+                    tileWriteOptions.write.writeMask = StencilBits::tileBoundary;
+                    tileWriteOptions.write.reference = StencilBits::tileBoundary;
+                    std::vector<std::shared_ptr<::RenderObjectInterface>> tileMaskRenderObjects {
+                        std::make_shared<RenderObject>(maskedDescription->maskingObject->asGraphicsObject(),
+                                                       maskedDescription->maskingObject)
+                    };
+                    addRenderPass(newPasses, RenderPassConfig(maskedDescription->renderPassIndex, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none),
+                                  tileMaskRenderObjects, nullptr, tileWriteOptions);
+
+                    RenderPassStencilOptions readStencilOptions;
+                    readStencilOptions.read.readMask = StencilBits::vectorClip | StencilBits::tileBoundary;
+                    readStencilOptions.read.reference = StencilBits::tileBoundary |
+                        (maskedDescription->maskInverseRead ? StencilBits::none : StencilBits::vectorClip);
+                    if (i == lastVisibleMaskedDescriptionIndex) {
+                        readStencilOptions.clearAfter.clearMask = StencilBits::tileBoundary | StencilBits::vectorClip;
+                    }
+                    addRenderPass(newPasses, RenderPassConfig(maskedDescription->renderPassIndex, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none),
+                                  visibleObjects, nullptr, readStencilOptions);
+                }
+            } else {
+                // The read pass consumes the prepared vector mask and then cleans stencil for later passes.
+                RenderPassStencilOptions readStencilOptions;
+                readStencilOptions.read.readMask = StencilBits::vectorClip;
+                readStencilOptions.read.reference = description->maskInverseRead ? StencilBits::none : StencilBits::vectorClip;
+                readStencilOptions.clearAfter.clearMask = StencilBits::vectorClip;
+                addRenderPass(newPasses, RenderPassConfig(description->renderPassIndex, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none),
+                              maskedRenderObjects, nullptr, readStencilOptions);
+            }
+            continue;
+        }
+        if ((description->renderPassIndex != lastRenderPassIndex ||
+             description->maskingObject != lastMask ||
+             description->stencilOptions != lastStencilOptions) &&
+            !renderObjects.empty()) {
+            flushRenderObjects(newPasses, renderObjects, lastMask, lastRenderPassIndex, lastStencilOptions, renderTarget);
         }
 
         if (description->isModifyingMask || description->selfMasked) {
-            if (!renderObjects.empty()) {
-                newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, false, renderTarget), renderObjects, lastMask));
-            }
-            renderObjects.clear();
-            lastMask = nullptr;
-            newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(description->renderPassIndex, description->selfMasked, renderTarget), description->renderObjects, description->maskingObject));
+            flushRenderObjects(newPasses, renderObjects, lastMask, lastRenderPassIndex, lastStencilOptions, renderTarget);
+            addRenderPass(newPasses, RenderPassConfig(description->renderPassIndex, description->selfMasked, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none),
+                          description->renderObjects, description->maskingObject, description->stencilOptions);
         } else {
             renderObjects.insert(renderObjects.end(), description->renderObjects.begin(), description->renderObjects.end());
             lastMask = description->maskingObject;
             lastRenderPassIndex = description->renderPassIndex;
+            lastStencilOptions = description->stencilOptions;
         }
+        ++descriptionIt;
     }
-    if (!renderObjects.empty()) {
-        newPasses.emplace_back(std::make_shared<RenderPass>(RenderPassConfig(lastRenderPassIndex, false, renderTarget), renderObjects, lastMask));
-        renderObjects.clear();
-        lastMask = nullptr;
-    }
+    flushRenderObjects(newPasses, renderObjects, lastMask, lastRenderPassIndex, lastStencilOptions, renderTarget);
 
     if (scissorRect) {
         for(const auto &pass: newPasses) {
@@ -788,6 +1121,18 @@ void Tiled2dMapVectorLayer::onRemoved() {
     if (mapInterface) {
         mapInterface->getTouchHandler()->removeListener(std::dynamic_pointer_cast<TouchInterface>(shared_from_this()));
     }
+
+    for (const auto &[source, sourceDataManager]: sourceDataManagers) {
+        sourceDataManager.syncAccess([](const auto &manager){
+            manager->clear();
+        });
+    }
+    for (const auto &[source, sourceDataManager]: symbolSourceDataManagers) {
+        sourceDataManager.syncAccess([](const auto &manager){
+            manager->clear();
+        });
+    }
+
     Tiled2dMapLayer::onRemoved();
 
     if (backgroundLayer) {
@@ -1110,9 +1455,6 @@ void Tiled2dMapVectorLayer::updateLayerDescriptions(const std::vector<std::share
             return;
         }
 
-        auto legacySource = legacyDescription->source;
-        auto newSource = layerDescription->source;
-
         // Evaluate if a complete replacement of the tiles is needed (source/zoom adjustments may lead to a different set of created tiles)
         bool needsTileReplace = legacyDescription->source != layerDescription->source
         || legacyDescription->sourceLayer != layerDescription->sourceLayer
@@ -1294,6 +1636,14 @@ bool Tiled2dMapVectorLayer::onDoubleClick(const Vec2F &posScreen) {
 
 bool Tiled2dMapVectorLayer::onLongPress(const Vec2F &posScreen) {
     return interactionManager->onLongPress(posScreen);
+}
+
+bool Tiled2dMapVectorLayer::onHover(const Vec2F &posScreen) {
+    return interactionManager->onHover(posScreen);
+}
+
+bool Tiled2dMapVectorLayer::onHoverComplete() {
+    return interactionManager->onHoverComplete();
 }
 
 bool Tiled2dMapVectorLayer::onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) {

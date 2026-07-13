@@ -19,6 +19,9 @@ abstract class CoordinateSystemIdentifiers {
         external fun EPSG4326(): Int
 
         @JvmStatic
+        external fun EPSG4326System2D(): Int
+
+        @JvmStatic
         external fun EPSG2056(): Int
 
         @JvmStatic

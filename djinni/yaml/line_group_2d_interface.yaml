@@ -8,7 +8,11 @@ cpp:
   typename: '::LineGroup2dInterface'
   header: '"LineGroup2dInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCLineGroup2dInterface'
   pointer: true
   hash: '%s.hash'

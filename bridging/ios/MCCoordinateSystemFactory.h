@@ -13,8 +13,12 @@
 
 + (nonnull MCMapCoordinateSystem *)getEpsg4326System;
 
++ (nonnull MCMapCoordinateSystem *)getEpsg4326System2d;
+
 + (nonnull MCMapCoordinateSystem *)getEpsg21781System;
 
 + (nonnull MCMapCoordinateSystem *)getUnitSphereSystem;
+
++ (nonnull MCMapCoordinateSystem *)getSystemFor:(int32_t)identifier;
 
 @end

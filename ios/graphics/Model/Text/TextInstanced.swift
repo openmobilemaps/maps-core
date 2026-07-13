@@ -29,7 +29,6 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
     private var rotationsBuffer: MTLBuffer?
     private var styleIndicesBuffer: MTLBuffer?
     private var styleBuffer: MTLBuffer?
-    private var originBuffers: MultiBuffer<simd_float4>
     private var aspectRatioBuffers: MultiBuffer<simd_float1>
 
     private var texture: MTLTexture?
@@ -39,7 +38,6 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
 
     init(shader: MCShaderProgramInterface, metalContext: MetalContext) {
         self.shader = shader as! TextInstancedShader
-        self.originBuffers = .init(device: metalContext.device)
         self.aspectRatioBuffers = .init(device: metalContext.device)
         super
             .init(
@@ -68,7 +66,7 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
     override func render(
         encoder: MTLRenderCommandEncoder,
         context: RenderingContext,
-        renderPass _: MCRenderPassConfig,
+        renderPass: MCRenderPassConfig,
         vpMatrix: Int64,
         mMatrix: Int64,
         origin: MCVec3D,
@@ -93,11 +91,8 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         else { return }
 
         if isMasked {
-            if stencilState == nil {
-                setupStencilStates()
-            }
-            encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0b1000_0000)
+            encoder.setDepthStencilState(maskStencilState(for: renderPass))
+            encoder.setStencilReferenceValue(maskStencilReference(for: renderPass))
         } else {
             encoder.setDepthStencilState(context.defaultMask)
         }
@@ -110,14 +105,6 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents()
-                .copyMemory(
-                    from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         if shader.usesModelMatrix() {
             if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
@@ -150,19 +137,6 @@ final class TextInstanced: BaseGraphicsObject, @unchecked Sendable {
             fatalError()
         }
         encoder.setVertexBuffer(originOffsetBuffer, offset: 0, index: 9)
-
-        let originBuffer = originBuffers.getNextBuffer(context)
-        if let bufferPointer = originBuffer?.contents()
-            .assumingMemoryBound(
-                to: simd_float4.self)
-        {
-            bufferPointer.pointee.x = Float(origin.x)
-            bufferPointer.pointee.y = Float(origin.y)
-            bufferPointer.pointee.z = Float(origin.z)
-        } else {
-            fatalError()
-        }
-        encoder.setVertexBuffer(originBuffer, offset: 0, index: 10)
 
         let aspectRatioBuffer = aspectRatioBuffers.getNextBuffer(context)
         if let bufferPointer = aspectRatioBuffer?.contents()

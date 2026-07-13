@@ -24,13 +24,15 @@ struct NativeTiled2dMapSourceInterface : ::djinni::JsInterface<::Tiled2dMapSourc
     static em::val cppProxyMethods();
 
     static void onVisibleBoundsChanged(const CppType& self, const em::val& w_visibleBounds,int32_t w_curT,double w_zoom);
-    static void onCameraChange(const CppType& self, const em::val& w_viewMatrix,const em::val& w_projectionMatrix,const em::val& w_origin,float w_verticalFov,float w_horizontalFov,float w_width,float w_height,float w_focusPointAltitude,const em::val& w_focusPointPosition,float w_zoom);
+    static void onCameraChange(const CppType& self, const em::val& w_viewMatrix,const em::val& w_projectionMatrix,const em::val& w_origin,float w_verticalFov,float w_horizontalFov,float w_width,float w_height,float w_focusPointAltitude,const em::val& w_focusPointPosition,float w_zoom,const em::val& w_cameraPosition,int32_t w_cameraMode);
     static void setMinZoomLevelIdentifier(const CppType& self, const em::val& w_value);
     static em::val getMinZoomLevelIdentifier(const CppType& self);
     static void setMaxZoomLevelIdentifier(const CppType& self, const em::val& w_value);
     static em::val getMaxZoomLevelIdentifier(const CppType& self);
+    static void setZoomLevelScaleFactor(const CppType& self, float w_value);
     static void pause(const CppType& self);
     static void resume(const CppType& self);
+    static void setTileLoadingPaused(const CppType& self, bool w_paused);
     static int32_t isReadyToRenderOffscreen(const CppType& self);
     static void setErrorManager(const CppType& self, const em::val& w_errorManager);
     static void forceReload(const CppType& self);

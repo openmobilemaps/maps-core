@@ -32,6 +32,9 @@ public:
     /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
     static /*not-null*/ std::shared_ptr<Tiled2dMapRasterLayerInterface> create(const /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders);
 
+    /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    static /*not-null*/ std::shared_ptr<Tiled2dMapRasterLayerInterface> createDisplaced(const /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> & layerConfig, const /*not-null*/ std::shared_ptr<::Tiled2dMapLayerConfig> & elevationConfig, const std::vector</*not-null*/ std::shared_ptr<::LoaderInterface>> & loaders);
+
     virtual /*not-null*/ std::shared_ptr<::LayerInterface> asLayerInterface() = 0;
 
     virtual void setCallbackHandler(const /*not-null*/ std::shared_ptr<Tiled2dMapRasterLayerCallbackInterface> & handler) = 0;
@@ -49,6 +52,19 @@ public:
     virtual ::RasterShaderStyle getStyle() = 0;
 
     virtual void setMinMagFilter(::TextureFilterType filterType) = 0;
+
+    /**
+     * When enabled and the layer config's zoom info has mask_tile set, tiles are built from
+     * the tile mask polygons themselves (earcut-tessellated geometry) instead of a rectangular
+     * quad clipped via the stencil buffer. Has no effect when zoom_info.mask_tile is false.
+     */
+    virtual void setUseMaskTileGeometry(bool enabled) = 0;
+
+    /** Debug helper: pauses tile-source selection/loading/removal without pausing rendered tile graphics. */
+    virtual void setTileLoadingPaused(bool paused) = 0;
+
+    /** Runtime LOD control. Higher values request more detailed tiles earlier; lower values request coarser tiles. */
+    virtual void setZoomLevelScaleFactor(float value) = 0;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 

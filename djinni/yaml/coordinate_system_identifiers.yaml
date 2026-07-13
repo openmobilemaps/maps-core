@@ -8,7 +8,11 @@ cpp:
   typename: '::CoordinateSystemIdentifiers'
   header: '"CoordinateSystemIdentifiers.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCCoordinateSystemIdentifiers'
   pointer: true
   hash: '%s.hash'

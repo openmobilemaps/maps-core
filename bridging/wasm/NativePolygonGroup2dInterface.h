@@ -25,6 +25,7 @@ struct NativePolygonGroup2dInterface : ::djinni::JsInterface<::PolygonGroup2dInt
 
     static void setVertices(const CppType& self, const em::val& w_vertices,const em::val& w_indices,const em::val& w_origin);
     static em::val asGraphicsObject(const CppType& self);
+    static em::val asMaskingObject(const CppType& self);
 
 };
 

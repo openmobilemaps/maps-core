@@ -14,7 +14,7 @@ import SwiftUI
 #if canImport(UIKit)
     import UIKit
     typealias PlatformColor = UIColor
-#elseif canImport(AppKit)
+#elseif canImport(AppKit) && !canImport(UIKit)
     import AppKit
     typealias PlatformColor = NSColor
 #endif
@@ -67,7 +67,7 @@ public extension Color {
             return MCVectorLayerFeatureInfoValue(stringVal: nil, doubleVal: nil, intVal: nil, boolVal: nil, colorVal: self.mapCoreColor, listFloatVal: nil, listStringVal: nil)
         }
     }
-#elseif canImport(AppKit)
+#elseif canImport(AppKit) && !canImport(UIKit)
     public extension NSColor {
         func toVectorLayerFeatureValue() -> MCVectorLayerFeatureInfoValue {
             return MCVectorLayerFeatureInfoValue(stringVal: nil, doubleVal: nil, intVal: nil, boolVal: nil, colorVal: self.mapCoreColor, listFloatVal: nil, listStringVal: nil)

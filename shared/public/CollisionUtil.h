@@ -10,15 +10,16 @@
 
 #pragma once
 
-#include "Matrix.h"
+#include "CircleD.h"
+#include "CollisionPrimitives.h"
 #include "MatrixD.h"
 #include "RectD.h"
 #include "RectD.h"
+#include "TrigonometryLUT.h"
 #include "Vec3D.h"
-#include "CircleD.h"
-#include "CollisionPrimitives.h"
-#include <vector>
 #include "Vec4D.h"
+#include <optional>
+#include <vector>
 
 class CollisionUtil {
 

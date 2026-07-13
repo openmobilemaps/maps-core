@@ -8,6 +8,8 @@
 #include "NativeMapCameraListenerInterface.h"
 #include "NativeMapInterface.h"
 #include "NativeRectCoord.h"
+#include "NativeTrackedCoordinateCallbackInterface.h"
+#include "NativeTrackedCoordinateInterface.h"
 #include "NativeVec2F.h"
 #include "NativeVec3D.h"
 
@@ -47,6 +49,7 @@ em::val NativeMapCameraInterface::cppProxyMethods() {
         "coordFromScreenPositionZoom",
         "screenPosFromCoord",
         "screenPosFromCoordZoom",
+        "createTrackedCoordinate",
         "mapUnitsFromPixels",
         "getScalingFactor",
         "coordIsVisibleOnScreen",
@@ -361,6 +364,16 @@ em::val NativeMapCameraInterface::screenPosFromCoordZoom(const CppType& self, co
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeVec2F>::handleNativeException(e);
     }
 }
+em::val NativeMapCameraInterface::createTrackedCoordinate(const CppType& self, const em::val& w_coordinate,const em::val& w_callback) {
+    try {
+        auto r = self->createTrackedCoordinate(::djinni_generated::NativeCoord::toCpp(w_coordinate),
+                                ::djinni_generated::NativeTrackedCoordinateCallbackInterface::toCpp(w_callback));
+        return ::djinni_generated::NativeTrackedCoordinateInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeTrackedCoordinateInterface>::handleNativeException(e);
+    }
+}
 double NativeMapCameraInterface::mapUnitsFromPixels(const CppType& self, double w_distancePx) {
     try {
         auto r = self->mapUnitsFromPixels(::djinni::F64::toCpp(w_distancePx));
@@ -532,6 +545,7 @@ EMSCRIPTEN_BINDINGS(_map_camera_interface) {
         .function("coordFromScreenPositionZoom", NativeMapCameraInterface::coordFromScreenPositionZoom)
         .function("screenPosFromCoord", NativeMapCameraInterface::screenPosFromCoord)
         .function("screenPosFromCoordZoom", NativeMapCameraInterface::screenPosFromCoordZoom)
+        .function("createTrackedCoordinate", NativeMapCameraInterface::createTrackedCoordinate)
         .function("mapUnitsFromPixels", NativeMapCameraInterface::mapUnitsFromPixels)
         .function("getScalingFactor", NativeMapCameraInterface::getScalingFactor)
         .function("coordIsVisibleOnScreen", NativeMapCameraInterface::coordIsVisibleOnScreen)

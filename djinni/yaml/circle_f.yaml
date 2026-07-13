@@ -8,7 +8,11 @@ cpp:
   typename: '::CircleF'
   header: '"CircleF.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCCircleF'
   pointer: true
   hash: '%s.hash'

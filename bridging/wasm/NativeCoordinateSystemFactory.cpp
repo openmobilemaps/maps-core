@@ -39,6 +39,15 @@ em::val NativeCoordinateSystemFactory::getEpsg4326System() {
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeMapCoordinateSystem>::handleNativeException(e);
     }
 }
+em::val NativeCoordinateSystemFactory::getEpsg4326System2d() {
+    try {
+        auto r = ::CoordinateSystemFactory::getEpsg4326System2d();
+        return ::djinni_generated::NativeMapCoordinateSystem::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeMapCoordinateSystem>::handleNativeException(e);
+    }
+}
 em::val NativeCoordinateSystemFactory::getEpsg21781System() {
     try {
         auto r = ::CoordinateSystemFactory::getEpsg21781System();
@@ -57,6 +66,15 @@ em::val NativeCoordinateSystemFactory::getUnitSphereSystem() {
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeMapCoordinateSystem>::handleNativeException(e);
     }
 }
+em::val NativeCoordinateSystemFactory::getSystemFor(int32_t w_identifier) {
+    try {
+        auto r = ::CoordinateSystemFactory::getSystemFor(::djinni::I32::toCpp(w_identifier));
+        return ::djinni_generated::NativeMapCoordinateSystem::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeMapCoordinateSystem>::handleNativeException(e);
+    }
+}
 
 EMSCRIPTEN_BINDINGS(_coordinate_system_factory) {
     em::class_<::CoordinateSystemFactory>("CoordinateSystemFactory")
@@ -65,8 +83,10 @@ EMSCRIPTEN_BINDINGS(_coordinate_system_factory) {
         .class_function("getEpsg2056System", NativeCoordinateSystemFactory::getEpsg2056System)
         .class_function("getEpsg3857System", NativeCoordinateSystemFactory::getEpsg3857System)
         .class_function("getEpsg4326System", NativeCoordinateSystemFactory::getEpsg4326System)
+        .class_function("getEpsg4326System2d", NativeCoordinateSystemFactory::getEpsg4326System2d)
         .class_function("getEpsg21781System", NativeCoordinateSystemFactory::getEpsg21781System)
         .class_function("getUnitSphereSystem", NativeCoordinateSystemFactory::getUnitSphereSystem)
+        .class_function("getSystemFor", NativeCoordinateSystemFactory::getSystemFor)
         ;
 }
 

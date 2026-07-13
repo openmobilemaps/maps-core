@@ -5,6 +5,7 @@
 #include "NativeColor.h"
 #include "NativeOpenGlRenderingContextInterface.h"
 #include "NativeRectI.h"
+#include "NativeRenderTargetInterface.h"
 #include "NativeRenderingCullMode.h"
 #include "NativeVec2I.h"
 #include "NativeVec3D.h"
@@ -21,7 +22,12 @@ em::val NativeRenderingContextInterface::cppProxyMethods() {
         "setupDrawFrame",
         "preRenderStencilMask",
         "postRenderStencilMask",
+        "clearStencilMask",
+        "setupStencilWriteMask",
         "applyScissorRect",
+        "getCreateOffscreenRenderTarget",
+        "deleteOffscreenRenderTarget",
+        "getOffscreenRenderTargets",
         "asOpenGlRenderingContext",
     });
     return methods;
@@ -94,12 +100,55 @@ void NativeRenderingContextInterface::postRenderStencilMask(const CppType& self)
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
     }
 }
+void NativeRenderingContextInterface::clearStencilMask(const CppType& self, int32_t w_clearMask) {
+    try {
+        self->clearStencilMask(::djinni::I32::toCpp(w_clearMask));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeRenderingContextInterface::setupStencilWriteMask(const CppType& self, int32_t w_writeMask,int32_t w_reference) {
+    try {
+        self->setupStencilWriteMask(::djinni::I32::toCpp(w_writeMask),
+                              ::djinni::I32::toCpp(w_reference));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
 void NativeRenderingContextInterface::applyScissorRect(const CppType& self, const em::val& w_scissorRect) {
     try {
         self->applyScissorRect(::djinni::Optional<std::optional, ::djinni_generated::NativeRectI>::toCpp(w_scissorRect));
     }
     catch(const std::exception& e) {
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+em::val NativeRenderingContextInterface::getCreateOffscreenRenderTarget(const CppType& self, const std::string& w_name) {
+    try {
+        auto r = self->getCreateOffscreenRenderTarget(::djinni::String::toCpp(w_name));
+        return ::djinni_generated::NativeRenderTargetInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeRenderTargetInterface>::handleNativeException(e);
+    }
+}
+void NativeRenderingContextInterface::deleteOffscreenRenderTarget(const CppType& self, const std::string& w_name) {
+    try {
+        self->deleteOffscreenRenderTarget(::djinni::String::toCpp(w_name));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+em::val NativeRenderingContextInterface::getOffscreenRenderTargets(const CppType& self) {
+    try {
+        auto r = self->getOffscreenRenderTargets();
+        return ::djinni::List<::djinni_generated::NativeRenderTargetInterface>::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::List<::djinni_generated::NativeRenderTargetInterface>>::handleNativeException(e);
     }
 }
 em::val NativeRenderingContextInterface::asOpenGlRenderingContext(const CppType& self) {
@@ -124,7 +173,12 @@ EMSCRIPTEN_BINDINGS(_rendering_context_interface) {
         .function("setupDrawFrame", NativeRenderingContextInterface::setupDrawFrame)
         .function("preRenderStencilMask", NativeRenderingContextInterface::preRenderStencilMask)
         .function("postRenderStencilMask", NativeRenderingContextInterface::postRenderStencilMask)
+        .function("clearStencilMask", NativeRenderingContextInterface::clearStencilMask)
+        .function("setupStencilWriteMask", NativeRenderingContextInterface::setupStencilWriteMask)
         .function("applyScissorRect", NativeRenderingContextInterface::applyScissorRect)
+        .function("getCreateOffscreenRenderTarget", NativeRenderingContextInterface::getCreateOffscreenRenderTarget)
+        .function("deleteOffscreenRenderTarget", NativeRenderingContextInterface::deleteOffscreenRenderTarget)
+        .function("getOffscreenRenderTargets", NativeRenderingContextInterface::getOffscreenRenderTargets)
         .function("asOpenGlRenderingContext", NativeRenderingContextInterface::asOpenGlRenderingContext)
         ;
 }

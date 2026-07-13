@@ -72,7 +72,12 @@ void OpenGlContext::setupDrawFrame(int64_t vpMatrix, const ::Vec3D & origin, dou
     if (!backgroundColorValid.test_and_set()) {
         glClearColor(backgroundColor.r, backgroundColor.g, backgroundColor.b, backgroundColor.a);
     }
+    GLboolean depthMask = GL_TRUE;
+    glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+    glDepthMask(GL_TRUE);
+    glClearDepthf(1.0f);
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    glDepthMask(depthMask);
     timeFrameDelta = (chronoutil::getCurrentTimestamp() - timeCreation).count();
 
     if (frameUniformsBuffer != GL_INVALID_INDEX && identityFrameUniformsBuffer != GL_INVALID_INDEX) {
@@ -82,14 +87,29 @@ void OpenGlContext::setupDrawFrame(int64_t vpMatrix, const ::Vec3D & origin, dou
 }
 
 void OpenGlContext::preRenderStencilMask() {
+    // Must not touch stencil contents; read passes rely on bits written in earlier passes.
     glEnable(GL_STENCIL_TEST);
-    glClearStencil(0);
-    glClear(GL_STENCIL_BUFFER_BIT);
-    glStencilFunc(GL_ALWAYS, 128, 1);
-    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 }
 
 void OpenGlContext::postRenderStencilMask() { glDisable(GL_STENCIL_TEST); }
+
+void OpenGlContext::clearStencilMask(int32_t clearMask) {
+    if (clearMask == 0) {
+        return;
+    }
+    glEnable(GL_STENCIL_TEST);
+    glStencilMask(static_cast<GLuint>(clearMask));
+    glClearStencil(0);
+    glClear(GL_STENCIL_BUFFER_BIT);
+    glStencilMask(0xFF);
+}
+
+void OpenGlContext::setupStencilWriteMask(int32_t writeMask, int32_t reference) {
+    glEnable(GL_STENCIL_TEST);
+    glStencilMask(static_cast<GLuint>(writeMask));
+    glStencilFunc(GL_ALWAYS, reference, writeMask);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
+}
 
 void OpenGlContext::applyScissorRect(const std::optional<::RectI> &scissorRect) {
     if (scissorRect) {
@@ -119,6 +139,22 @@ void OpenGlContext::setCulling(RenderingCullMode mode) {
 
 std::shared_ptr<OpenGlRenderingContextInterface> OpenGlContext::asOpenGlRenderingContext() {
     return shared_from_this();
+}
+
+std::shared_ptr<RenderTargetInterface> OpenGlContext::getCreateOffscreenRenderTarget(const std::string & name) {
+    return getCreateRenderTarget(name, TextureFilterType::NEAREST, Color(0, 0, 0, 1), false)->asRenderTargetInterface();
+}
+
+void OpenGlContext::deleteOffscreenRenderTarget(const std::string & name) {
+    deleteRenderTarget(name);
+}
+
+std::vector</*not-null*/ std::shared_ptr<RenderTargetInterface>> OpenGlContext::getOffscreenRenderTargets() {
+    std::vector<std::shared_ptr<RenderTargetInterface>> targets;
+    for (const auto &entry : getRenderTargets()) {
+        targets.push_back(entry->asRenderTargetInterface());
+    }
+    return targets;
 }
 
 // OpenGlRenderingContextInterface

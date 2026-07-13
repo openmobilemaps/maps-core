@@ -39,8 +39,13 @@ export interface RenderingContextInterface {
     setupDrawFrame(vpMatrix: bigint, origin: Vec3D, screenPixelAsRealMeterFactor: number): void;
     preRenderStencilMask(): void;
     postRenderStencilMask(): void;
+    clearStencilMask(clearMask: number): void;
+    setupStencilWriteMask(writeMask: number, reference: number): void;
     /** optional rectangle, remove scissoring when not set */
     applyScissorRect(scissorRect: RectI | undefined): void;
+    getCreateOffscreenRenderTarget(name: string): RenderTargetInterface;
+    deleteOffscreenRenderTarget(name: string): void;
+    getOffscreenRenderTargets(): Array<RenderTargetInterface>;
     asOpenGlRenderingContext(): OpenGlRenderingContextInterface | undefined;
 }
 
@@ -67,6 +72,7 @@ export interface RenderObjectInterface {
     hasCustomModelMatrix(): boolean;
     isScreenSpaceCoords(): boolean;
     getCustomModelMatrix(): Array<number>;
+    getMaskingObject(): MaskingObjectInterface | undefined;
     setHidden(hidden: boolean): void;
     isHidden(): boolean;
 }
@@ -100,6 +106,10 @@ export interface /*record*/ RenderPassConfig {
     renderPassIndex: number;
     isPassMasked: boolean;
     renderTarget?: RenderTargetInterface;
+    stencilReadMask: number;
+    stencilReadReference: number;
+    stencilWriteMask: number;
+    stencilWriteReference: number;
 }
 
 export interface RendererInterface {

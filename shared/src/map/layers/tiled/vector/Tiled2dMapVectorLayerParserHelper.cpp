@@ -11,12 +11,14 @@
 #include "Tiled2dMapVectorLayerParserHelper.h"
 
 #include "Logger.h"
+#include "RenderPassStencilOptions.h"
 #include "json.h"
 #include "VectorMapSourceDescription.h"
 #include "DataLoaderResult.h"
 #include "Tiled2dMapVectorLayer.h"
 #include "LineVectorLayerDescription.h"
 #include "PolygonVectorLayerDescription.h"
+#include "CircleVectorLayerDescription.h"
 #include "SymbolVectorLayerDescription.h"
 #include "RasterVectorLayerDescription.h"
 #include "BackgroundVectorLayerDescription.h"
@@ -73,7 +75,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
 
     std::vector<std::shared_ptr<VectorLayerDescription>> layers;
 
-    std::map<std::string, std::shared_ptr<RasterVectorLayerDescription>> rasterLayerMap;
+    std::map<std::string, std::shared_ptr<RasterVectorMapSourceDescription>> rasterSourceMap;
 
     std::map<std::string, std::shared_ptr<GeoJSONVTInterface>> geojsonSources;
 
@@ -92,8 +94,8 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             bool maskTiles = true;
             double zoomLevelScaleFactor = 1.0;
 
-            bool overzoom = val.contains("overzoom")  ? tileJsons["overzoom"].get<bool>() : true;
-            bool underzoom = val.contains("underzoom")  ? tileJsons["underzoom"].get<bool>() : false;
+            bool overzoom = val.contains("overzoom")  ? val["overzoom"].get<bool>() : true;
+            bool underzoom = val.contains("underzoom")  ? val["underzoom"].get<bool>() : false;
 
             std::optional<std::vector<int>> levels;
             int minZoom = std::numeric_limits<int>::max();
@@ -111,12 +113,16 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 minZoom = val.value("minzoom", 0);
                 maxZoom = val.value("maxzoom", 22);
             }
+            std::optional<int32_t> coordinateReferenceSystem;
+            if(val.contains("crs") && val["crs"].is_string()) {
+                coordinateReferenceSystem = CoordinateSystemIdentifiers::fromCrsIdentifier(val["crs"].get<std::string>());
+            } else if(val["metadata"].is_object() && val["metadata"].contains("crs") && val["metadata"]["crs"].is_string()) {
+                coordinateReferenceSystem = CoordinateSystemIdentifiers::fromCrsIdentifier(val["metadata"]["crs"].get<std::string>());
+            }
             
             std::optional<::RectCoord> bounds;
-            std::optional<std::string> coordinateReferenceSystem;
 
             if (val["tiles"].is_array()) {
-                auto str = val.dump();
                 url = val["tiles"].begin()->get<std::string>();
                 adaptScaleToScreen = val.value("adaptScaleToScreen", adaptScaleToScreen);
                 numDrawPreviousLayers = val.value("numDrawPreviousLayers", numDrawPreviousLayers);
@@ -135,9 +141,6 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     }
                 }
 
-                if(val["metadata"].is_object() && val["metadata"].contains("crs") && val["metadata"]["crs"].is_string()) {
-                    coordinateReferenceSystem = val["metadata"]["crs"].get<std::string>();
-                }
 
             } else if (val["url"].is_string()) {
                 auto result = LoaderHelper::loadData(replaceUrlParams(val["url"].get<std::string>(), sourceUrlParams), std::nullopt, loaders);
@@ -166,36 +169,26 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     }
                 }
 
-                if(json["metadata"].is_object() && json["metadata"].contains("crs") && json["metadata"]["crs"].is_string()) {
-                    coordinateReferenceSystem = json["metadata"]["crs"].get<std::string>();
-                }
 
                 minZoom = json.value("minzoom", 0);
                 maxZoom = json.value("maxzoom", 22);
             }
 
-
-            RasterVectorStyle style = RasterVectorStyle(nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr);
-            rasterLayerMap[key] = std::make_shared<RasterVectorLayerDescription>(layerName,
-                                                                                 key,
-                                                                                 0,
-                                                                                 24,
-                                                                                 minZoom,
-                                                                                 maxZoom,
-                                                                                 url,
-                                                                                 nullptr,
-                                                                                 style,
-                                                                                 adaptScaleToScreen,
-                                                                                 numDrawPreviousLayers,
-                                                                                 maskTiles,
-                                                                                 zoomLevelScaleFactor,
-                                                                                 std::nullopt,
-                                                                                 nullptr,
-                                                                                 underzoom,
-                                                                                 overzoom,
-                                                                                 bounds,
-                                                                                 coordinateReferenceSystem,
-                                                                                 levels);
+            rasterSourceMap[key] = std::make_shared<RasterVectorMapSourceDescription>(
+                key,
+                url,
+                minZoom,
+                maxZoom,
+                bounds,
+                zoomLevelScaleFactor,
+                adaptScaleToScreen,
+                numDrawPreviousLayers,
+                underzoom,
+                overzoom,
+                levels,
+                coordinateReferenceSystem,
+                maskTiles
+            );
 
         } else if (type == "vector" && val["url"].is_string()) {
             auto result = LoaderHelper::loadData(replaceUrlParams(val["url"].get<std::string>(), sourceUrlParams), std::nullopt, loaders);
@@ -275,6 +268,10 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
             minZoom = tileJson.value("minzoom", 0);
             maxZoom = tileJson.value("maxzoom", 22);
         }
+        std::optional<int32_t> coordinateReferenceSystem;
+        if(tileJson.contains("crs") && tileJson["crs"].is_string()) {
+            coordinateReferenceSystem = CoordinateSystemIdentifiers::fromCrsIdentifier(tileJson["crs"].get<std::string>());
+        }
 
         sourceDescriptions.push_back(
                                      std::make_shared<VectorMapSourceDescription>(identifier,
@@ -287,7 +284,9 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                                   numDrawPreviousLayers,
                                                                                   underzoom,
                                                                                   overzoom,
-                                                                                  levels));
+                                                                                  levels,
+                                                                                  coordinateReferenceSystem
+                                                                                  ));
     }
 
 
@@ -316,12 +315,30 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
         globalTransitionDelay = json["transition"].value("delay", globalTransitionDelay);
     }
 
+    auto getSourceZoomRange = [&sourceDescriptions, &geojsonSources](const std::string &source) -> std::pair<int, int> {
+        for (const auto &sourceDesc : sourceDescriptions) {
+            if (sourceDesc->identifier == source) {
+                return {sourceDesc->minZoom, sourceDesc->maxZoom};
+            }
+        }
+        for (const auto &[identifier, geojsonSource] : geojsonSources) {
+            if (identifier == source) {
+                return {geojsonSource->getMinZoom(), geojsonSource->getMaxZoom()};
+            }
+        }
+        return {0, 22};
+    };
+
     for (auto&[key, val]: json["layers"].items()) {
         if (val["layout"].is_object() && val["layout"]["visibility"] == "none") {
             continue;
         }
 
         std::optional<int32_t> renderPassIndex;
+        RenderPassStencilOptions renderPassStencilOptions;
+        std::optional<std::string> maskSource;
+        std::optional<std::string> maskSourceLayer;
+        bool maskInverseRead = false;
         std::shared_ptr<Value> interactable = globalIsInteractable;
         bool layerMultiselect = false;
         bool layerSelfMasked = false;
@@ -344,6 +361,63 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                 blendMode = parser.parseValue(val["metadata"]["blend-mode"]);
             }
         }
+        if (val["mask-source"].is_string()) {
+            maskSource = val["mask-source"].get<std::string>();
+        }
+        if (val["mask-source-layer"].is_string()) {
+            maskSourceLayer = val["mask-source-layer"].get<std::string>();
+        }
+        if (val["mask-mode"].is_string()) {
+            const auto maskMode = val["mask-mode"].get<std::string>();
+            maskInverseRead = maskMode == "outside";
+        }
+        if (val["render-pass"].is_object()) {
+            const auto &renderPass = val["render-pass"];
+            if (renderPass["index"].is_number()) {
+                renderPassIndex = renderPass.value("index", 0);
+            }
+            if (renderPass["stencil"].is_object()) {
+                const auto &stencil = renderPass["stencil"];
+                const bool write = stencil.value("write", false) || stencil.value("stencil-only", false);
+                const bool read = stencil.value("read", false) || stencil.value("inverse-read", false);
+                const bool clearBefore = stencil.value("clear-before-render", stencil.value("clear-before", write));
+                const bool cleanupAfter = stencil.value("cleanup-after-render", stencil.value("cleanup-after", true));
+                bool inverseRead = stencil.value("inverse-read", false);
+                if (write) {
+                    renderPassStencilOptions.write.writeMask = StencilBits::geometryMask;
+                    renderPassStencilOptions.write.reference = StencilBits::geometryMask;
+                    if (clearBefore) {
+                        renderPassStencilOptions.clearBefore.clearMask = StencilBits::geometryMask;
+                    }
+                    if (cleanupAfter) {
+                        renderPassStencilOptions.clearAfter.clearMask = StencilBits::geometryMask;
+                    }
+                }
+                if (read) {
+                    renderPassStencilOptions.read.readMask = StencilBits::geometryMask;
+                    renderPassStencilOptions.read.reference = inverseRead ? StencilBits::none : StencilBits::geometryMask;
+                    if (clearBefore) {
+                        renderPassStencilOptions.clearBefore.clearMask = StencilBits::geometryMask;
+                    }
+                    if (cleanupAfter) {
+                        renderPassStencilOptions.clearAfter.clearMask = StencilBits::geometryMask;
+                    }
+                }
+                if (stencil["mode"].is_string() && stencil["mode"].get<std::string>() == "outside") {
+                    inverseRead = true;
+                    renderPassStencilOptions.read.readMask = StencilBits::geometryMask;
+                    renderPassStencilOptions.read.reference = StencilBits::none;
+                }
+            }
+        }
+
+        auto addLayer = [&layers, &renderPassStencilOptions, &maskSource, &maskSourceLayer, &maskInverseRead](const std::shared_ptr<VectorLayerDescription> &layer) {
+            layer->renderPassStencilOptions = renderPassStencilOptions;
+            layer->maskSource = maskSource;
+            layer->maskSourceLayer = maskSourceLayer;
+            layer->maskInverseRead = maskInverseRead;
+            layers.push_back(layer);
+        };
 
         int64_t transitionDuration = globalTransitionDuration;
         int64_t transitionDelay = globalTransitionDelay;
@@ -359,10 +433,47 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                                                       blendMode),
                                                                                 renderPassIndex,
                                                                                 interactable);
-            layers.push_back(layerDesc);
+            addLayer(layerDesc);
 
-        } else if (val["type"] == "raster" && rasterLayerMap.count(val["source"]) != 0) {
-            auto layer = rasterLayerMap[val["source"]];
+        } else if (val["type"] == "raster" && rasterSourceMap.count(val["source"]) != 0) {
+            const auto &source = rasterSourceMap[val["source"]];
+            std::optional<RasterTextureLookup> textureLookup = std::nullopt;
+            if (val["paint"]["raster-texture-lookup"].is_object()) {
+                const auto &lookup = val["paint"]["raster-texture-lookup"];
+                if (lookup["sprite"].is_string() && lookup["zoom-min"].is_number() && lookup["zoom-max"].is_number()) {
+                    const double zoomMin = lookup["zoom-min"].get<double>();
+                    const double zoomMax = lookup["zoom-max"].get<double>();
+                    if (zoomMin != zoomMax) {
+                        RasterTextureLookupMode mode = RasterTextureLookupMode::MONO;
+                        bool validMode = true;
+                        if (lookup.contains("mode")) {
+                            if (!lookup["mode"].is_string()) {
+                                LogError <<= "Ignoring raster texture lookup for layer " + val["id"].get<std::string>() + ": mode must be a string.";
+                                validMode = false;
+                            } else {
+                                const auto modeString = lookup["mode"].get<std::string>();
+                                if (modeString == "mono") {
+                                    mode = RasterTextureLookupMode::MONO;
+                                } else if (modeString == "dual") {
+                                    mode = RasterTextureLookupMode::DUAL;
+                                } else if (modeString == "quad") {
+                                    mode = RasterTextureLookupMode::QUAD;
+                                } else {
+                                    LogError <<= "Ignoring raster texture lookup for layer " + val["id"].get<std::string>() + ": unsupported mode '" + modeString + "'.";
+                                    validMode = false;
+                                }
+                            }
+                        }
+                        if (validMode) {
+                            textureLookup = RasterTextureLookup(SpriteIconId(lookup["sprite"].get<std::string>()), zoomMin, zoomMax, mode);
+                        }
+                    } else {
+                        LogError <<= "Ignoring raster texture lookup for layer " + val["id"].get<std::string>() + ": zoom-min and zoom-max must differ.";
+                    }
+                } else {
+                    LogError <<= "Ignoring raster texture lookup for layer " + val["id"].get<std::string>() + ": sprite, zoom-min and zoom-max are required.";
+                }
+            }
             RasterVectorStyle style = RasterVectorStyle(parser.parseValue(val["paint"]["raster-opacity"]),
                                                         parser.parseValue(val["paint"]["raster-brightness-min"]),
                                                         parser.parseValue(val["paint"]["raster-brightness-max"]),
@@ -373,30 +484,47 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                         blendMode);
             std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
 
-            bool underzoom = layer->underzoom && !val.contains("minzoom");
-            bool overzoom = layer->overzoom && !val.contains("maxzoom");
+            // TODO
+            [[maybe_unused]]
+            bool underzoom = source->underzoom && !val.contains("minzoom");
+            [[maybe_unused]]
+            bool overzoom = source->overzoom && !val.contains("maxzoom");
 
-            auto newLayer = std::make_shared<RasterVectorLayerDescription>(val["id"],
-                                                                           val["source"],
-                                                                           val.value("minzoom", layer->minZoom),
-                                                                           val.value("maxzoom", layer->maxZoom),
-                                                                           layer->sourceMinZoom,
-                                                                           layer->sourceMaxZoom,
-                                                                           layer->url,
-                                                                           filter,
-                                                                           style,
-                                                                           layer->adaptScaleToScreen,
-                                                                           layer->numDrawPreviousLayers,
-                                                                           layer->maskTiles,
-                                                                           layer->zoomLevelScaleFactor,
-                                                                           layer->renderPassIndex,
-                                                                           interactable,
-                                                                           underzoom,
-                                                                           overzoom,
-                                                                           layer->bounds,
-                                                                           layer->coordinateReferenceSystem,
-                                                                           layer->levels);
-            layers.push_back(newLayer);
+            auto layer = std::make_shared<RasterVectorLayerDescription>(val["id"],
+                                                                        source,
+                                                                        val.value("minzoom", source->minZoom),
+                                                                        val.value("maxzoom", source->maxZoom),
+                                                                        filter,
+                                                                        renderPassIndex,
+                                                                        interactable,
+                                                                        style,
+                                                                        textureLookup);
+            if (maskSource && maskSourceLayer) {
+                layer->maskLayerIdentifier = "__raster_mask_" + layer->identifier;
+            }
+            addLayer(layer);
+
+            if (maskSource && maskSourceLayer) {
+                const auto [maskSourceMinZoom, maskSourceMaxZoom] = getSourceZoomRange(*maskSource);
+                const int maskLayerMaxZoom = overzoom ? std::numeric_limits<int>::max() : layer->maxZoom;
+                auto maskStyle = PolygonVectorStyle(nullptr, parser.parseValue(0.0), nullptr, blendMode, true, nullptr);
+                auto maskLayer = std::make_shared<PolygonVectorLayerDescription>(
+                    "__raster_mask_" + layer->identifier,
+                    *maskSource,
+                    *maskSourceLayer,
+                    layer->minZoom,
+                    maskLayerMaxZoom,
+                    maskSourceMinZoom,
+                    maskSourceMaxZoom,
+                    nullptr,
+                    maskStyle,
+                    std::nullopt,
+                    nullptr,
+                    false,
+                    false);
+                maskLayer->maskTargetLayerIdentifier = layer->identifier;
+                layers.push_back(maskLayer);
+            }
         } else if (val["type"] == "line") {
 
             std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
@@ -411,7 +539,9 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     parser.parseValue(val["paint"]["line-offset"]),
                     blendMode,
                     parser.parseValue(val["paint"]["line-dotted"]),
-                    parser.parseValue(val["paint"]["line-dotted-skew"])
+                    parser.parseValue(val["paint"]["line-dotted-skew"]),
+                    parser.parseValue(val["paint"]["line-dash-fade"]),
+                    parser.parseValue(val["paint"]["line-dash-animation-speed"])
             );
 
             int minZoom = 0;
@@ -450,8 +580,54 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                     layerSelfMasked,
                     selectionSizeFactor);
 
-            layers.push_back(layerDesc);
+            addLayer(layerDesc);
 
+        } else if (val["type"] == "circle") {
+            std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
+
+            CircleVectorStyle style(parser.parseValue(val["paint"]["circle-color"]),
+                                    parser.parseValue(val["paint"]["circle-opacity"]),
+                                    parser.parseValue(val["paint"]["circle-radius"]),
+                                    parser.parseValue(val["paint"]["circle-stroke-color"]),
+                                    parser.parseValue(val["paint"]["circle-stroke-opacity"]),
+                                    parser.parseValue(val["paint"]["circle-stroke-width"]),
+                                    blendMode);
+
+            float selectionSizeFactor = 1.0f;
+            if (!val["metadata"].is_null()) {
+                selectionSizeFactor = val["metadata"].value("selection-size-factor", 1.0f);
+            }
+
+            int minZoom = 0;
+            int maxZoom = 22;
+            for (const auto &sourceDesc : sourceDescriptions) {
+                if (sourceDesc->identifier == val["source"]) {
+                    minZoom = sourceDesc->minZoom;
+                    maxZoom = sourceDesc->maxZoom;
+                }
+            }
+            for (const auto &[identifier, source] : geojsonSources) {
+                if (identifier == val["source"]) {
+                    minZoom = source->getMinZoom();
+                    maxZoom = source->getMaxZoom();
+                }
+            }
+
+            auto layerDesc = std::make_shared<CircleVectorLayerDescription>(val["id"],
+                                                                            val["source"],
+                                                                            val.value("source-layer", ""),
+                                                                            val.value("minzoom", 0),
+                                                                            val.value("maxzoom", 24),
+                                                                            minZoom,
+                                                                            maxZoom,
+                                                                            filter,
+                                                                            style,
+                                                                            renderPassIndex,
+                                                                            interactable,
+                                                                            layerMultiselect,
+                                                                            layerSelfMasked,
+                                                                            selectionSizeFactor);
+            addLayer(layerDesc);
         } else if (val["type"] == "symbol") {
 
             SymbolVectorStyle style(parser.parseValue(val["layout"]["text-size"]),
@@ -527,7 +703,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                             renderPassIndex,
                                                                             interactable,
                                                                             layerSelfMasked); // in-layer layerMultiselect not yet supported
-            layers.push_back(layerDesc);
+            addLayer(layerDesc);
         } else if (val["type"] == "fill") {
 
             std::shared_ptr<Value> filter = parser.parseValue(val["filter"]);
@@ -568,7 +744,7 @@ Tiled2dMapVectorLayerParserResult Tiled2dMapVectorLayerParserHelper::parseStyleJ
                                                                              layerMultiselect,
                                                                              layerSelfMasked);
 
-            layers.push_back(layerDesc);
+            addLayer(layerDesc);
         }
     }
 

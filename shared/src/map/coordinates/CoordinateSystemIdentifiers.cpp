@@ -22,6 +22,9 @@ int32_t CoordinateSystemIdentifiers::EPSG3857() { return 3857; };
 // https://epsg.io/4326
 int32_t CoordinateSystemIdentifiers::EPSG4326() { return 4326; };
 
+// WGS 84 scaled 2D coordinate system
+int32_t CoordinateSystemIdentifiers::EPSG4326System2D() { return 100002; };
+
 // LV03+
 // https://epsg.io/2056
 int32_t CoordinateSystemIdentifiers::EPSG2056() { return 2056; };
@@ -59,6 +62,8 @@ double CoordinateSystemIdentifiers::unitToMeterFactor(int32_t coordinateSystemId
         coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG21781()) {
         return 1.0;
     } else if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG4326()) {
+        return 360.0 / 40075017.0;
+    } else if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::EPSG4326System2D()) {
         return 360.0 / 40075017.0;
     } else if (coordinateSystemIdentifier == CoordinateSystemIdentifiers::UnitSphere()) {
         return 2 * M_PI / 40075017.0;

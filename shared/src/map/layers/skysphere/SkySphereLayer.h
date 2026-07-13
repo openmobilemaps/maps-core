@@ -23,6 +23,8 @@ class SkySphereLayer
           public SkySphereLayerInterface,
           public std::enable_shared_from_this<SkySphereLayer> {
 public:
+    explicit SkySphereLayer(bool useLocal = false);
+
     // SimpleLayerInterface
 
     void update() override;
@@ -57,7 +59,7 @@ private:
 
     std::vector<std::shared_ptr<::RenderPassInterface>> renderPasses;
     bool isHidden = false;
+    bool useLocal = false;
 
     std::shared_ptr<::TextureHolderInterface> skySphereTexture;
 };
-

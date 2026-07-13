@@ -8,7 +8,11 @@ cpp:
   typename: '::IconLayerInterface'
   header: '"IconLayerInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCIconLayerInterface'
   pointer: true
   hash: '%s.hash'

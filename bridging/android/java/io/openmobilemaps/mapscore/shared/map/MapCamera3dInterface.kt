@@ -12,6 +12,24 @@ abstract class MapCamera3dInterface {
 
     abstract fun setCameraConfig(config: Camera3dConfig, durationSeconds: Float?, targetZoom: Float?, targetCoordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord?)
 
+    abstract fun getCameraMode(): MapCamera3dMode
+
+    abstract fun setCameraMode(mode: MapCamera3dMode)
+
+    abstract fun isPoseCameraActive(): Boolean
+
+    abstract fun setPoseCamera(position: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, yawDegrees: Float, pitchDegrees: Float, rollDegrees: Float, verticalFovDegrees: Float, nearPlaneMeters: Float, farPlaneMeters: Float)
+
+    abstract fun clearPoseCamera()
+
+    abstract fun setCustomViewMatrix(viewMatrix: ArrayList<Float>)
+
+    abstract fun clearCustomViewMatrix()
+
+    abstract fun setCustomProjectionMatrix(projectionMatrix: ArrayList<Float>)
+
+    abstract fun clearCustomProjectionMatrix()
+
     public class CppProxy : MapCamera3dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -38,5 +56,59 @@ abstract class MapCamera3dInterface {
             native_setCameraConfig(this.nativeRef, config, durationSeconds, targetZoom, targetCoordinate)
         }
         private external fun native_setCameraConfig(_nativeRef: Long, config: Camera3dConfig, durationSeconds: Float?, targetZoom: Float?, targetCoordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord?)
+
+        override fun getCameraMode(): MapCamera3dMode {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getCameraMode(this.nativeRef)
+        }
+        private external fun native_getCameraMode(_nativeRef: Long): MapCamera3dMode
+
+        override fun setCameraMode(mode: MapCamera3dMode) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setCameraMode(this.nativeRef, mode)
+        }
+        private external fun native_setCameraMode(_nativeRef: Long, mode: MapCamera3dMode)
+
+        override fun isPoseCameraActive(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_isPoseCameraActive(this.nativeRef)
+        }
+        private external fun native_isPoseCameraActive(_nativeRef: Long): Boolean
+
+        override fun setPoseCamera(position: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, yawDegrees: Float, pitchDegrees: Float, rollDegrees: Float, verticalFovDegrees: Float, nearPlaneMeters: Float, farPlaneMeters: Float) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setPoseCamera(this.nativeRef, position, yawDegrees, pitchDegrees, rollDegrees, verticalFovDegrees, nearPlaneMeters, farPlaneMeters)
+        }
+        private external fun native_setPoseCamera(_nativeRef: Long, position: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, yawDegrees: Float, pitchDegrees: Float, rollDegrees: Float, verticalFovDegrees: Float, nearPlaneMeters: Float, farPlaneMeters: Float)
+
+        override fun clearPoseCamera() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_clearPoseCamera(this.nativeRef)
+        }
+        private external fun native_clearPoseCamera(_nativeRef: Long)
+
+        override fun setCustomViewMatrix(viewMatrix: ArrayList<Float>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setCustomViewMatrix(this.nativeRef, viewMatrix)
+        }
+        private external fun native_setCustomViewMatrix(_nativeRef: Long, viewMatrix: ArrayList<Float>)
+
+        override fun clearCustomViewMatrix() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_clearCustomViewMatrix(this.nativeRef)
+        }
+        private external fun native_clearCustomViewMatrix(_nativeRef: Long)
+
+        override fun setCustomProjectionMatrix(projectionMatrix: ArrayList<Float>) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setCustomProjectionMatrix(this.nativeRef, projectionMatrix)
+        }
+        private external fun native_setCustomProjectionMatrix(_nativeRef: Long, projectionMatrix: ArrayList<Float>)
+
+        override fun clearCustomProjectionMatrix() {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_clearCustomProjectionMatrix(this.nativeRef)
+        }
+        private external fun native_clearCustomProjectionMatrix(_nativeRef: Long)
     }
 }

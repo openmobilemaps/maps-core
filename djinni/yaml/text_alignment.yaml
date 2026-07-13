@@ -8,6 +8,9 @@ cpp:
   typename: '::TextAlignment'
   header: '"TextAlignment.h"'
   byValue: true
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCTextAlignment'
   pointer: false

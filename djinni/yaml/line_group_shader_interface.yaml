@@ -8,7 +8,11 @@ cpp:
   typename: '::LineGroupShaderInterface'
   header: '"LineGroupShaderInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCLineGroupShaderInterface'
   pointer: true
   hash: '%s.hash'

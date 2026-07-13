@@ -4,14 +4,18 @@
 #pragma once
 
 #include "GraphicsObjectInterface.h"
+#include "MaskingObjectInterface.h"
 #include <cstdint>
 #include <memory>
+#include <optional>
 
 class RenderConfigInterface {
 public:
     virtual ~RenderConfigInterface() = default;
 
     virtual /*not-null*/ std::shared_ptr<::GraphicsObjectInterface> getGraphicsObject() = 0;
+
+    virtual /*nullable*/ std::shared_ptr<::MaskingObjectInterface> getMaskingObject() = 0;
 
     virtual int32_t getRenderIndex() = 0;
 };

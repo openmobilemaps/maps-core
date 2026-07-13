@@ -6,6 +6,7 @@
 #include "NativeCoord.h"
 #include "NativeErrorManager.h"
 #include "NativeLayerReadyState.h"
+#include "NativeMapCamera3dMode.h"
 #include "NativeRectCoord.h"
 #include "NativeVec3D.h"
 
@@ -33,7 +34,7 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
-CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1onCameraChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_viewMatrix, jobject j_projectionMatrix, ::djinni_generated::NativeVec3D::JniType j_origin, jfloat j_verticalFov, jfloat j_horizontalFov, jfloat j_width, jfloat j_height, jfloat j_focusPointAltitude, ::djinni_generated::NativeCoord::JniType j_focusPointPosition, jfloat j_zoom)
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1onCameraChange(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jobject j_viewMatrix, jobject j_projectionMatrix, ::djinni_generated::NativeVec3D::JniType j_origin, jfloat j_verticalFov, jfloat j_horizontalFov, jfloat j_width, jfloat j_height, jfloat j_focusPointAltitude, ::djinni_generated::NativeCoord::JniType j_focusPointPosition, jfloat j_zoom, ::djinni_generated::NativeVec3D::Boxed::JniType j_cameraPosition, ::djinni_generated::NativeMapCamera3dMode::JniType j_cameraMode)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapSourceInterface>(nativeRef);
@@ -46,7 +47,9 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
                             ::djinni::F32::toCpp(jniEnv, j_height),
                             ::djinni::F32::toCpp(jniEnv, j_focusPointAltitude),
                             ::djinni_generated::NativeCoord::toCpp(jniEnv, j_focusPointPosition),
-                            ::djinni::F32::toCpp(jniEnv, j_zoom));
+                            ::djinni::F32::toCpp(jniEnv, j_zoom),
+                            ::djinni::Optional<std::optional, ::djinni_generated::NativeVec3D>::toCpp(jniEnv, j_cameraPosition),
+                            ::djinni_generated::NativeMapCamera3dMode::toCpp(jniEnv, j_cameraMode));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
@@ -84,6 +87,14 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1setZoomLevelScaleFactor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_value)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapSourceInterface>(nativeRef);
+        ref->setZoomLevelScaleFactor(::djinni::F32::toCpp(jniEnv, j_value));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1pause(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
@@ -97,6 +108,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapSourceInterface>(nativeRef);
         ref->resume();
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_Tiled2dMapSourceInterface_00024CppProxy_native_1setTileLoadingPaused(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_paused)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapSourceInterface>(nativeRef);
+        ref->setTileLoadingPaused(::djinni::Bool::toCpp(jniEnv, j_paused));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

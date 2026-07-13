@@ -11,7 +11,6 @@
 import Foundation
 import MapCoreSharedModule
 @preconcurrency import Metal
-import UIKit
 import simd
 
 class SphereEffectShader: BaseShader, @unchecked Sendable {
@@ -34,7 +33,7 @@ class SphereEffectShader: BaseShader, @unchecked Sendable {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline else { return }
+        guard let pipeline = activePipeline else { return }
         context.setRenderPipelineStateIfNeeded(pipeline)
 
         if let ellipseBuffer = ellipseBuffers?.getNextBuffer(context) {

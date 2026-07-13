@@ -34,7 +34,9 @@ private:
         ~JavaProxy();
 
         /*not-null*/ std::shared_ptr<::Quad2dInterface> createQuad(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
+        /*not-null*/ std::shared_ptr<::TexturedPolygonInterface> createTexturedPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
         /*not-null*/ std::shared_ptr<::Quad2dInterface> createQuadTessellated(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
+        /*not-null*/ std::shared_ptr<::Quad2dInterface> createQuadTessellatedDisplaced() override;
         /*not-null*/ std::shared_ptr<::Polygon2dInterface> createPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
         /*not-null*/ std::shared_ptr<::Polygon2dInterface> createPolygonTessellated(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
         /*not-null*/ std::shared_ptr<::IcosahedronInterface> createIcosahedronObject(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) override;
@@ -55,7 +57,9 @@ private:
 
     const ::djinni::GlobalRef<jclass> clazz { ::djinni::jniFindClass("io/openmobilemaps/mapscore/shared/graphics/objects/GraphicsObjectFactoryInterface") };
     const jmethodID method_createQuad { ::djinni::jniGetMethodID(clazz.get(), "createQuad", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Quad2dInterface;") };
+    const jmethodID method_createTexturedPolygon { ::djinni::jniGetMethodID(clazz.get(), "createTexturedPolygon", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/TexturedPolygonInterface;") };
     const jmethodID method_createQuadTessellated { ::djinni::jniGetMethodID(clazz.get(), "createQuadTessellated", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Quad2dInterface;") };
+    const jmethodID method_createQuadTessellatedDisplaced { ::djinni::jniGetMethodID(clazz.get(), "createQuadTessellatedDisplaced", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/Quad2dInterface;") };
     const jmethodID method_createPolygon { ::djinni::jniGetMethodID(clazz.get(), "createPolygon", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Polygon2dInterface;") };
     const jmethodID method_createPolygonTessellated { ::djinni::jniGetMethodID(clazz.get(), "createPolygonTessellated", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/Polygon2dInterface;") };
     const jmethodID method_createIcosahedronObject { ::djinni::jniGetMethodID(clazz.get(), "createIcosahedronObject", "(Lio/openmobilemaps/mapscore/shared/graphics/shader/ShaderProgramInterface;)Lio/openmobilemaps/mapscore/shared/graphics/objects/IcosahedronInterface;") };

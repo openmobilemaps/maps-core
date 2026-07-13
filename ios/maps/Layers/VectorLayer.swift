@@ -8,6 +8,7 @@
 import Foundation
 import MapCoreSharedModule
 
+@available(*, unavailable, message: "VectorLayer was removed. Use MCTiled2dMapVectorLayerInterface.make(...) and pass the resulting layer to MCMapView/MCMapInterface.")
 open class VectorLayer: Layer, ObservableObject, @unchecked Sendable {
     public init(
         _ layerName: String = UUID().uuidString,

@@ -7,6 +7,7 @@
 @extern "../../yaml/vec_3_d.yaml"
 @extern "../../yaml/vec_2_d.yaml"
 @extern "../../yaml/vec_2_f.yaml"
+@extern "../../yaml/owned_bytes.yaml"
 @extern "../../yaml/shared_bytes.yaml"
 @extern "../../yaml/font_data.yaml"
 
@@ -17,6 +18,11 @@ graphics_object_interface = interface +c +j +o {
     setup(context: rendering_context_interface);
     # Clear graphics object and invalidate isReady
     clear();
+    # Pause/Resume clear and re-setup the object from the render context. 
+    # This can be equivalent to clear/setup, but can be a no-op on some platforms.
+    pause();
+    # Ensure calling on graphics thread
+    resume(context: rendering_context_interface);
     # by defaults objects if masked are only rendered where the mask is set
     # if setting this flag the masked is applied inversly
     set_is_inverse_masked(inversed: bool);
@@ -36,7 +42,9 @@ compute_object_interface = interface +c +j +o {
 
 graphics_object_factory_interface = interface +c +j +o {
     create_quad(shader: shader_program_interface) : quad_2d_interface;
+    create_textured_polygon(shader: shader_program_interface) : textured_polygon_interface;
     create_quad_tessellated(shader: shader_program_interface) : quad_2d_interface;
+    create_quad_tessellated_displaced() : quad_2d_interface;
     create_polygon(shader: shader_program_interface) : polygon_2d_interface;
     create_polygon_tessellated(shader: shader_program_interface) : polygon_2d_interface;
     create_icosahedron_object(shader: shader_program_interface) : icosahedron_interface;
@@ -61,9 +69,26 @@ quad_2d_interface = interface +c +j +o {
     set_subdivision_factor(factor: i32);
     set_min_mag_filter(filter_type: texture_filter_type);
     load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    load_dual_texture(context: rendering_context_interface, texture_holder: texture_holder_interface, elevation_holder: optional<texture_holder_interface>);
+    # Explicit binding for the color texture plus an optional lookup sprite (sampled in the fragment stage)
+    # and an optional elevation heightmap (sampled in the vertex/tessellation stage). This lets displaced
+    # raster tiles use the raster texture lookup, which load_dual_texture cannot express because it only
+    # carries a single secondary texture (interpreted as elevation by displaced quads). Non-displaced quads
+    # keep the default behaviour and treat lookup_holder like the load_dual_texture secondary texture.
+    load_textures(context: rendering_context_interface, texture_holder: texture_holder_interface, lookup_holder: optional<texture_holder_interface>, elevation_holder: optional<texture_holder_interface>);
     remove_texture();
     as_graphics_object(): graphics_object_interface;
     as_masking_object(): masking_object_interface;
+}
+
+textured_polygon_interface = interface +c +j +o {
+    set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_d, is_3d: bool);
+    set_subdivision_factor(factor: i32);
+    set_min_mag_filter(filter_type: texture_filter_type);
+    load_texture(context: rendering_context_interface, texture_holder: texture_holder_interface);
+    load_dual_texture(context: rendering_context_interface, texture_holder: texture_holder_interface, elevation_holder: optional<texture_holder_interface>);
+    remove_texture();
+    as_graphics_object(): graphics_object_interface;
 }
 
 quad_2d_instanced_interface = interface +c +j +o {
@@ -128,7 +153,7 @@ render_line_description = record {
 }
 
 line_group_2d_interface = interface +c +j +o {
-    set_lines(lines: shared_bytes, indices: shared_bytes, origin: vec_3_d, is_3d: bool);
+    set_lines(lines: owned_bytes, indices: owned_bytes, origin: vec_3_d, is_3d: bool);
     as_graphics_object(): graphics_object_interface;
 }
 
@@ -148,6 +173,7 @@ render_vertices_description = record {
 polygon_group_2d_interface = interface +c +j +o {
     set_vertices(vertices: shared_bytes, indices: shared_bytes, origin: vec_3_d);
     as_graphics_object(): graphics_object_interface;
+    as_masking_object(): masking_object_interface;
 }
 
 polygon_pattern_group_2d_interface = interface +c +j +o {

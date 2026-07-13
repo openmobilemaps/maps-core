@@ -56,6 +56,7 @@ struct NativeMapCameraInterface : ::djinni::JsInterface<::MapCameraInterface, Na
     static em::val coordFromScreenPositionZoom(const CppType& self, const em::val& w_posScreen,float w_zoom);
     static em::val screenPosFromCoord(const CppType& self, const em::val& w_coord);
     static em::val screenPosFromCoordZoom(const CppType& self, const em::val& w_coord,float w_zoom);
+    static em::val createTrackedCoordinate(const CppType& self, const em::val& w_coordinate,const em::val& w_callback);
     static double mapUnitsFromPixels(const CppType& self, double w_distancePx);
     static double getScalingFactor(const CppType& self);
     static bool coordIsVisibleOnScreen(const CppType& self, const em::val& w_coord,float w_paddingPc);

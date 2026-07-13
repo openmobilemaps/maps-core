@@ -8,6 +8,9 @@ cpp:
   typename: '::SimpleLineStyle'
   header: '"SimpleLineStyle.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCSimpleLineStyle'
   pointer: true

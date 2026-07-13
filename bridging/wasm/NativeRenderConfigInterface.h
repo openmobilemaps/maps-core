@@ -24,6 +24,7 @@ struct NativeRenderConfigInterface : ::djinni::JsInterface<::RenderConfigInterfa
     static em::val cppProxyMethods();
 
     static em::val getGraphicsObject(const CppType& self);
+    static em::val getMaskingObject(const CppType& self);
     static int32_t getRenderIndex(const CppType& self);
 
 };

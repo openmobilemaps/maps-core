@@ -8,7 +8,11 @@ cpp:
   typename: '::IconFactory'
   header: '"IconFactory.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCIconFactory'
   pointer: true
   hash: '%s.hash'

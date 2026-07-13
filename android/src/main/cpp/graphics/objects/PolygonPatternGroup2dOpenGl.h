@@ -10,19 +10,21 @@
 
 #pragma once
 
+#include "BaseGraphicsObjectOpenGl.h"
 #include "GraphicsObjectInterface.h"
 #include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
 #include "PolygonPatternGroup2dInterface.h"
 #include "ShaderProgramInterface.h"
 #include "BaseShaderProgramOpenGl.h"
+#include "TextureAttachment.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 #include <vector>
 #include <RectD.h>
 #include <Quad2dD.h>
 
-class PolygonPatternGroup2dOpenGl : public GraphicsObjectInterface,
+class PolygonPatternGroup2dOpenGl : public BaseGraphicsObjectOpenGl,
                      public MaskingObjectInterface,
                      public PolygonPatternGroup2dInterface,
                      public std::enable_shared_from_this<PolygonPatternGroup2dOpenGl> {
@@ -34,8 +36,10 @@ class PolygonPatternGroup2dOpenGl : public GraphicsObjectInterface,
     virtual bool isReady() override;
 
     virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context) override;
-
     virtual void clear() override;
+
+    virtual void pause() override;
+    virtual void resume(const std::shared_ptr<RenderingContextInterface> &context) override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                               int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor,
@@ -89,8 +93,7 @@ protected:
     bool glDataBuffersGenerated = false;
     Vec3D polygonOrigin = Vec3D(0.0, 0.0, 0.0);
 
-    std::shared_ptr<TextureHolderInterface> textureHolder;
-    int texturePointer;
+    TextureAttachment textureAttachment;
 
     double factorHeight = 1.0;
     double factorWidth = 1.0;

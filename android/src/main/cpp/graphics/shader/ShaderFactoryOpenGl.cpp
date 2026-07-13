@@ -134,6 +134,10 @@ std::shared_ptr<SkySphereShaderInterface> ShaderFactoryOpenGl::createSkySphereSh
     return std::make_shared<SkySphereShaderOpenGl>();
 }
 
+std::shared_ptr<SkySphereShaderInterface> ShaderFactoryOpenGl::createSkySphereLocalShader() {
+    return std::make_shared<SkySphereShaderOpenGl>(true);
+}
+
 std::shared_ptr<ElevationInterpolationShaderInterface> ShaderFactoryOpenGl::createElevationInterpolationShader() {
     return std::make_shared<ElevationInterpolationShaderOpenGl>();
 }

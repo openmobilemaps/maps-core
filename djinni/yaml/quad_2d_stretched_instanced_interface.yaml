@@ -8,7 +8,11 @@ cpp:
   typename: '::Quad2dStretchedInstancedInterface'
   header: '"Quad2dStretchedInstancedInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCQuad2dStretchedInstancedInterface'
   pointer: true
   hash: '%s.hash'

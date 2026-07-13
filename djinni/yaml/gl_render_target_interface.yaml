@@ -8,6 +8,9 @@ cpp:
   typename: '::GlRenderTargetInterface'
   header: '"GlRenderTargetInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCGlRenderTargetInterface'
   pointer: true

@@ -14,6 +14,14 @@ RenderConfig::RenderConfig(std::shared_ptr<GraphicsObjectInterface> graphicsObje
     : graphicsObjectInterface(graphicsObjectInterface)
     , renderIndex(renderIndex) {}
 
+RenderConfig::RenderConfig(std::shared_ptr<GraphicsObjectInterface> graphicsObjectInterface,
+                           std::shared_ptr<MaskingObjectInterface> maskingObjectInterface, int32_t renderIndex)
+    : graphicsObjectInterface(graphicsObjectInterface)
+    , maskingObjectInterface(maskingObjectInterface)
+    , renderIndex(renderIndex) {}
+
 std::shared_ptr<::GraphicsObjectInterface> RenderConfig::getGraphicsObject() { return graphicsObjectInterface; }
+
+std::shared_ptr<::MaskingObjectInterface> RenderConfig::getMaskingObject() { return maskingObjectInterface; }
 
 int32_t RenderConfig::getRenderIndex() { return renderIndex; }

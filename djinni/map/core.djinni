@@ -143,6 +143,15 @@ layer_interface = interface +c +j +o {
     set_primary_render_target(target: optional<render_target_interface>);
 }
 
+tracked_coordinate_callback_interface = interface +c +j +o +w {
+    screen_position_did_change(position: optional<vec_2_f>);
+}
+
+tracked_coordinate_interface = interface +c +j +o +w {
+    set_coordinate(coordinate: coord);
+    set_visible(visible: bool);
+}
+
 map_camera_interface = interface +c {
     static create(map_interface: map_interface, screen_density_ppi: f32, is_3_d: bool): map_camera_interface;
 
@@ -194,6 +203,8 @@ map_camera_interface = interface +c {
     screen_pos_from_coord(coord: coord): vec_2_f;
     screen_pos_from_coord_zoom(coord: coord, zoom: f32): vec_2_f;
 
+    create_tracked_coordinate(coordinate: coord, callback: tracked_coordinate_callback_interface): tracked_coordinate_interface;
+
     map_units_from_pixels(distancePx: f64): f64;
     get_scaling_factor(): f64;
 
@@ -218,10 +229,26 @@ map_camera_interface = interface +c {
     as_map_camera_3d(): optional<map_camera_3d_interface>;
 }
 
+map_camera_3d_mode = enum {
+    orbit;
+    pose;
+}
+
 map_camera_3d_interface = interface +c {
     get_camera_config(): camera_3d_config;
-
     set_camera_config(config: camera_3d_config, durationSeconds: optional<f32>, target_zoom: optional<f32>, target_coordinate: optional<coord>);
+    
+    get_camera_mode(): map_camera_3d_mode;
+    set_camera_mode(mode: map_camera_3d_mode);
+
+    is_pose_camera_active(): bool;
+    set_pose_camera(position: coord, yaw_degrees: f32, pitch_degrees: f32, roll_degrees: f32, vertical_fov_degrees: f32, near_plane_meters: f32, far_plane_meters: f32);
+    clear_pose_camera();
+    
+    set_custom_view_matrix(view_matrix: list<f32>);
+    clear_custom_view_matrix();
+    set_custom_projection_matrix(projection_matrix: list<f32>);
+    clear_custom_projection_matrix();
 }
 
 camera_interpolation = record {

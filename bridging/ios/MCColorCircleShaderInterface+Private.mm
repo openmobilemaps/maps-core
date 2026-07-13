@@ -44,6 +44,28 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setCircleStyle:(float)fillRed
+             fillGreen:(float)fillGreen
+              fillBlue:(float)fillBlue
+             fillAlpha:(float)fillAlpha
+             strokeRed:(float)strokeRed
+           strokeGreen:(float)strokeGreen
+            strokeBlue:(float)strokeBlue
+           strokeAlpha:(float)strokeAlpha
+           innerRadius:(float)innerRadius {
+    try {
+        _cppRefHandle.get()->setCircleStyle(::djinni::F32::toCpp(fillRed),
+                                            ::djinni::F32::toCpp(fillGreen),
+                                            ::djinni::F32::toCpp(fillBlue),
+                                            ::djinni::F32::toCpp(fillAlpha),
+                                            ::djinni::F32::toCpp(strokeRed),
+                                            ::djinni::F32::toCpp(strokeGreen),
+                                            ::djinni::F32::toCpp(strokeBlue),
+                                            ::djinni::F32::toCpp(strokeAlpha),
+                                            ::djinni::F32::toCpp(innerRadius));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (nullable id<MCShaderProgramInterface>)asShaderProgramInterface {
     try {
         auto objcpp_result_ = _cppRefHandle.get()->asShaderProgramInterface();
@@ -67,6 +89,20 @@ public:
                                                          green:(::djinni::F32::fromCpp(c_green))
                                                           blue:(::djinni::F32::fromCpp(c_blue))
                                                          alpha:(::djinni::F32::fromCpp(c_alpha))];
+        }
+    }
+    void setCircleStyle(float c_fillRed, float c_fillGreen, float c_fillBlue, float c_fillAlpha, float c_strokeRed, float c_strokeGreen, float c_strokeBlue, float c_strokeAlpha, float c_innerRadius) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setCircleStyle:(::djinni::F32::fromCpp(c_fillRed))
+                                                           fillGreen:(::djinni::F32::fromCpp(c_fillGreen))
+                                                            fillBlue:(::djinni::F32::fromCpp(c_fillBlue))
+                                                           fillAlpha:(::djinni::F32::fromCpp(c_fillAlpha))
+                                                           strokeRed:(::djinni::F32::fromCpp(c_strokeRed))
+                                                         strokeGreen:(::djinni::F32::fromCpp(c_strokeGreen))
+                                                          strokeBlue:(::djinni::F32::fromCpp(c_strokeBlue))
+                                                         strokeAlpha:(::djinni::F32::fromCpp(c_strokeAlpha))
+                                                         innerRadius:(::djinni::F32::fromCpp(c_innerRadius))];
         }
     }
     /*not-null*/ std::shared_ptr<::ShaderProgramInterface> asShaderProgramInterface() override

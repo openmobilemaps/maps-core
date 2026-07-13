@@ -24,6 +24,14 @@ open class SimpleTouchInterface : TouchInterface() {
 		return false
 	}
 
+	override fun onHover(posScreen: Vec2F): Boolean {
+		return false
+	}
+
+	override fun onHoverComplete(): Boolean {
+		return false
+	}
+
 	override fun onMove(deltaScreen: Vec2F, confirmed: Boolean, doubleClick: Boolean): Boolean {
 		return false
 	}

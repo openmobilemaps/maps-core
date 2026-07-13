@@ -37,7 +37,7 @@ struct PolygonGroupStripeStyling {
 
 vertex PolygonGroupVertexOut
 polygonGroupVertexShader(const Vertex3DIn vertexIn [[stage_in]],
-                 constant float4x4 &vpMatrix [[buffer(1)]],
+                 constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
                  constant float4 &originOffset [[buffer(2)]])
 {
     PolygonGroupVertexOut out {
@@ -64,7 +64,7 @@ struct PolygonPatternGroupVertexOut {
 
 vertex PolygonGroupStripedVertexOut
 polygonStripedGroupVertexShader(const Vertex3DIn vertexIn [[stage_in]],
-                                constant float4x4 &vpMatrix [[buffer(1)]],
+                                constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
                                 constant float4 &originOffset [[buffer(2)]],
                                 constant float2 &posOffset [[buffer(3)]]
                                 )
@@ -98,7 +98,7 @@ polygonGroupStripedFragmentShader(PolygonGroupStripedVertexOut in [[stage_in]],
 
 vertex PolygonPatternGroupVertexOut
 polygonPatternGroupVertexShader(const Vertex3DIn vertexIn [[stage_in]],
-                                constant float4x4 &vpMatrix [[buffer(1)]],
+                                constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
                                 constant float2 &scalingFactor [[buffer(2)]],
                                 constant float2 &posOffset [[buffer(3)]],
                                 constant float4 &originOffset [[buffer(4)]]) {
@@ -141,7 +141,7 @@ polygonPatternGroupFadeInFragmentShader(PolygonPatternGroupVertexOut in [[stage_
                                   sampler textureSampler [[sampler(0)]],
                                   constant half *opacity [[buffer(0)]],
                                   constant float *texureCoordinates [[buffer(1)]],
-                                  constant float &screenPixelAsRealMeterFactor [[buffer(2)]],
+                                  constant float &screenPixelAsRealMeterFactor [[buffer(MC_GLOBAL_SCREEN_PIXEL_FACTOR_BUFFER_INDEX)]],
                                   constant float2 &scalingFactor [[buffer(3)]])
 {
 

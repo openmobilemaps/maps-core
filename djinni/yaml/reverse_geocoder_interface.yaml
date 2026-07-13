@@ -8,7 +8,11 @@ cpp:
   typename: '::ReverseGeocoderInterface'
   header: '"ReverseGeocoderInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCReverseGeocoderInterface'
   pointer: true
   hash: '%s.hash'

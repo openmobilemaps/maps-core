@@ -51,6 +51,8 @@ export interface CoordinateSystemIdentifiers_statics {
      * https://epsg.io/4326
      */
     EPSG4326(): number;
+    /** WGS 84 scaled 2D coordinate system */
+    EPSG4326System2D(): number;
     /**
      * LV03+
      * https://epsg.io/2056
@@ -84,8 +86,10 @@ export interface CoordinateSystemFactory_statics {
     getEpsg2056System(): MapCoordinateSystem;
     getEpsg3857System(): MapCoordinateSystem;
     getEpsg4326System(): MapCoordinateSystem;
+    getEpsg4326System2d(): MapCoordinateSystem;
     getEpsg21781System(): MapCoordinateSystem;
     getUnitSphereSystem(): MapCoordinateSystem;
+    getSystemFor(identifier: number): MapCoordinateSystem;
 }
 
 export interface /*record*/ Coord {

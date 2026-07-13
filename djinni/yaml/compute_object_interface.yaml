@@ -8,7 +8,11 @@ cpp:
   typename: '::ComputeObjectInterface'
   header: '"ComputeObjectInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCComputeObjectInterface'
   pointer: true
   hash: '%s.hash'

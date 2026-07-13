@@ -13,6 +13,8 @@ em::val NativeTouchInterface::cppProxyMethods() {
         "onClickConfirmed",
         "onDoubleClick",
         "onLongPress",
+        "onHover",
+        "onHoverComplete",
         "onMove",
         "onMoveComplete",
         "onOneFingerDoubleClickMoveComplete",
@@ -64,6 +66,24 @@ bool NativeTouchInterface::onDoubleClick(const CppType& self, const em::val& w_p
 bool NativeTouchInterface::onLongPress(const CppType& self, const em::val& w_posScreen) {
     try {
         auto r = self->onLongPress(::djinni_generated::NativeVec2F::toCpp(w_posScreen));
+        return ::djinni::Bool::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::Bool>::handleNativeException(e);
+    }
+}
+bool NativeTouchInterface::onHover(const CppType& self, const em::val& w_posScreen) {
+    try {
+        auto r = self->onHover(::djinni_generated::NativeVec2F::toCpp(w_posScreen));
+        return ::djinni::Bool::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::Bool>::handleNativeException(e);
+    }
+}
+bool NativeTouchInterface::onHoverComplete(const CppType& self) {
+    try {
+        auto r = self->onHoverComplete();
         return ::djinni::Bool::fromCpp(r);
     }
     catch(const std::exception& e) {
@@ -156,6 +176,8 @@ EMSCRIPTEN_BINDINGS(_touch_interface) {
         .function("onClickConfirmed", NativeTouchInterface::onClickConfirmed)
         .function("onDoubleClick", NativeTouchInterface::onDoubleClick)
         .function("onLongPress", NativeTouchInterface::onLongPress)
+        .function("onHover", NativeTouchInterface::onHover)
+        .function("onHoverComplete", NativeTouchInterface::onHoverComplete)
         .function("onMove", NativeTouchInterface::onMove)
         .function("onMoveComplete", NativeTouchInterface::onMoveComplete)
         .function("onOneFingerDoubleClickMoveComplete", NativeTouchInterface::onOneFingerDoubleClickMoveComplete)

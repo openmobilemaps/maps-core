@@ -12,6 +12,8 @@ abstract class PolygonGroup2dInterface {
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
 
+    abstract fun asMaskingObject(): MaskingObjectInterface
+
     public class CppProxy : PolygonGroup2dInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -38,5 +40,11 @@ abstract class PolygonGroup2dInterface {
             return native_asGraphicsObject(this.nativeRef)
         }
         private external fun native_asGraphicsObject(_nativeRef: Long): GraphicsObjectInterface
+
+        override fun asMaskingObject(): MaskingObjectInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_asMaskingObject(this.nativeRef)
+        }
+        private external fun native_asMaskingObject(_nativeRef: Long): MaskingObjectInterface
     }
 }

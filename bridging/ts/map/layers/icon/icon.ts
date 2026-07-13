@@ -29,6 +29,8 @@ export interface IconInfoInterface {
     getType(): IconType;
     getIconAnchor(): Vec2F;
     getBlendMode(): BlendMode;
+    setRotation(angle: number): void;
+    getRotation(): number;
 }
 
 export enum IconType {

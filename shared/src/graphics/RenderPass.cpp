@@ -30,6 +30,10 @@ RenderPassConfig RenderPass::getRenderPassConfig() { return config; }
 
 std::shared_ptr<::MaskingObjectInterface> RenderPass::getMaskingObject() { return maskingObject; }
 
+RenderPassStencilOptions RenderPass::getStencilOptions() const { return stencilOptions; }
+
+void RenderPass::setStencilOptions(const RenderPassStencilOptions &options) { stencilOptions = options; }
+
 void RenderPass::setScissoringRect(std::optional<::RectI> rect) { scissoringRect = rect; }
 
 std::optional<::RectI> RenderPass::getScissoringRect() { return scissoringRect; }

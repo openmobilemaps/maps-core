@@ -9,9 +9,19 @@
 #include "LineGroup2dInterface.h"
 #include "LineCapType.h"
 #include "LineJoinType.h"
+#include "ReleasableAllocator.h"
+#include "OwnedBytesHelper.h"
 
 class LineGeometryBuilder {
   public:
+    // Packing factor used to combine the per-vertex line style index and the line side into a
+    // single vertex attribute float: styling = styleIndex * styleSidePackingFactor + side.
+    // side is in [-1, 1] and styleIndex is a small non-negative integer (< maxStylesPerGroup),
+    // so the shader recovers them via round(styling / factor) and styling - styleIndex * factor.
+    // This constant MUST match the decode constant in the line shaders (Metal LineShader.metal
+    // and the OpenGL ColorLineGroup2dShaderOpenGl vertex shader).
+    static constexpr float styleSidePackingFactor = 100.0f;
+
     static void buildLines(const std::shared_ptr<LineGroup2dInterface> &line,
                            const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines, const Vec3D &origin, LineCapType capType,
                            LineJoinType defaultJoinType, bool is3d, bool optimizeForDots) {
@@ -21,8 +31,8 @@ class LineGeometryBuilder {
             capType = LineCapType::ROUND; // Force round cap for dot optimization
         }
 
-        std::vector<float> lineAttributes;
-        std::vector<uint32_t> lineIndices;
+        std::vector<float, ReleasableAllocator<float>> lineAttributes;
+        std::vector<uint32_t, ReleasableAllocator<uint32_t>> lineIndices;
         reserveEstimatedNumVertices(lines, defaultJoinType, capType, is3d, lineAttributes, lineIndices);
 
         uint32_t vertexCount = 0;
@@ -113,7 +123,7 @@ class LineGeometryBuilder {
                             cosHalfAngle = extrude.x * normal.x + extrude.y * normal.y;
                             turnDirection = (lastNormal.x * normal.y - lastNormal.y * normal.x); // 2D cross product
                         }
-                        
+
                         extrudeScale = cosHalfAngle != 0 ? std::abs(1.0 / cosHalfAngle) : 1.0;
 
                         if (extrudeScale > 2.0) {
@@ -146,15 +156,17 @@ class LineGeometryBuilder {
                     auto originalPrePreIndex = prePreIndex;
                     auto originalPreIndex = preIndex;
                     float prefixCorrection = 0.0;
-                    pushLineVertex(p, Vec3D(0, 0, 0), 1.0, 0, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, false, vertexCount,
+                    pushLineVertex(p, Vec3D(0, 0, 0), 1.0, 0, prefixTotalLineLength, prefixCorrection, lineStyleIndex, false, false, vertexCount,
                                    prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                     int32_t centerIndex = preIndex;
+                    bool isFirstCapRingVertex = true;
                     for (float r = -1; r <= 1; r += 0.2) {
                         Vec3D roundExtrude = Vec3DHelper::normalize(extrude * r - extrudeLineVec * (1.0 - std::abs(r)));
                         prefixCorrection = Vec3DHelper::dotProduct(roundExtrude, lastLineVec);
-                        pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, endSide == -1,
-                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                         prePreIndex = centerIndex;
+                        pushLineVertex(p, roundExtrude, 1.0, 1.0, prefixTotalLineLength, prefixCorrection, lineStyleIndex, !isFirstCapRingVertex, endSide == -1,
+                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                        isFirstCapRingVertex = false;
                     }
                     prePreIndex = originalPrePreIndex;
                     preIndex = originalPreIndex;
@@ -277,15 +289,17 @@ class LineGeometryBuilder {
                     auto originalPrePreIndex = prePreIndex;
                     auto originalPreIndex = preIndex;
                     float prefixCorrection = 0;
-                    pushLineVertex(p, Vec3D(0, 0, 0), 1.0, 0, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, false, vertexCount,
+                    pushLineVertex(p, Vec3D(0, 0, 0), 1.0, 0, prefixTotalLineLength, prefixCorrection, lineStyleIndex, false, false, vertexCount,
                                    prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                     int32_t centerIndex = preIndex;
+                    bool isFirstCapRingVertex = true;
                     for (float r = -1; r <= 1; r += 0.2) {
                         Vec3D roundExtrude = Vec3DHelper::normalize(extrude * r - extrudeLineVec * (1.0 - std::abs(r)));
                         float prefixCorrection = Vec3DHelper::dotProduct(roundExtrude, lineVec);
-                        pushLineVertex(p, roundExtrude, 1.0, r, prefixTotalLineLength, prefixCorrection, lineStyleIndex, true, endSide == -1,
-                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
                         prePreIndex = centerIndex;
+                        pushLineVertex(p, roundExtrude, 1.0, 1.0, prefixTotalLineLength, prefixCorrection, lineStyleIndex, !isFirstCapRingVertex, endSide == -1,
+                                       vertexCount, prePreIndex, preIndex, lineAttributes, lineIndices, is3d);
+                        isFirstCapRingVertex = false;
                     }
                     prePreIndex = originalPrePreIndex;
                     preIndex = originalPreIndex;
@@ -295,15 +309,15 @@ class LineGeometryBuilder {
             }
         }
 
-        auto attributes = SharedBytes((int64_t)lineAttributes.data(), (int32_t)lineAttributes.size(), (int32_t)sizeof(float));
-        auto indices = SharedBytes((int64_t)lineIndices.data(), (int32_t)lineIndices.size(), (int32_t)sizeof(uint32_t));
-        line->setLines(attributes, indices, origin, is3d);
+        line->setLines(OwnedBytesHelper::fromVector(std::move(lineAttributes)), OwnedBytesHelper::fromVector(std::move(lineIndices)), origin, is3d);
     }
 
     static void pushLineVertex(const Vec3D &p, const Vec3D &extrude, const float extrudeScale, const float side,
                                const float prefixTotalLineLength, const float prefixCorrection, const int lineStyleIndex, const bool addTriangle,
                                const bool reverse, uint32_t &vertexCount, int32_t &prePreIndex, int32_t &preIndex,
-                               std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices, bool is3d) {
+                               std::vector<float, ReleasableAllocator<float>> &lineAttributes,
+                               std::vector<uint32_t, ReleasableAllocator<uint32_t>> &lineIndices,
+                               bool is3d) {
 
         lineAttributes.push_back(p.x);
         lineAttributes.push_back(p.y);
@@ -316,15 +330,16 @@ class LineGeometryBuilder {
             lineAttributes.push_back(extrude.z * extrudeScale);
         }
 
-        // Line Side
-        lineAttributes.push_back((float)side);
+        // Pack the style index and side into a single float (see styleSidePackingFactor) to save
+        // one attribute per vertex; the shader unpacks both before use.
+        const float packedStyleSide = (float)lineStyleIndex * styleSidePackingFactor + side;
 
         // Segment Start Length Position (length prefix sum)
         lineAttributes.push_back(prefixTotalLineLength);
         lineAttributes.push_back(prefixCorrection);
 
-        // Style Info
-        lineAttributes.push_back(lineStyleIndex);
+        // Style Info (packed with line side)
+        lineAttributes.push_back(packedStyleSide);
 
         uint32_t newIndex = vertexCount++;
 
@@ -366,7 +381,8 @@ class LineGeometryBuilder {
 
     static void reserveEstimatedNumVertices(const std::vector<std::tuple<std::vector<Vec3D>, int>> &lines,
                                             LineJoinType joinType, LineCapType capType, bool is3d,
-                                            std::vector<float> &lineAttributes, std::vector<uint32_t> &lineIndices)
+                                            std::vector<float, ReleasableAllocator<float>> &lineAttributes,
+                                            std::vector<uint32_t, ReleasableAllocator<uint32_t>> &lineIndices)
     {
         const int64_t capVertices = capType == LineCapType::ROUND ? roundCapVertexCount : 0;
         const int64_t capTriangles = capType == LineCapType::ROUND ? roundCapVertexCount : 0;

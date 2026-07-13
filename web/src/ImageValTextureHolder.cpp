@@ -5,16 +5,19 @@
 #include <emscripten/threading.h>
 #endif
 
+#include <cassert>
 #include <list>
 
-EM_JS(void, gl_tex_image_2d, (emscripten::EM_VAL img_handle), {
+EM_JS(void, gl_tex_image_2d, (emscripten::EM_VAL img_handle, bool unpackPremultiplyAlpha), {
     var img = Emval.toValue(img_handle);
     var gl = GLctx;
+    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, unpackPremultiplyAlpha);
     return gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA8, img.width, img.height, 0, gl.RGBA, gl.UNSIGNED_BYTE, img);
 });
 
-ImageValTextureHolder::ImageValTextureHolder(emscripten::val img_)
+ImageValTextureHolder::ImageValTextureHolder(emscripten::val img_, bool unpackPremultiplyAlpha)
   : usageCounter(0)
+  , unpackPremultiplyAlpha(unpackPremultiplyAlpha)
 {
     width = img_["width"].as<uint32_t>();
     height = img_["height"].as<uint32_t>();
@@ -29,13 +32,14 @@ int32_t ImageValTextureHolder::attachToGraphics() {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        gl_tex_image_2d(img.as_handle());
+        gl_tex_image_2d(img.as_handle(), unpackPremultiplyAlpha);
     }
     return textureId;
 }
 
 // Clears the texture from the graphics system
 void ImageValTextureHolder::clearFromGraphics() {
+    assert(usageCounter > 0 && "Double-clear of an ImageValTextureHolder!");
     if (--usageCounter == 0 && textureId != 0) {
         glDeleteTextures(1, &textureId);
         textureId = 0;
@@ -48,8 +52,8 @@ void ImageValTextureHolder::clearFromGraphics() {
  */
 static std::list<std::shared_ptr<ImageValTextureHolder>> garbagePile;
 
-std::shared_ptr<ImageValTextureHolder> ImageValTextureHolder::create(emscripten::val img) {
-    auto textureHolder = std::shared_ptr<ImageValTextureHolder>(new ImageValTextureHolder(img));
+std::shared_ptr<ImageValTextureHolder> ImageValTextureHolder::create(emscripten::val img, bool unpackPremultiplyAlpha) {
+    auto textureHolder = std::shared_ptr<ImageValTextureHolder>(new ImageValTextureHolder(img, unpackPremultiplyAlpha));
     garbagePile.push_back(textureHolder);
     return textureHolder;
 }

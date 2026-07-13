@@ -8,7 +8,11 @@ cpp:
   typename: '::BlendMode'
   header: '"BlendMode.h"'
   byValue: true
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCBlendMode'
   pointer: false
   hash: '%s.hash'

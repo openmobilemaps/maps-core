@@ -16,6 +16,17 @@ abstract class Quad2dInterface {
 
     abstract fun loadTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
 
+    abstract fun loadDualTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface, elevationHolder: TextureHolderInterface?)
+
+    /**
+     * Explicit binding for the color texture plus an optional lookup sprite (sampled in the fragment stage)
+     * and an optional elevation heightmap (sampled in the vertex/tessellation stage). This lets displaced
+     * raster tiles use the raster texture lookup, which load_dual_texture cannot express because it only
+     * carries a single secondary texture (interpreted as elevation by displaced quads). Non-displaced quads
+     * keep the default behaviour and treat lookupHolder like the load_dual_texture secondary texture.
+     */
+    abstract fun loadTextures(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface, lookupHolder: TextureHolderInterface?, elevationHolder: TextureHolderInterface?)
+
     abstract fun removeTexture()
 
     abstract fun asGraphicsObject(): GraphicsObjectInterface
@@ -60,6 +71,18 @@ abstract class Quad2dInterface {
             native_loadTexture(this.nativeRef, context, textureHolder)
         }
         private external fun native_loadTexture(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface)
+
+        override fun loadDualTexture(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface, elevationHolder: TextureHolderInterface?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_loadDualTexture(this.nativeRef, context, textureHolder, elevationHolder)
+        }
+        private external fun native_loadDualTexture(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface, elevationHolder: TextureHolderInterface?)
+
+        override fun loadTextures(context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface, lookupHolder: TextureHolderInterface?, elevationHolder: TextureHolderInterface?) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_loadTextures(this.nativeRef, context, textureHolder, lookupHolder, elevationHolder)
+        }
+        private external fun native_loadTextures(_nativeRef: Long, context: io.openmobilemaps.mapscore.shared.graphics.RenderingContextInterface, textureHolder: TextureHolderInterface, lookupHolder: TextureHolderInterface?, elevationHolder: TextureHolderInterface?)
 
         override fun removeTexture() {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

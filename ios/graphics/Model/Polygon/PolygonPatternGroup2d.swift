@@ -78,12 +78,8 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
         #endif
 
         if isMasked {
-            if stencilState == nil {
-                self.stencilState = self.maskStencilState()
-            }
-
-            encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0b1100_0000)
+            encoder.setDepthStencilState(maskStencilState(for: pass))
+            encoder.setStencilReferenceValue(maskStencilReference(for: pass))
         }
 
         if pass.isPassMasked {
@@ -104,14 +100,8 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
 
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
-
         // scale factors for shaders
-        var pixelFactor: Float = Float(screenPixelAsRealMeterFactor)
+        let pixelFactor: Float = Float(screenPixelAsRealMeterFactor)
 
         if self.shader.fadeInPattern {
             var scaleFactors = SIMD2<Float>([pixelFactor, pixelFactor])
@@ -119,7 +109,6 @@ final class PolygonPatternGroup2d: BaseGraphicsObject, @unchecked Sendable {
             encoder.setVertexBytes(&posOffset, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
 
             scaleFactors = customScreenPixelFactor.x != 0 ? customScreenPixelFactor : SIMD2<Float>([pixelFactor, pixelFactor])
-            encoder.setFragmentBytes(&pixelFactor, length: MemoryLayout<Float>.stride, index: 2)
             encoder.setFragmentBytes(&scaleFactors, length: MemoryLayout<SIMD2<Float>>.stride, index: 3)
         } else {
             var scaleFactors = customScreenPixelFactor.x != 0 ? customScreenPixelFactor : SIMD2<Float>([pixelFactor, pixelFactor])

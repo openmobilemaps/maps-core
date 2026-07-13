@@ -23,6 +23,17 @@ struct RasterShaderStyle: Equatable {
 
     init(style: MCRasterShaderStyle) {
         self.opacity = style.opacity
+        if style.brightnessMin < 0 {
+            // Negative brightnessMin is the internal texture-lookup sentinel.
+            self.brightnessMin = style.brightnessMin
+            // Lookup mode reuses the remaining style fields without color-adjustment transforms:
+            self.brightnessMax = style.brightnessMax  // lookupU
+            self.contrast = style.contrast  // lookupV
+            self.saturation = style.saturation  // lookupWidth
+            self.gamma = style.gamma  // lookupHeight
+            self.brightnessShift = style.brightnessShift  // normalized zoom
+            return
+        }
         self.brightnessMin = style.brightnessMin
         self.brightnessMax = style.brightnessMax
         self.contrast = style.contrast > 0 ? (1 / (1 - style.contrast)) : (1 + style.contrast)
@@ -51,7 +62,7 @@ open class RasterShader: BaseShader, @unchecked Sendable {
     }
 
     override open func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline else { return }
+        guard let pipeline = activePipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBuffer(rasterStyleBuffer, offset: 0, index: 1)

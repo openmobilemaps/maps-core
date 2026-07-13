@@ -14,19 +14,18 @@
 #include "DefaultTouchHandlerInterface.h"
 #include "LambdaTask.h"
 #include "LayerInterface.h"
+#include "LayerReadyState.h"
 #include "MapCallbackInterface.h"
 #include "MapCameraInterface.h"
 #include "MapReadyCallbackInterface.h"
 #include "TouchInterface.h"
 #include "IndexedLayer.h"
-#include "Logger.h"
 #include "RenderingCullMode.h"
-#include <algorithm>
+#include <stdexcept>
+#include <thread>
 #ifdef __EMSCRIPTEN__
     #include <emscripten/threading.h>
 #endif
-
-#include "Tiled2dMapRasterLayer.h"
 
 MapScene::MapScene(std::shared_ptr<SceneInterface> scene, const MapConfig &mapConfig,
                    const std::shared_ptr<::SchedulerInterface> &scheduler, float pixelDensity, bool is3D)

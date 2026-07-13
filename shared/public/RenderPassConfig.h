@@ -14,12 +14,24 @@ struct RenderPassConfig final {
     int32_t renderPassIndex;
     bool isPassMasked;
     /*nullable*/ std::shared_ptr<RenderTargetInterface> renderTarget;
+    int32_t stencilReadMask;
+    int32_t stencilReadReference;
+    int32_t stencilWriteMask;
+    int32_t stencilWriteReference;
 
     RenderPassConfig(int32_t renderPassIndex_,
                      bool isPassMasked_,
-                     /*nullable*/ std::shared_ptr<RenderTargetInterface> renderTarget_)
+                     /*nullable*/ std::shared_ptr<RenderTargetInterface> renderTarget_,
+                     int32_t stencilReadMask_,
+                     int32_t stencilReadReference_,
+                     int32_t stencilWriteMask_,
+                     int32_t stencilWriteReference_)
     : renderPassIndex(std::move(renderPassIndex_))
     , isPassMasked(std::move(isPassMasked_))
     , renderTarget(std::move(renderTarget_))
+    , stencilReadMask(std::move(stencilReadMask_))
+    , stencilReadReference(std::move(stencilReadReference_))
+    , stencilWriteMask(std::move(stencilWriteMask_))
+    , stencilWriteReference(std::move(stencilWriteReference_))
     {}
 };

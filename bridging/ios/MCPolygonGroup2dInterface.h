@@ -5,6 +5,7 @@
 #import "MCVec3D.h"
 #import <Foundation/Foundation.h>
 @protocol MCGraphicsObjectInterface;
+@protocol MCMaskingObjectInterface;
 
 
 @protocol MCPolygonGroup2dInterface
@@ -14,5 +15,7 @@
              origin:(nonnull MCVec3D *)origin;
 
 - (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;
+
+- (nullable id<MCMaskingObjectInterface>)asMaskingObject;
 
 @end

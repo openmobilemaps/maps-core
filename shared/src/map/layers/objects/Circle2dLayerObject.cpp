@@ -16,33 +16,42 @@
 
 Circle2dLayerObject::Circle2dLayerObject(const std::shared_ptr<MapInterface> &mapInterface)
         : is3d(mapInterface->is3d()),
+          mapInterface(mapInterface),
           conversionHelper(mapInterface->getCoordinateConverterHelper()),
           shader(mapInterface->is3d() ? mapInterface->getShaderFactory()->createUnitSphereColorCircleShader()
                                       : mapInterface->getShaderFactory()->createColorCircleShader()),
           quad(mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface())),
-          graphicsObject(quad->asGraphicsObject()), renderConfig(std::make_shared<RenderConfig>(graphicsObject, 0)) {}
+          graphicsObject(quad->asGraphicsObject()),
+          renderConfig(std::make_shared<RenderConfig>(graphicsObject, quad->asMaskingObject(), 0)) {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> Circle2dLayerObject::getRenderConfig() { return {renderConfig}; }
 
+void Circle2dLayerObject::setBlendMode(BlendMode blendMode) { shader->asShaderProgramInterface()->setBlendMode(blendMode); }
+
 void Circle2dLayerObject::setColor(Color color) { shader->setColor(color.r, color.g, color.b, color.a); }
+
+void Circle2dLayerObject::setStyle(Color fillColor, Color strokeColor, float innerRadius) {
+    shader->setCircleStyle(fillColor.r, fillColor.g, fillColor.b, fillColor.a,
+                           strokeColor.r, strokeColor.g, strokeColor.b, strokeColor.a,
+                           innerRadius);
+}
 
 void Circle2dLayerObject::setPosition(Coord position, double radius) {
     Coord renderPos = conversionHelper->convertToRenderSystem(position);
     auto origin = Vec3D(renderPos.x, renderPos.y, renderPos.z);
     if (is3d) {
-        origin.x = 1.0 * sin(renderPos.y) * cos(renderPos.x);
-        origin.y = 1.0 * cos(renderPos.y);
-        origin.z = -1.0 * sin(renderPos.y) * sin(renderPos.x);
+        origin.x = renderPos.z * sin(renderPos.y) * cos(renderPos.x);
+        origin.y = renderPos.z * cos(renderPos.y);
+        origin.z = -renderPos.z * sin(renderPos.y) * sin(renderPos.x);
     }
 
-    quad->setFrame(Quad3dD(Vec3D(renderPos.x - radius, renderPos.y + radius, 0.0),
-                           Vec3D(renderPos.x + radius, renderPos.y + radius, 0.0),
-                           Vec3D(renderPos.x + radius, renderPos.y - radius, 0.0),
-                           Vec3D(renderPos.x - radius, renderPos.y - radius, 0.0)),
-                   RectD(0, 0, 1, 1), origin, is3d);
+    quad->setFrame(Quad3dD(Vec3D(origin.x - radius, origin.y + radius, origin.z),
+                           Vec3D(origin.x + radius, origin.y + radius, origin.z),
+                           Vec3D(origin.x + radius, origin.y - radius, origin.z),
+                           Vec3D(origin.x - radius, origin.y - radius, origin.z)),
+                   RectD(0, 0, 1, 1), origin, false);
 }
 
 std::shared_ptr<Quad2dInterface> Circle2dLayerObject::getQuadObject() { return quad; }
 
 std::shared_ptr<GraphicsObjectInterface> Circle2dLayerObject::getGraphicsObject() { return graphicsObject; }
-

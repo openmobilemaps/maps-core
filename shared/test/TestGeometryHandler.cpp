@@ -28,8 +28,6 @@ void parseAndTriangulate(const char *filePath, ParsingResult expectedResult, Cat
         vtzero::vector_tile tileData(data.data(), data.size());
         mapbox::detail::Earcut<uint16_t> earcutter;
         while (auto layer = tileData.next_layer()) {
-            std::string sourceLayerName = std::string(layer.name());
-
             while (const auto &feature = layer.next_feature()) {
                 int extent = (int) layer.extent();
                 auto const featureContext = std::make_shared<FeatureContext>(stringTable, feature);

@@ -96,10 +96,11 @@ open class OffscreenMapRenderer(val sizePx: Vec2I, val density: Float = 72f) : G
 			prepare()
 
 			getRenderingContext().let { context ->
-				context.asOpenGlRenderingContext()?.getRenderTargets()?.forEach { renderTarget ->
-					renderTarget.bindFramebuffer(context)
-					drawOffscreenFrame(renderTarget.asRenderTargetInterface())
-					renderTarget.unbindFramebuffer()
+				context.getOffscreenRenderTargets().forEach { renderTarget ->
+					val openGlRenderTarget = renderTarget.asGlRenderTargetInterface() ?: return@forEach
+					openGlRenderTarget.bindFramebuffer(context)
+					drawOffscreenFrame(renderTarget)
+					openGlRenderTarget.unbindFramebuffer()
 				}
 			}
 

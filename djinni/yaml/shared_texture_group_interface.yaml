@@ -8,6 +8,9 @@ cpp:
   typename: '::SharedTextureGroupInterface'
   header: '"SharedTextureGroupInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCSharedTextureGroupInterface'
   pointer: true

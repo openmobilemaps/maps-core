@@ -7,6 +7,7 @@
 
 #include "ThreadPoolSchedulerImpl.h"
 #include "Logger.h"
+#include <algorithm>
 #include <chrono>
 #include <cassert>
 #include <cmath>

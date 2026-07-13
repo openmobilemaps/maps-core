@@ -18,6 +18,10 @@ abstract class TouchInterface {
 
     abstract fun onLongPress(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): Boolean
 
+    abstract fun onHover(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): Boolean
+
+    abstract fun onHoverComplete(): Boolean
+
     abstract fun onMove(deltaScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, confirmed: Boolean, doubleClick: Boolean): Boolean
 
     abstract fun onMoveComplete(): Boolean
@@ -78,6 +82,18 @@ abstract class TouchInterface {
             return native_onLongPress(this.nativeRef, posScreen)
         }
         private external fun native_onLongPress(_nativeRef: Long, posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): Boolean
+
+        override fun onHover(posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_onHover(this.nativeRef, posScreen)
+        }
+        private external fun native_onHover(_nativeRef: Long, posScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F): Boolean
+
+        override fun onHoverComplete(): Boolean {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_onHoverComplete(this.nativeRef)
+        }
+        private external fun native_onHoverComplete(_nativeRef: Long): Boolean
 
         override fun onMove(deltaScreen: io.openmobilemaps.mapscore.shared.graphics.common.Vec2F, confirmed: Boolean, doubleClick: Boolean): Boolean {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

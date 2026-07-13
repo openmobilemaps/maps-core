@@ -61,14 +61,14 @@ void Tiled2dMapVectorPolygonTile::updateVectorLayerDescription(const std::shared
     }
 }
 
-void Tiled2dMapVectorPolygonTile::update() {
+bool Tiled2dMapVectorPolygonTile::update() {
     if (shaders.empty()) {
-        return;
+        return false;
     }
 
     if (!toClear.empty()) {
         for (auto const &polygon: toClear) {
-            if (polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->clear();
+            polygon->getPolygonObject()->clear();
         }
         toClear.clear();
     }
@@ -76,7 +76,7 @@ void Tiled2dMapVectorPolygonTile::update() {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     if (!mapInterface || !camera) {
-        return;
+        return false;
     }
 
     double zoomIdentifier = layerConfig->getZoomIdentifier(camera->getZoom());
@@ -95,14 +95,14 @@ void Tiled2dMapVectorPolygonTile::update() {
     }
 
     if (!inZoomRange) {
-        return;
+        return false;
     }
 
     if (lastZoom &&
         ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) &&
         lastAlpha == alpha &&
         !isStyleStateDependant) {
-        return;
+        return false;
     }
     lastZoom = zoomIdentifier;
     lastAlpha = alpha;
@@ -146,11 +146,13 @@ void Tiled2dMapVectorPolygonTile::update() {
         auto s = SharedBytes((int64_t)shaderStyles.data(), (int32_t)featureGroups.at(styleGroupId).size(), numAttributesPerStyle * (int32_t)sizeof(float));
         shaders[styleGroupId]->setStyles(s);
     }
+
+    return false;
 }
 
 void Tiled2dMapVectorPolygonTile::clear() {
     for (auto const &polygon: polygons) {
-        if (polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->clear();
+        polygon->getPolygonObject()->clear();
     }
 }
 
@@ -169,6 +171,26 @@ void Tiled2dMapVectorPolygonTile::setup() {
 
 }
 
+void Tiled2dMapVectorPolygonTile::pause() {
+    for (auto const &polygon: polygons) {
+        if (polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->pause();
+    }
+}
+
+void Tiled2dMapVectorPolygonTile::resume() {
+    auto mapInterface = this->mapInterface.lock();
+    if (!mapInterface) {
+        return;
+    }
+    const auto &context = mapInterface->getRenderingContext();
+    for (auto const &polygon: polygons) {
+        if (!polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->resume(context);
+    }
+    
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
+}
+
 void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
     auto mapInterface = this->mapInterface.lock();
     const auto &shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
@@ -177,8 +199,6 @@ void Tiled2dMapVectorPolygonTile::setVectorTileData(const Tiled2dMapVectorTileDa
     }
 
     bool is3d = mapInterface->is3d();
-
-    const std::string layerName = description->sourceLayer;
 
     const auto indicesLimit = is3d ? std::numeric_limits<uint16_t>::max() / 2 : std::numeric_limits<uint16_t>::max();
 
@@ -382,7 +402,7 @@ void Tiled2dMapVectorPolygonTile::addPolygons(const std::vector<std::vector<Obje
     std::vector<std::shared_ptr<RenderObjectInterface>> newRenderObjects;
     for (auto const &object : polygons) {
         for (const auto &config : object->getRenderConfig()) {
-            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject(), config->getMaskingObject()));
         }
     }
     renderObjects = newRenderObjects;

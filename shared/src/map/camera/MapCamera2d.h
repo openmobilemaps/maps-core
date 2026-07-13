@@ -25,11 +25,16 @@
 #include <mutex>
 #include <optional>
 #include <set>
+#include <vector>
+
+class TrackedCoordinate;
+class TrackedCoordinateCallbackInterface;
+class TrackedCoordinateInterface;
 
 class MapCamera2d : public MapCameraInterface,
                     public CameraInterface,
                     public SimpleTouchInterface,
-                    public std::enable_shared_from_this<CameraInterface> {
+                    public std::enable_shared_from_this<MapCamera2d> {
   public:
     MapCamera2d(const std::shared_ptr<MapInterface> &mapInterface, float screenDensityPpi);
 
@@ -140,6 +145,10 @@ class MapCamera2d : public MapCameraInterface,
 
     virtual ::Vec2F screenPosFromCoordZoom(const ::Coord & coord, float zoom) override;
 
+    virtual std::shared_ptr<TrackedCoordinateInterface> createTrackedCoordinate(
+        const ::Coord &coordinate,
+        const std::shared_ptr<TrackedCoordinateCallbackInterface> &callback) override;
+
     bool coordIsVisibleOnScreen(const ::Coord & coord, float paddingPc) override;
 
     virtual double mapUnitsFromPixels(double distancePx) override;
@@ -161,6 +170,8 @@ protected:
 
     std::recursive_mutex listenerMutex;
     std::set<std::shared_ptr<MapCameraListenerInterface>> listeners;
+    std::recursive_mutex trackedCoordinateMutex;
+    std::vector<std::weak_ptr<TrackedCoordinate>> trackedCoordinates;
 
     std::shared_ptr<MapInterface> mapInterface;
     std::shared_ptr<CoordinateConversionHelperInterface> conversionHelper;
@@ -215,6 +226,7 @@ protected:
     enum ListenerType { BOUNDS = 1, ROTATION = 1 << 1, MAP_INTERACTION = 1 << 2 };
 
     void notifyListeners(const int &listenerType);
+    void notifyTrackedCoordinates();
 
     // MARK: Animations
 

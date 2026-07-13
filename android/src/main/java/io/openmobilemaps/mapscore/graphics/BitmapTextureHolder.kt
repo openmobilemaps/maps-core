@@ -91,6 +91,7 @@ class BitmapTextureHolder(
 	override fun clearFromGraphics() {
 		dataMutex.lock()
 		try {
+			assert(usageCounter > 0, { "Double-clear of a bitmap texture holder!" })
 			if (--usageCounter == 0) {
 				GLES20.glDeleteTextures(1, IntBuffer.wrap(texturePointer))
 			}

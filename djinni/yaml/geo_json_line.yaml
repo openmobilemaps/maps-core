@@ -8,7 +8,11 @@ cpp:
   typename: '::GeoJsonLine'
   header: '"GeoJsonLine.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCGeoJsonLine'
   pointer: true
   hash: '%s.hash'

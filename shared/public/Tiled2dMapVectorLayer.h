@@ -24,9 +24,16 @@
 #include "Tiled2dMapVectorSourceListener.h"
 #include "Tiled2dMapVectorStateManager.h"
 #include "TiledLayerError.h"
+#include "RenderPassConfig.h"
+#include "RenderPassStencilOptions.h"
+#include "Tiled2dMapTileInfo.h"
+#include "Tiled2dMapVersionedTileInfo.h"
+#include "VectorLayerDescription.h"
 #include "VectorMapSourceDescription.h"
 #include "VectorSet.h"
+#include <optional>
 #include <unordered_map>
+#include <unordered_set>
 
 class Tiled2dMapVectorBackgroundSubLayer;
 class Tiled2dMapVectorSourceTileDataManager;
@@ -103,22 +110,39 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
         bool isModifyingMask;
         bool selfMasked;
         int32_t renderPassIndex;
+        RenderPassStencilOptions stencilOptions;
+        Tiled2dMapTileInfo tileInfo;
+        std::string layerIdentifier;
+        std::optional<std::string> maskSource;
+        std::optional<std::string> maskLayerIdentifier;
+        bool maskInverseRead;
+        std::optional<std::string> maskTargetLayerIdentifier;
 
         TileRenderDescription(int32_t layerIndex, size_t sourceHash, int32_t zoomIdentifier,
                               const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects,
                               const std::shared_ptr<MaskingObjectInterface> &maskingObject, bool isModifyingMask, bool selfMasked,
-                              int32_t renderPassIndex)
+                              int32_t renderPassIndex, const RenderPassStencilOptions &stencilOptions,
+                              const Tiled2dMapVersionedTileInfo &tileInfo,
+                              const VectorLayerDescription &layerDescription)
             : renderIndex((layerIndex << 16) + zoomIdentifier)
             , sourceHash(sourceHash)
             , renderObjects(renderObjects)
             , maskingObject(maskingObject)
             , isModifyingMask(isModifyingMask)
             , selfMasked(selfMasked)
-            , renderPassIndex(renderPassIndex) {}
+            , renderPassIndex(renderPassIndex)
+            , stencilOptions(stencilOptions)
+            , tileInfo(tileInfo.tileInfo)
+            , layerIdentifier(layerDescription.identifier)
+            , maskSource(layerDescription.maskSource)
+            , maskLayerIdentifier(layerDescription.maskLayerIdentifier)
+            , maskInverseRead(layerDescription.maskInverseRead)
+            , maskTargetLayerIdentifier(layerDescription.maskTargetLayerIdentifier) {}
     };
 
     virtual void onRenderPassUpdate(const std::string &source, bool isSymbol,
-                                    const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription);
+                                    const std::vector<std::shared_ptr<TileRenderDescription>> &renderDescription,
+                                    std::unordered_set<Tiled2dMapTileInfo> readyTiles = {});
 
     virtual void onAdded(const std::shared_ptr<::MapInterface> &mapInterface, int32_t layerIndex) override;
 
@@ -174,6 +198,10 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     bool onDoubleClick(const Vec2F &posScreen) override;
 
     bool onLongPress(const Vec2F &posScreen) override;
+
+    bool onHover(const Vec2F &posScreen) override;
+
+    bool onHoverComplete() override;
 
     bool onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
 
@@ -287,6 +315,7 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     int64_t lastCollitionCheck = 0;
     double lastDataManagerZoom = 0;
     bool isAnimating = false;
+    bool tilesRequireInvalidate = false;
 
     std::shared_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> strongSelectionDelegate;
     std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> selectionDelegate;
@@ -298,6 +327,7 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     struct SourceRenderDescriptions {
         std::vector<std::shared_ptr<TileRenderDescription>> renderDescriptions;
         std::vector<std::shared_ptr<TileRenderDescription>> symbolRenderDescriptions;
+        std::unordered_set<Tiled2dMapTileInfo> readyTiles;
     };
 
     std::unordered_map<std::string, SourceRenderDescriptions> sourceRenderDescriptionMap;
@@ -314,6 +344,24 @@ class Tiled2dMapVectorLayer : public Tiled2dMapLayer,
     std::shared_ptr<Tiled2dMapVectorLayerSymbolDelegateInterface> symbolDelegate;
 
     void updateReadyStateListenerIfNeeded();
+
+    static bool isCoveredByReadyTiles(const Tiled2dMapTileInfo &tile,
+                                      const std::unordered_set<Tiled2dMapTileInfo> &readyTiles);
+    bool hasSatisfiedMaskDependency(const std::shared_ptr<TileRenderDescription> &description) const;
+    static std::vector<std::shared_ptr<::RenderObjectInterface>> getRasterMaskRenderObjects(
+            const std::unordered_map<std::string, std::vector<std::shared_ptr<TileRenderDescription>>> &rasterMaskRenderDescriptions,
+            const std::string &targetLayerIdentifier);
+    static void addRenderPass(std::vector<std::shared_ptr<RenderPassInterface>> &passes,
+                              const RenderPassConfig &config,
+                              const std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects,
+                              const std::shared_ptr<MaskingObjectInterface> &maskingObject,
+                              const RenderPassStencilOptions &stencilOptions);
+    static void flushRenderObjects(std::vector<std::shared_ptr<RenderPassInterface>> &passes,
+                                   std::vector<std::shared_ptr<::RenderObjectInterface>> &renderObjects,
+                                   std::shared_ptr<MaskingObjectInterface> &lastMask,
+                                   int32_t &lastRenderPassIndex,
+                                   RenderPassStencilOptions &lastStencilOptions,
+                                   const std::shared_ptr<RenderTargetInterface> &renderTarget);
 
     std::optional<LayerReadyState> lastReadyState;
     std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;

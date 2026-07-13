@@ -58,6 +58,10 @@ private:
 
     void handleTouchCancel();
 
+    void handleHover(Vec2F position);
+
+    void handleHoverComplete();
+
     void handleTwoFingerDown();
 
     void handleTwoFingerMove(std::tuple<Vec2F, Vec2F> oldpointer, std::tuple<Vec2F, Vec2F> pointer);

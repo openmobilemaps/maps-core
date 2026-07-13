@@ -122,7 +122,33 @@
             },
             "properties": {
               "id": "4444",
-              "type": "e"
+              "type": "e1"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                9.0,
+                46.9
+              ]
+            },
+            "properties": {
+              "type": "e2"
+            }
+          },
+          {
+            "type": "Feature",
+            "geometry": {
+              "type": "Point",
+              "coordinates": [
+                9.35,
+                46.9
+              ]
+            },
+            "properties": {
+              "type": "e3"
             }
           },
           {
@@ -290,7 +316,7 @@
       ]
     },
     {
-      "id": "test_label_e",
+      "id": "test_label_e1",
       "type": "symbol",
       "source": "test_label",
       "layout": {
@@ -299,7 +325,7 @@
         ],
         "text-size": 10,
         "visibility": "visible",
-        "text-field": "E: state dependent",
+        "text-field": "E1: state icon",
         "text-anchor": "bottom",
         "icon-image": ["coalesce", ["global-state", "state-icon-image"], "light:circle_dark_grey_8"],
         "icon-anchor": "top"
@@ -307,7 +333,55 @@
       "filter": [
         "in",
         "type",
-        "e"
+        "e1"
+      ]
+    },
+    {
+      "id": "test_label_e2",
+      "type": "symbol",
+      "source": "test_label",
+      "layout": {
+        "text-font": [
+          "Roboto-Regular"
+        ],
+        "text-size": 10,
+        "visibility": "visible",
+        "text-field": "E2: state opacity",
+        "text-anchor": "bottom",
+        "icon-size": 0.6,
+        "icon-image": "light:hazard_grey",
+        "icon-anchor": "top"
+      },
+      "paint": {
+        "icon-opacity": ["case", ["global-state", "state-toggle"], 0.1, 1.0]
+      },
+      "filter": [
+        "in",
+        "type",
+        "e2"
+      ]
+    },
+    {
+      "id": "test_label_e3",
+      "type": "symbol",
+      "source": "test_label",
+      "layout": {
+        "text-font": [
+          "Roboto-Regular"
+        ],
+        "text-size": 10,
+        "visibility": "visible",
+        "text-field": "E3: state size/rot",
+        "text-anchor": "bottom",
+        "icon-size": ["case", ["global-state", "state-toggle"], 0.8, 0.6],
+        "icon-image": "light:hazard_grey",
+        "icon-rotate": ["case", ["global-state", "state-toggle"], 45.0, 0.0],
+        "icon-anchor": "top"
+      },
+      "filter": [
+        "in",
+        "type",
+        "e3"
       ]
     },
     {

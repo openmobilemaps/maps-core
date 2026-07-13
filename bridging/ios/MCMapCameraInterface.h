@@ -11,6 +11,8 @@
 @class MCMapCamera3dInterface;
 @class MCMapCameraInterface;
 @class MCMapInterface;
+@protocol MCTrackedCoordinateCallbackInterface;
+@protocol MCTrackedCoordinateInterface;
 
 
 @interface MCMapCameraInterface : NSObject
@@ -96,6 +98,9 @@
 
 - (nonnull MCVec2F *)screenPosFromCoordZoom:(nonnull MCCoord *)coord
                                        zoom:(float)zoom;
+
+- (nullable id<MCTrackedCoordinateInterface>)createTrackedCoordinate:(nonnull MCCoord *)coordinate
+                                                            callback:(nullable id<MCTrackedCoordinateCallbackInterface>)callback;
 
 - (double)mapUnitsFromPixels:(double)distancePx;
 

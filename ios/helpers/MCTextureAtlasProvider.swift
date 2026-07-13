@@ -10,7 +10,7 @@ import MapCoreSharedModule
 #if canImport(UIKit)
     import UIKit
     public typealias PlatformImage = UIImage
-#elseif canImport(AppKit)
+#elseif canImport(AppKit) && !canImport(UIKit)
     import AppKit
     public typealias PlatformImage = NSImage
 #endif
@@ -41,7 +41,12 @@ public enum MCTextureAtlasProvider {
                 return nil
             }
 
-            guard let cgImage = combinedImage.cgImage else {
+            #if canImport(UIKit)
+                let cgImage = combinedImage.cgImage
+            #elseif canImport(AppKit) && !canImport(UIKit)
+                let cgImage = combinedImage.mcCgImage
+            #endif
+            guard let cgImage else {
                 assertionFailure("Combined image has no CGImage representation")
                 return nil
             }
@@ -76,7 +81,7 @@ public enum MCTextureAtlasProvider {
 
             return UIGraphicsGetImageFromCurrentImageContext()
 
-        #elseif canImport(AppKit)
+        #elseif canImport(AppKit) && !canImport(UIKit)
             let image = NSImage(size: canvasSize)
             image.lockFocus()
 

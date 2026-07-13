@@ -44,11 +44,10 @@ void TextInstancedShaderOpenGl::preRender(const std::shared_ptr<::RenderingConte
     BaseShaderProgramOpenGl::preRender(context, isScreenSpaceCoords);
 
     std::shared_ptr<OpenGlContext> openGlContext = std::static_pointer_cast<OpenGlContext>(context);
-    int program = openGlContext->getProgram(programName);
-    glUseProgram(program);
-
-    int aspectRatioHandle = glGetUniformLocation(program, "uAspectRatio");
-    glUniform1f(aspectRatioHandle, openGlContext->getAspectRatio());
+    if (!aspectRatioHandle) {
+        aspectRatioHandle = glGetUniformLocation(program, "uAspectRatio");
+    }
+    glUniform1f(*aspectRatioHandle, openGlContext->getAspectRatio());
 }
 
 std::string TextInstancedShaderOpenGl::getVertexShader() {
@@ -154,8 +153,10 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                   float haloWidth;
                                                   float haloBlur;
                                               };
+                                              // Note: we use vec4 instead of TextStyle for the styles in uTextStyles because having arrays of structs in uniforms
+                                              // leads to _very_ slow shader compilation in some WebGL implementations (notably Firefox on MacOS, blocking for many seconds).
                                               layout(std140) uniform TextStyleCollection {
-                                                  TextStyle styles[) + std::to_string(MAX_NUM_TEXT_STYLES) + OMMShaderCode(];
+                                                  vec4 styles[) + std::to_string( MAX_NUM_TEXT_STYLES) + OMMShaderCode(];
                                               } uTextStyles;
 
                                               // MSDF (Multichannel Signed Distance Field) font texture
@@ -179,12 +180,19 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                   }
 
                                                   highp int styleIndex = int(vStyleIndex);
+                                                  // unpack style vec4 for readability.
+                                                  TextStyle style = TextStyle(
+                                                      uTextStyles.styles[styleIndex].x,
+                                                      uTextStyles.styles[styleIndex].y,
+                                                      uTextStyles.styles[styleIndex].z,
+                                                      uTextStyles.styles[styleIndex].w
+                                                  );
 
                                                   highp uint colorBits = 0u;
                                                   if (bool(isHalo)) {
-                                                      colorBits = floatBitsToUint(uTextStyles.styles[styleIndex].haloColorRGBA);
+                                                      colorBits = floatBitsToUint(style.haloColorRGBA);
                                                   } else {
-                                                      colorBits = floatBitsToUint(uTextStyles.styles[styleIndex].colorRGBA);
+                                                      colorBits = floatBitsToUint(style.colorRGBA);
                                                   }
                                                   vec4 color = vec4(
                                                           float(colorBits >> 24), // r
@@ -220,8 +228,8 @@ std::string TextInstancedShaderOpenGl::getFragmentShader() {
                                                   float edgeAlpha = 0.0;
 
                                                   if(bool(isHalo)) {
-                                                      float haloWidth = uTextStyles.styles[styleIndex].haloWidth;
-                                                      float haloBlur = uTextStyles.styles[styleIndex].haloBlur;
+                                                      float haloWidth = style.haloWidth;
+                                                      float haloBlur = style.haloBlur;
 
                                                       if (haloWidth == 0.0 && haloBlur == 0.0) {
                                                           discard;

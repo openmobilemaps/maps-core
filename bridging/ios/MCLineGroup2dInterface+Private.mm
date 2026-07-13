@@ -8,7 +8,7 @@
 #import "DJIMarshal+Private.h"
 #import "DJIObjcWrapperCache+Private.h"
 #import "MCGraphicsObjectInterface+Private.h"
-#import "MCSharedBytes+Private.h"
+#import "MCOwnedBytes+Private.h"
 #import "MCVec3D+Private.h"
 #include <exception>
 #include <stdexcept>
@@ -34,13 +34,13 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     return self;
 }
 
-- (void)setLines:(nonnull MCSharedBytes *)lines
-         indices:(nonnull MCSharedBytes *)indices
+- (void)setLines:(nonnull MCOwnedBytes *)lines
+         indices:(nonnull MCOwnedBytes *)indices
           origin:(nonnull MCVec3D *)origin
             is3d:(BOOL)is3d {
     try {
-        _cppRefHandle.get()->setLines(::djinni_generated::SharedBytes::toCpp(lines),
-                                      ::djinni_generated::SharedBytes::toCpp(indices),
+        _cppRefHandle.get()->setLines(::djinni_generated::OwnedBytes::toCpp(lines),
+                                      ::djinni_generated::OwnedBytes::toCpp(indices),
                                       ::djinni_generated::Vec3D::toCpp(origin),
                                       ::djinni::Bool::toCpp(is3d));
     } DJINNI_TRANSLATE_EXCEPTIONS()
@@ -62,11 +62,11 @@ class LineGroup2dInterface::ObjcProxy final
     friend class ::djinni_generated::LineGroup2dInterface;
 public:
     using ObjcProxyBase::ObjcProxyBase;
-    void setLines(const ::SharedBytes & c_lines, const ::SharedBytes & c_indices, const ::Vec3D & c_origin, bool c_is3d) override
+    void setLines(const ::OwnedBytes & c_lines, const ::OwnedBytes & c_indices, const ::Vec3D & c_origin, bool c_is3d) override
     {
         @autoreleasepool {
-            [djinni_private_get_proxied_objc_object() setLines:(::djinni_generated::SharedBytes::fromCpp(c_lines))
-                                                       indices:(::djinni_generated::SharedBytes::fromCpp(c_indices))
+            [djinni_private_get_proxied_objc_object() setLines:(::djinni_generated::OwnedBytes::fromCpp(c_lines))
+                                                       indices:(::djinni_generated::OwnedBytes::fromCpp(c_indices))
                                                         origin:(::djinni_generated::Vec3D::fromCpp(c_origin))
                                                           is3d:(::djinni::Bool::fromCpp(c_is3d))];
         }

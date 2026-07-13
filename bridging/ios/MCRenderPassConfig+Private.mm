@@ -13,14 +13,22 @@ auto RenderPassConfig::toCpp(ObjcType obj) -> CppType
     assert(obj);
     return {::djinni::I32::toCpp(obj.renderPassIndex),
             ::djinni::Bool::toCpp(obj.isPassMasked),
-            ::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::toCpp(obj.renderTarget)};
+            ::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::toCpp(obj.renderTarget),
+            ::djinni::I32::toCpp(obj.stencilReadMask),
+            ::djinni::I32::toCpp(obj.stencilReadReference),
+            ::djinni::I32::toCpp(obj.stencilWriteMask),
+            ::djinni::I32::toCpp(obj.stencilWriteReference)};
 }
 
 auto RenderPassConfig::fromCpp(const CppType& cpp) -> ObjcType
 {
     return [[MCRenderPassConfig alloc] initWithRenderPassIndex:(::djinni::I32::fromCpp(cpp.renderPassIndex))
                                                   isPassMasked:(::djinni::Bool::fromCpp(cpp.isPassMasked))
-                                                  renderTarget:(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::fromCpp(cpp.renderTarget))];
+                                                  renderTarget:(::djinni::Optional<std::optional, ::djinni_generated::RenderTargetInterface>::fromCpp(cpp.renderTarget))
+                                               stencilReadMask:(::djinni::I32::fromCpp(cpp.stencilReadMask))
+                                          stencilReadReference:(::djinni::I32::fromCpp(cpp.stencilReadReference))
+                                              stencilWriteMask:(::djinni::I32::fromCpp(cpp.stencilWriteMask))
+                                         stencilWriteReference:(::djinni::I32::fromCpp(cpp.stencilWriteReference))];
 }
 
 } // namespace djinni_generated

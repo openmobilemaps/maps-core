@@ -31,6 +31,11 @@
 + (nullable MCTiled2dMapRasterLayerInterface *)create:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
                                               loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders;
 
+/** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
++ (nullable MCTiled2dMapRasterLayerInterface *)createDisplaced:(nullable id<MCTiled2dMapLayerConfig>)layerConfig
+                                               elevationConfig:(nullable id<MCTiled2dMapLayerConfig>)elevationConfig
+                                                       loaders:(nonnull NSArray<id<MCLoaderInterface>> *)loaders;
+
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
 - (void)setCallbackHandler:(nullable id<MCTiled2dMapRasterLayerCallbackInterface>)handler;
@@ -48,6 +53,19 @@
 - (nonnull MCRasterShaderStyle *)getStyle;
 
 - (void)setMinMagFilter:(MCTextureFilterType)filterType;
+
+/**
+ * When enabled and the layer config's zoom info has mask_tile set, tiles are built from
+ * the tile mask polygons themselves (earcut-tessellated geometry) instead of a rectangular
+ * quad clipped via the stencil buffer. Has no effect when zoom_info.mask_tile is false.
+ */
+- (void)setUseMaskTileGeometry:(BOOL)enabled;
+
+/** Debug helper: pauses tile-source selection/loading/removal without pausing rendered tile graphics. */
+- (void)setTileLoadingPaused:(BOOL)paused;
+
+/** Runtime LOD control. Higher values request more detailed tiles earlier; lower values request coarser tiles. */
+- (void)setZoomLevelScaleFactor:(float)value;
 
 - (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
 

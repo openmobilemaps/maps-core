@@ -3,6 +3,7 @@
 
 #include "NativeRenderObjectInterface.h"  // my header
 #include "NativeGraphicsObjectInterface.h"
+#include "NativeMaskingObjectInterface.h"
 
 namespace djinni_generated {
 
@@ -12,6 +13,7 @@ em::val NativeRenderObjectInterface::cppProxyMethods() {
         "hasCustomModelMatrix",
         "isScreenSpaceCoords",
         "getCustomModelMatrix",
+        "getMaskingObject",
         "setHidden",
         "isHidden",
     });
@@ -54,6 +56,15 @@ em::val NativeRenderObjectInterface::getCustomModelMatrix(const CppType& self) {
         return ::djinni::ExceptionHandlingTraits<::djinni::List<::djinni::F32>>::handleNativeException(e);
     }
 }
+em::val NativeRenderObjectInterface::getMaskingObject(const CppType& self) {
+    try {
+        auto r = self->getMaskingObject();
+        return ::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>>::handleNativeException(e);
+    }
+}
 void NativeRenderObjectInterface::setHidden(const CppType& self, bool w_hidden) {
     try {
         self->setHidden(::djinni::Bool::toCpp(w_hidden));
@@ -80,6 +91,7 @@ EMSCRIPTEN_BINDINGS(_render_object_interface) {
         .function("hasCustomModelMatrix", NativeRenderObjectInterface::hasCustomModelMatrix)
         .function("isScreenSpaceCoords", NativeRenderObjectInterface::isScreenSpaceCoords)
         .function("getCustomModelMatrix", NativeRenderObjectInterface::getCustomModelMatrix)
+        .function("getMaskingObject", NativeRenderObjectInterface::getMaskingObject)
         .function("setHidden", NativeRenderObjectInterface::setHidden)
         .function("isHidden", NativeRenderObjectInterface::isHidden)
         ;

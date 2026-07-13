@@ -78,6 +78,8 @@ abstract class MapCameraInterface {
 
     abstract fun screenPosFromCoordZoom(coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
 
+    abstract fun createTrackedCoordinate(coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, callback: TrackedCoordinateCallbackInterface): TrackedCoordinateInterface
+
     abstract fun mapUnitsFromPixels(distancePx: Double): Double
 
     abstract fun getScalingFactor(): Double
@@ -315,6 +317,12 @@ abstract class MapCameraInterface {
             return native_screenPosFromCoordZoom(this.nativeRef, coord, zoom)
         }
         private external fun native_screenPosFromCoordZoom(_nativeRef: Long, coord: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, zoom: Float): io.openmobilemaps.mapscore.shared.graphics.common.Vec2F
+
+        override fun createTrackedCoordinate(coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, callback: TrackedCoordinateCallbackInterface): TrackedCoordinateInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createTrackedCoordinate(this.nativeRef, coordinate, callback)
+        }
+        private external fun native_createTrackedCoordinate(_nativeRef: Long, coordinate: io.openmobilemaps.mapscore.shared.map.coordinates.Coord, callback: TrackedCoordinateCallbackInterface): TrackedCoordinateInterface
 
         override fun mapUnitsFromPixels(distancePx: Double): Double {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

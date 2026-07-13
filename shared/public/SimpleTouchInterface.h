@@ -24,6 +24,10 @@ class SimpleTouchInterface : public TouchInterface {
 
     virtual bool onLongPress(const ::Vec2F &posScreen) override { return false; };
 
+    virtual bool onHover(const ::Vec2F &posScreen) override { return false; };
+
+    virtual bool onHoverComplete() override { return false; };
+
     virtual bool onMove(const ::Vec2F &deltaScreen, bool confirmed, bool doubleClick) override { return false; };
 
     virtual bool onMoveComplete() override { return false; };

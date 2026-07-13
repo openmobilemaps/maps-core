@@ -9,7 +9,6 @@
  */
 
 #include "Text2dInstancedOpenGl.h"
-#include "Logger.h"
 #include "OpenGlHelper.h"
 #include "TextureHolderInterface.h"
 #include "TextInstancedShaderOpenGl.h"
@@ -18,7 +17,9 @@
 Text2dInstancedOpenGl::Text2dInstancedOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
         : shaderProgram(shader) {}
 
-bool Text2dInstancedOpenGl::isReady() { return ready && (!usesTextureCoords || textureHolder) && !buffersNotReady; }
+bool Text2dInstancedOpenGl::isReady() {
+    return ready && (!usesTextureCoords || textureAttachment.isAttached()) && !buffersNotReady;
+}
 
 std::shared_ptr<GraphicsObjectInterface> Text2dInstancedOpenGl::asGraphicsObject() { return shared_from_this(); }
 
@@ -28,13 +29,29 @@ void Text2dInstancedOpenGl::clear() {
         removeGlBuffers();
         buffersNotReady = buffersNotReadyResetValue;
     }
-    if (textureCoordsReady) {
-        removeTextureCoordsGlBuffers();
-    }
-    if (textureHolder) {
-        removeTexture();
-    }
+    removeTextureCoordsGlBuffers();
+    removeTexture();
     ready = false;
+}
+
+void Text2dInstancedOpenGl::pause() {
+    if (!clearOnPause) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    removeGlBuffers();
+    buffersNotReady = buffersNotReadyResetValue;
+    removeTextureCoordsGlBuffers();
+    textureAttachment.detach();
+    ready = false;
+}
+
+void Text2dInstancedOpenGl::resume(const std::shared_ptr<::RenderingContextInterface> &context) {
+    if (!clearOnPause) {
+        return;
+    }
+    textureAttachment.attach();
+    setup(context);
 }
 
 void Text2dInstancedOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
@@ -174,6 +191,7 @@ void Text2dInstancedOpenGl::prepareGlData(int program) {
         originHandle = glGetUniformLocation(program, "uOrigin");
     }
     isHaloHandle = glGetUniformLocation(program, "isHalo");
+    textureSamplerHandle = glGetUniformLocation(program, "textureSampler");
     textureFactorHandle = glGetUniformLocation(program, "textureFactor");
     distanceRangeHandle = glGetUniformLocation(program, "distanceRange");
 
@@ -237,33 +255,25 @@ void Text2dInstancedOpenGl::loadFont(const std::shared_ptr<::RenderingContextInt
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
 
     distanceRange = fontData.info.distanceRange;
+    loadTexture(textureHolder);
+}
 
-    removeTexture();
-
-    if (textureHolder != nullptr) {
-        texturePointer = textureHolder->attachToGraphics();
-
-        factorHeight = textureHolder->getImageHeight() * 1.0f / textureHolder->getTextureHeight();
-        factorWidth = textureHolder->getImageWidth() * 1.0f / textureHolder->getTextureWidth();
+void Text2dInstancedOpenGl::loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    const bool newlyAttached = textureAttachment.attach(textureHolder);
+    if (newlyAttached) {
         adjustTextureCoordinates();
 
         if (ready) {
             prepareTextureCoordsGlData(program);
         }
-        this->textureHolder = textureHolder;
     }
 }
 
 void Text2dInstancedOpenGl::removeTexture() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (textureHolder) {
-        textureHolder->clearFromGraphics();
-        textureHolder = nullptr;
-        texturePointer = -1;
-        if (textureCoordsReady) {
-            removeTextureCoordsGlBuffers();
-        }
-    }
+    textureAttachment.clear();
+    removeTextureCoordsGlBuffers();
 }
 
 void Text2dInstancedOpenGl::adjustTextureCoordinates() {
@@ -278,6 +288,8 @@ void Text2dInstancedOpenGl::adjustTextureCoordinates() {
 void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                    int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
                                    bool isMasked, double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
+    disableDepthTest();
+
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || (usesTextureCoords && !textureCoordsReady) || instanceCount == 0 || buffersNotReady || !shaderProgram->isRenderable()) {
         return;
@@ -287,15 +299,21 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
     GLuint validTarget = 0;
     GLenum zpass = GL_KEEP;
     if (isMasked) {
-        stencilMask += 128;
-        validTarget = isMaskInversed ? 0 : 128;
+        if (renderPass.stencilReadMask != 0) {
+            stencilMask = static_cast<GLuint>(renderPass.stencilReadMask);
+            validTarget = static_cast<GLuint>(renderPass.stencilReadReference);
+        } else {
+            stencilMask += 128;
+            validTarget = isMaskInversed ? 0 : 128;
+        }
     }
     if (renderPass.isPassMasked) {
-        stencilMask += 127;
+        stencilMask |= 127;
         zpass = GL_INCR;
     }
 
     if (stencilMask != 0) {
+        glStencilMask(0xFF);
         glStencilFunc(GL_EQUAL, validTarget, stencilMask);
         glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }
@@ -305,7 +323,7 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
 
     if (usesTextureCoords) {
         prepareTextureDraw(program);
-        glUniform2f(textureFactorHandle, factorWidth, factorHeight);
+        glUniform2f(textureFactorHandle, textureAttachment.widthFactor(), textureAttachment.heightFactor());
     }
 
     glBindBufferBase(GL_UNIFORM_BUFFER, STYLE_UBO_BINDING, textStyleBuffer);
@@ -339,7 +357,7 @@ void Text2dInstancedOpenGl::render(const std::shared_ptr<::RenderingContextInter
 }
 
 void Text2dInstancedOpenGl::prepareTextureDraw(int program) {
-    if (!textureHolder) {
+    if (!textureAttachment.isAttached()) {
         return;
     }
 
@@ -347,11 +365,10 @@ void Text2dInstancedOpenGl::prepareTextureDraw(int program) {
     glActiveTexture(GL_TEXTURE0);
 
     // Bind the texture to this unit.
-    glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
+    glBindTexture(GL_TEXTURE_2D, textureAttachment.texture());
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
-    int textureUniformHandle = glGetUniformLocation(program, "textureSampler");
-    glUniform1i(textureUniformHandle, 0);
+    glUniform1i(textureSamplerHandle, 0);
 }
 
 void Text2dInstancedOpenGl::setInstanceCount(int count) {

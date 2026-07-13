@@ -1,0 +1,36 @@
+{
+  "version": 8,
+  "name": "raster-texture-lookup-quad",
+  "sources": {
+    "hillshade": {
+      "type": "raster",
+      "tiles": [
+        "https://example.com/hillshade/{z}/{x}/{y}.png"
+      ],
+      "minzoom": 0,
+      "maxzoom": 16
+    }
+  },
+  "sprite": [
+    {
+      "id": "ramps",
+      "url": "https://example.com/sprites/ramps"
+    }
+  ],
+  "layers": [
+    {
+      "id": "hillshade-lookup",
+      "type": "raster",
+      "source": "hillshade",
+      "paint": {
+        "raster-texture-lookup": {
+          "sprite": "ramps:hillshade",
+          "zoom-min": 5.0,
+          "zoom-max": 16.0,
+          "mode": "quad"
+        },
+        "raster-opacity": 0.85
+      }
+    }
+  ]
+}

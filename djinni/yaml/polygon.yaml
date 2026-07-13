@@ -8,6 +8,9 @@ cpp:
   typename: '::Polygon'
   header: '"Polygon.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCPolygon'
   pointer: true

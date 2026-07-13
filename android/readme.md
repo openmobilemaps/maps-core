@@ -31,6 +31,9 @@
 
 ## How to build
 
+> [!CAUTION]
+> Due to architectural changes in the OpenMobileMaps repositories, these instructions are no longer up to date. Several adjustments are required for a functional build configuration. For now, we strongly recommend using the prebuilt dependency from Maven Central.
+
 Make sure you have all submodules initialized and updated. To do this, use
 
 ```
@@ -64,7 +67,7 @@ This library is available on MavenCentral. To add it to your Android project, ad
 
 ```
 dependencies {
-  implementation 'io.openmobilemaps:mapscore:3.7.1'
+  implementation 'io.openmobilemaps:mapscore:4.0.0'
 }
 ```
 

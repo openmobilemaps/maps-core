@@ -19,6 +19,8 @@ em::val NativeQuad2dInterface::cppProxyMethods() {
         "setSubdivisionFactor",
         "setMinMagFilter",
         "loadTexture",
+        "loadDualTexture",
+        "loadTextures",
         "removeTexture",
         "asGraphicsObject",
         "asMaskingObject",
@@ -62,6 +64,27 @@ void NativeQuad2dInterface::loadTexture(const CppType& self, const em::val& w_co
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
     }
 }
+void NativeQuad2dInterface::loadDualTexture(const CppType& self, const em::val& w_context,const em::val& w_textureHolder,const em::val& w_elevationHolder) {
+    try {
+        self->loadDualTexture(::djinni_generated::NativeRenderingContextInterface::toCpp(w_context),
+                        ::djinni_generated::NativeTextureHolderInterface::toCpp(w_textureHolder),
+                        ::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::toCpp(w_elevationHolder));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeQuad2dInterface::loadTextures(const CppType& self, const em::val& w_context,const em::val& w_textureHolder,const em::val& w_lookupHolder,const em::val& w_elevationHolder) {
+    try {
+        self->loadTextures(::djinni_generated::NativeRenderingContextInterface::toCpp(w_context),
+                     ::djinni_generated::NativeTextureHolderInterface::toCpp(w_textureHolder),
+                     ::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::toCpp(w_lookupHolder),
+                     ::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::toCpp(w_elevationHolder));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
 void NativeQuad2dInterface::removeTexture(const CppType& self) {
     try {
         self->removeTexture();
@@ -97,6 +120,8 @@ EMSCRIPTEN_BINDINGS(_quad_2d_interface) {
         .function("setSubdivisionFactor", NativeQuad2dInterface::setSubdivisionFactor)
         .function("setMinMagFilter", NativeQuad2dInterface::setMinMagFilter)
         .function("loadTexture", NativeQuad2dInterface::loadTexture)
+        .function("loadDualTexture", NativeQuad2dInterface::loadDualTexture)
+        .function("loadTextures", NativeQuad2dInterface::loadTextures)
         .function("removeTexture", NativeQuad2dInterface::removeTexture)
         .function("asGraphicsObject", NativeQuad2dInterface::asGraphicsObject)
         .function("asMaskingObject", NativeQuad2dInterface::asMaskingObject)

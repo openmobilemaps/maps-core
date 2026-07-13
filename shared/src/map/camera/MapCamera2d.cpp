@@ -20,6 +20,7 @@
 #include "Vec2DHelper.h"
 #include "Vec2FHelper.h"
 #include "Logger.h"
+#include "TrackedCoordinate.h"
 #include "VectorHelper.h"
 
 #define DEFAULT_ANIM_LENGTH 300
@@ -415,6 +416,30 @@ void MapCamera2d::removeListener(const std::shared_ptr<MapCameraListenerInterfac
 
 std::shared_ptr<::CameraInterface> MapCamera2d::asCameraInterface() { return shared_from_this(); }
 
+std::shared_ptr<TrackedCoordinateInterface> MapCamera2d::createTrackedCoordinate(
+    const ::Coord &coordinate,
+    const std::shared_ptr<TrackedCoordinateCallbackInterface> &callback) {
+    std::weak_ptr<MapCamera2d> weakSelf = shared_from_this();
+    auto trackedCoordinate = std::make_shared<TrackedCoordinate>(
+        coordinate,
+        callback,
+        [weakSelf](const Coord &trackedCoordinate, bool visible) -> std::optional<Vec2F> {
+            auto self = weakSelf.lock();
+            if (!self || !visible || !self->coordIsVisibleOnScreen(trackedCoordinate, 0.0f)) {
+                return std::nullopt;
+            }
+            return self->screenPosFromCoord(trackedCoordinate);
+        });
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(trackedCoordinateMutex);
+        trackedCoordinates.emplace_back(trackedCoordinate);
+    }
+
+    trackedCoordinate->notifyScreenPositionChanged();
+    return trackedCoordinate;
+}
+
 std::vector<float> MapCamera2d::getVpMatrix() {
     Vec2I sizeViewport = mapInterface->getRenderingContext()->getViewportSize();
     double currentRotation = angle;
@@ -587,6 +612,31 @@ void MapCamera2d::notifyListeners(const int &listenerType) {
         if (listenerType & ListenerType::MAP_INTERACTION) {
             listener->onMapInteraction();
         }
+    }
+
+    if (listenerType & (ListenerType::BOUNDS | ListenerType::ROTATION)) {
+        notifyTrackedCoordinates();
+    }
+}
+
+void MapCamera2d::notifyTrackedCoordinates() {
+    std::vector<std::shared_ptr<TrackedCoordinate>> activeTrackedCoordinates;
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(trackedCoordinateMutex);
+        auto iterator = trackedCoordinates.begin();
+        while (iterator != trackedCoordinates.end()) {
+            if (auto trackedCoordinate = iterator->lock()) {
+                activeTrackedCoordinates.push_back(trackedCoordinate);
+                ++iterator;
+            } else {
+                iterator = trackedCoordinates.erase(iterator);
+            }
+        }
+    }
+
+    for (const auto &trackedCoordinate : activeTrackedCoordinates) {
+        trackedCoordinate->notifyScreenPositionChanged();
     }
 }
 

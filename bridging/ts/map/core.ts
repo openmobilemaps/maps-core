@@ -108,6 +108,15 @@ export interface LayerInterface {
     setPrimaryRenderTarget(target: RenderTargetInterface | undefined): void;
 }
 
+export interface TrackedCoordinateCallbackInterface {
+    screenPositionDidChange(position: Vec2F | undefined): void;
+}
+
+export interface TrackedCoordinateInterface {
+    setCoordinate(coordinate: Coord): void;
+    setVisible(visible: boolean): void;
+}
+
 export interface MapCameraInterface {
     freeze(freeze: boolean): void;
     moveToCenterPositionZoom(centerPosition: Coord, zoom: number, animated: boolean): void;
@@ -142,6 +151,7 @@ export interface MapCameraInterface {
     coordFromScreenPositionZoom(posScreen: Vec2F, zoom: number): Coord;
     screenPosFromCoord(coord: Coord): Vec2F;
     screenPosFromCoordZoom(coord: Coord, zoom: number): Vec2F;
+    createTrackedCoordinate(coordinate: Coord, callback: TrackedCoordinateCallbackInterface): TrackedCoordinateInterface;
     mapUnitsFromPixels(distancePx: number): number;
     getScalingFactor(): number;
     /** padding in percentage, where 1.0 = rect is half of full width and height */
@@ -163,9 +173,23 @@ export interface MapCameraInterface_statics {
     create(mapInterface: MapInterface, screenDensityPpi: number, is3D: boolean): MapCameraInterface;
 }
 
+export enum MapCamera3dMode {
+    ORBIT = 0,
+    POSE = 1,
+}
+
 export interface MapCamera3dInterface {
     getCameraConfig(): Camera3dConfig;
     setCameraConfig(config: Camera3dConfig, durationSeconds: number | undefined, targetZoom: number | undefined, targetCoordinate: Coord | undefined): void;
+    getCameraMode(): MapCamera3dMode;
+    setCameraMode(mode: MapCamera3dMode): void;
+    isPoseCameraActive(): boolean;
+    setPoseCamera(position: Coord, yawDegrees: number, pitchDegrees: number, rollDegrees: number, verticalFovDegrees: number, nearPlaneMeters: number, farPlaneMeters: number): void;
+    clearPoseCamera(): void;
+    setCustomViewMatrix(viewMatrix: Array<number>): void;
+    clearCustomViewMatrix(): void;
+    setCustomProjectionMatrix(projectionMatrix: Array<number>): void;
+    clearCustomProjectionMatrix(): void;
 }
 
 export interface /*record*/ CameraInterpolation {

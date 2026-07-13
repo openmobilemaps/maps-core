@@ -8,6 +8,9 @@ cpp:
   typename: '::GlRenderingContextInterface'
   header: '"GlRenderingContextInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCGlRenderingContextInterface'
   pointer: true

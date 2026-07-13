@@ -9,6 +9,7 @@
  */
 
 #include "LineGroup2dOpenGl.h"
+#include "OwnedBytesHelper.h"
 #include <cmath>
 #include <cstring>
 #include <string>
@@ -18,32 +19,24 @@ LineGroup2dOpenGl::LineGroup2dOpenGl(const std::shared_ptr<BaseShaderProgramOpen
 
 std::shared_ptr<GraphicsObjectInterface> LineGroup2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
-bool LineGroup2dOpenGl::isReady() { return ready; }
+bool LineGroup2dOpenGl::isReady() { return (ready && !dataUpdated); }
 
 
-void LineGroup2dOpenGl::setLines(const ::SharedBytes & lines, const ::SharedBytes & indices, const Vec3D &origin, bool is3d) {
+void LineGroup2dOpenGl::setLines(const ::OwnedBytes & lines, const ::OwnedBytes & indices, const Vec3D &origin, bool is3d) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    ready = false;
-    dataReady = false;
+    std::tie(lineAttributes, lineAttributesSize) = OwnedBytesHelper::toUniquePtr<GLfloat>(lines);
+    std::tie(lineIndices, lineIndicesSize) = OwnedBytesHelper::toUniquePtr<GLuint>(indices);
 
-    lineIndices.resize(indices.elementCount);
-    lineAttributes.resize(lines.elementCount);
     lineOrigin = origin;
     this->is3d = is3d;
 
-    if (indices.elementCount > 0) {
-        std::memcpy(lineIndices.data(), (void *) indices.address, indices.elementCount * indices.bytesPerElement);
-    }
-    if (lines.elementCount > 0) {
-        std::memcpy(lineAttributes.data(), (void *) lines.address, lines.elementCount * lines.bytesPerElement);
-    }
-
     dataReady = true;
+    dataUpdated = true;
 }
 
 void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &context) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (ready || !dataReady) {
+    if (isReady() || !dataReady) {
         return;
     }
 
@@ -64,7 +57,6 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 
     positionHandle = glGetAttribLocation(program, "position");
     extrudeHandle = glGetAttribLocation(program, "extrude");
-    lineSideHandle = glGetAttribLocation(program, "lineSide");
     lengthPrefixHandle = glGetAttribLocation(program, "lengthPrefix");
     lengthCorrectionHandle = glGetAttribLocation(program, "lengthCorrection");
     stylingIndexHandle = glGetAttribLocation(program, "stylingIndex");
@@ -73,12 +65,19 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
         glGenBuffers(1, &vertexAttribBuffer);
     }
     glBindBuffer(GL_ARRAY_BUFFER, vertexAttribBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * lineAttributes.size(), &lineAttributes[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * lineAttributesSize, lineAttributes.get(), GL_STATIC_DRAW);
+    if (!clearOnPause) {
+        lineAttributes.reset();
+        dataReady = false;
+    }
 
+    // Vertex layout (per vertex): position (dim), extrude (dim), lengthPrefix, lengthCorrection,
+    // stylingIndex. The stylingIndex float packs the style index and side (styleIndex * 100 + side);
+    // it is unpacked in the vertex shader. See LineGeometryBuilder::pushLineVertex.
     size_t floatSize = sizeof(GLfloat);
     size_t dimensionality = is3d ? 3 : 2;
     size_t sizeAttribGroup = floatSize * dimensionality;
-    size_t stride = sizeAttribGroup * 2 + 4 * floatSize;
+    size_t stride = sizeAttribGroup * 2 + 3 * floatSize;
 
     glEnableVertexAttribArray(positionHandle);
     glVertexAttribPointer(positionHandle, dimensionality, GL_FLOAT, false, stride, nullptr);
@@ -86,23 +85,18 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
     glEnableVertexAttribArray(extrudeHandle);
     glVertexAttribPointer(extrudeHandle, dimensionality, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 1));
 
-    if (lineSideHandle >= 0) {
-        glEnableVertexAttribArray(lineSideHandle);
-        glVertexAttribPointer(lineSideHandle, 1, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 2));
-    }
-
     if (lengthPrefixHandle >= 0) {
         glEnableVertexAttribArray(lengthPrefixHandle);
-        glVertexAttribPointer(lengthPrefixHandle, 1, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 2 + 1 * floatSize));
+        glVertexAttribPointer(lengthPrefixHandle, 1, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 2));
     }
 
     if (lengthCorrectionHandle >= 0) {
         glEnableVertexAttribArray(lengthCorrectionHandle);
-        glVertexAttribPointer(lengthCorrectionHandle, 1, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 2 + 2 * floatSize));
+        glVertexAttribPointer(lengthCorrectionHandle, 1, GL_FLOAT, false, stride, (float *) (sizeAttribGroup * 2 + 1 * floatSize));
     }
 
     glEnableVertexAttribArray(stylingIndexHandle);
-    glVertexAttribPointer(stylingIndexHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 3 * floatSize));
+    glVertexAttribPointer(stylingIndexHandle, 1, GL_FLOAT, false, stride, (float *)(sizeAttribGroup * 2 + 2 * floatSize));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -110,7 +104,12 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
         glGenBuffers(1, &indexBuffer);
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * lineIndices.size(), &lineIndices[0], GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * lineIndicesSize, lineIndices.get(), GL_STATIC_DRAW);
+    if (!clearOnPause) {
+        lineIndices.reset();
+        dataReady = false;
+    }
+    indexBufferSize = lineIndicesSize;
 
     glBindVertexArray(0);
 
@@ -123,6 +122,7 @@ void LineGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface>
 
     shaderProgram->setupGlObjects(openGlContext);
 
+    dataUpdated = false;
     ready = true;
     glDataBuffersGenerated = true;
 }
@@ -150,6 +150,8 @@ void LineGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inv
 void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                                double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
+    disableDepthTest();
+
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || !shaderProgram->isRenderable()) {
         return;
@@ -161,15 +163,21 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     GLuint validTarget = 0;
     GLenum zpass = GL_KEEP;
     if (isMasked) {
-        stencilMask += 128;
-        validTarget = isMaskInversed ? 0 : 128;
+        if (renderPass.stencilReadMask != 0) {
+            stencilMask = static_cast<GLuint>(renderPass.stencilReadMask);
+            validTarget = static_cast<GLuint>(renderPass.stencilReadReference);
+        } else {
+            stencilMask += 128;
+            validTarget = isMaskInversed ? 0 : 128;
+        }
     }
     if (renderPass.isPassMasked) {
-        stencilMask += 127;
+        stencilMask |= 127;
         zpass = GL_INCR;
     }
 
     if (stencilMask != 0) {
+        glStencilMask(0xFF);
         glStencilFunc(GL_EQUAL, validTarget, stencilMask);
         glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }
@@ -188,7 +196,7 @@ void LineGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface
     shaderProgram->preRender(openGlContext, isScreenSpaceCoords);
 
     // Draw the triangle
-    glDrawElements(GL_TRIANGLES, lineIndices.size(), GL_UNSIGNED_INT, nullptr);
+    glDrawElements(GL_TRIANGLES, indexBufferSize, GL_UNSIGNED_INT, nullptr);
 
     glBindVertexArray(0);
 

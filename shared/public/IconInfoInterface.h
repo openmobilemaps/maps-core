@@ -37,4 +37,8 @@ public:
     virtual ::Vec2F getIconAnchor() = 0;
 
     virtual ::BlendMode getBlendMode() = 0;
+
+    virtual void setRotation(double angle) = 0;
+
+    virtual double getRotation() = 0;
 };

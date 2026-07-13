@@ -22,6 +22,10 @@ public class OffscreenMapRenderer {
     private long threadId;
 
     public OffscreenMapRenderer(int width, int height, int numSamples) {
+        this(width, height, numSamples, false);
+    }
+
+    public OffscreenMapRenderer(int width, int height, int numSamples, boolean is3D) {
         // Screen DPI: 1 inch / 0.28mm (as defined in Annex E "Well-known scale sets" in "OpenGIS®
         // Web Map Tile Service Implementation Standard").
         this(
@@ -29,14 +33,20 @@ public class OffscreenMapRenderer {
                 height,
                 numSamples,
                 new MapConfig(CoordinateSystemFactory.getEpsg3857System()),
-                2 * 90.714286f);
+                2 * 90.714286f,
+                is3D);
     }
 
     public OffscreenMapRenderer(
             int width, int height, int numSamples, MapConfig mapConfig, float dpi) {
+        this(width, height, numSamples, mapConfig, dpi, false);
+    }
+
+    public OffscreenMapRenderer(
+            int width, int height, int numSamples, MapConfig mapConfig, float dpi, boolean is3D) {
         threadId = Thread.currentThread().threadId();
 
-        map = MapInterface.createWithOpenGl(mapConfig, ThreadPoolScheduler.create(), dpi, false);
+        map = MapInterface.createWithOpenGl(mapConfig, ThreadPoolScheduler.create(), dpi, is3D);
         // Set dummy callbacks, we don't use these here.
         map.setCallbackHandler(
                 new MapCallbackInterface() {

@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include "RenderObjectInterface.h"
 #include "RenderPassInterface.h"
+#include "RenderPassStencilOptions.h"
 
 class RenderPass : public RenderPassInterface {
 public:
@@ -32,10 +33,15 @@ public:
 
     void setScissoringRect(std::optional< ::RectI> rect);
 
+    RenderPassStencilOptions getStencilOptions() const;
+
+    void setStencilOptions(const RenderPassStencilOptions &options);
+
 private:
     RenderPassConfig config;
     std::vector<std::shared_ptr<::RenderObjectInterface>> renderObjects;
     std::shared_ptr<MaskingObjectInterface> maskingObject;
+    RenderPassStencilOptions stencilOptions;
 
     std::optional< ::RectI> scissoringRect = std::nullopt;
 };

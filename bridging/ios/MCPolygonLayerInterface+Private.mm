@@ -6,6 +6,7 @@
 #import "DJICppWrapperCache+Private.h"
 #import "DJIError.h"
 #import "DJIMarshal+Private.h"
+#import "MCBlendMode+Private.h"
 #import "MCLayerInterface+Private.h"
 #import "MCPolygonInfo+Private.h"
 #import "MCPolygonLayerCallbackInterface+Private.h"
@@ -108,6 +109,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)setRenderPassIndex:(int32_t)index {
     try {
         _cppRefHandle.get()->setRenderPassIndex(::djinni::I32::toCpp(index));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setBlendMode:(MCBlendMode)blendMode {
+    try {
+        _cppRefHandle.get()->setBlendMode(::djinni::Enum<::BlendMode, MCBlendMode>::toCpp(blendMode));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

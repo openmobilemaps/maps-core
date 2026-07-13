@@ -31,6 +31,10 @@ public:
 
     bool onLongPress(const Vec2F &posScreen) override;
 
+    bool onHover(const Vec2F &posScreen) override;
+
+    bool onHoverComplete() override;
+
     bool onMove(const Vec2F &deltaScreen, bool confirmed, bool doubleClick) override;
 
     bool onMoveComplete() override;

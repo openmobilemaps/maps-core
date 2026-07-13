@@ -20,6 +20,7 @@
 #include "TextureHolderInterface.h"
 #include "Tiled2dMapVectorStyleParser.h"
 #include "TrigonometryLUT.h"
+#include "Logger.h"
 
 Tiled2dMapVectorPolygonPatternTile::Tiled2dMapVectorPolygonPatternTile(const std::weak_ptr<MapInterface> &mapInterface,
                                                                        const std::weak_ptr<Tiled2dMapVectorLayer> &vectorLayer,
@@ -66,15 +67,15 @@ void Tiled2dMapVectorPolygonPatternTile::updateVectorLayerDescription(const std:
     }
 }
 
-void Tiled2dMapVectorPolygonPatternTile::update() {
+bool Tiled2dMapVectorPolygonPatternTile::update() {
     if (shaders.empty()) {
-        return;
+        return false;
     }
 
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     if (!mapInterface || !camera) {
-        return;
+        return false;
     }
 
     double cameraZoom = camera->getZoom();
@@ -97,7 +98,7 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
     }
 
     if (!inZoomRange) {
-        return;
+        return false;
     }
 
     if (lastZoom &&
@@ -108,7 +109,7 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
                 polygon->setScalingFactor(scalingFactor);
             }
         }
-        return;
+        return false;
     }
 
     lastZoom = zoomIdentifier;
@@ -129,12 +130,14 @@ void Tiled2dMapVectorPolygonPatternTile::update() {
             polygon->setScalingFactor(scalingFactor);
         }
     }
+
+    return false;
 }
 
 void Tiled2dMapVectorPolygonPatternTile::clear() {
     for (const auto &[styleGroupId, polygons] : styleGroupPolygonsMap) {
         for (const auto &polygon: polygons) {
-            if (polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->clear();
+            polygon->getPolygonObject()->clear();
         }
     }
 }
@@ -161,6 +164,32 @@ void Tiled2dMapVectorPolygonPatternTile::setup() {
     tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
 }
 
+void Tiled2dMapVectorPolygonPatternTile::pause() {
+    for (const auto &[styleGroupId, polygons] : styleGroupPolygonsMap) {
+        for (const auto &polygon: polygons) {
+            if (polygon->getPolygonObject()->isReady()) polygon->getPolygonObject()->pause();
+        }
+    }
+}
+
+void Tiled2dMapVectorPolygonPatternTile::resume() {
+    auto mapInterface = this->mapInterface.lock();
+    if (!mapInterface) {
+        return;
+    }
+    const auto context = mapInterface->getRenderingContext();
+    for (const auto &[styleGroupId, polygons] : styleGroupPolygonsMap) {
+        for (const auto &polygon: polygons) {
+            if (!polygon->getPolygonObject()->isReady()) {
+                polygon->getPolygonObject()->resume(context);
+            }
+        }
+    }
+
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
+}
+
 void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) {
     auto mapInterface = this->mapInterface.lock();
     const auto &shaderFactory = mapInterface ? mapInterface->getShaderFactory() : nullptr;
@@ -169,7 +198,6 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
     }
     bool is3d = mapInterface->is3d();
 
-    const std::string layerName = description->sourceLayer;
     const auto indicesLimit = std::numeric_limits<uint16_t>::max();
 
     if (!tileData->empty()) {
@@ -215,8 +243,6 @@ void Tiled2dMapVectorPolygonPatternTile::setVectorTileData(const Tiled2dMapVecto
             }
 
             if (inside) {
-
-                std::vector<Coord> positions;
 
                 int styleIndex = -1;
                 int styleGroupIndex = -1;
@@ -366,7 +392,7 @@ void Tiled2dMapVectorPolygonPatternTile::addPolygons(const std::vector<std::vect
     std::vector<std::shared_ptr<RenderObjectInterface>> newRenderObjects;
     for (const auto &polygon: polygonRenderOrder) {
         for (const auto &config: polygon->getRenderConfig()) {
-            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject(), config->getMaskingObject()));
         }
     }
     renderObjects = newRenderObjects;
@@ -400,8 +426,12 @@ std::vector<std::shared_ptr<RenderObjectInterface>> Tiled2dMapVectorPolygonPatte
     return renderObjects;
 }
 
-void Tiled2dMapVectorPolygonPatternTile::setSpriteData(const std::shared_ptr<SpriteData> &spriteData,
+void Tiled2dMapVectorPolygonPatternTile::setSpriteData(const std::string &spriteId,
+                                                         const std::shared_ptr<SpriteData> &spriteData,
                                                          const std::shared_ptr<TextureHolderInterface> &spriteTexture) {
+    if (spriteId != "default") {
+        return;
+    }
     this->spriteData = spriteData;
     this->spriteTexture = spriteTexture;
 

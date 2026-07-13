@@ -8,7 +8,11 @@ cpp:
   typename: '::IconTextFit'
   header: '"IconTextFit.h"'
   byValue: true
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCIconTextFit'
   pointer: false
   hash: '%s.hash'

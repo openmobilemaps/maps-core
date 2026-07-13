@@ -1,0 +1,20 @@
+@extern "../../../yaml/layer_interface.yaml"
+@extern "../../../yaml/polygon_coord.yaml"
+@extern "../../../yaml/rect_coord.yaml"
+@extern "../../../yaml/texture_holder_interface.yaml"
+
+textured_polygon_layer_interface = interface +c {
+    static create(): textured_polygon_layer_interface;
+
+    # The polygon's coordinates are mapped to texture UV by their position within texture_bounds:
+    # texture_bounds.top_left -> (0,0), texture_bounds.bottom_right -> (1,1).
+    set_polygon(polygon: polygon_coord, texture_bounds: rect_coord);
+
+    load_texture(texture: texture_holder_interface);
+
+    set_alpha(alpha: f32);
+
+    set_render_pass_index(index: i32);
+
+    as_layer_interface(): layer_interface;
+}

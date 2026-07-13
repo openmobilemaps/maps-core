@@ -17,6 +17,8 @@
 #include "PolygonPatternGroup2dOpenGl.h"
 #include "Quad2dInstancedOpenGl.h"
 #include "Quad2dOpenGl.h"
+#include "Quad2dTessellatedDisplacedOpenGl.h"
+#include "TexturedPolygonOpenGl.h"
 #include "Text2dOpenGl.h"
 #include "Text2dInstancedOpenGl.h"
 #include "Quad2dStretchedInstancedOpenGl.h"
@@ -24,11 +26,17 @@
 #if HARDWARE_TESSELLATION_SUPPORTED
 #include "Quad2dTessellatedOpenGl.h"
 #include "Polygon2dTessellatedOpenGl.h"
+#include "TessellatedDisplacedRasterShaderOpenGl.h"
 #include "TessellatedColorShaderOpenGl.h"
 #endif
 
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuad(const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Quad2dOpenGl>(enforceGlShader(shader));
+}
+
+std::shared_ptr<TexturedPolygonInterface>
+GraphicsObjectFactoryOpenGl::createTexturedPolygon(const std::shared_ptr<::ShaderProgramInterface> &shader) {
+    return std::make_shared<TexturedPolygonOpenGl>(enforceGlShader(shader));
 }
 
 std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuadTessellated(const std::shared_ptr<::ShaderProgramInterface> &shader) {
@@ -38,6 +46,15 @@ std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuadTessella
     return nullptr;
 #endif
 
+}
+
+std::shared_ptr<Quad2dInterface> GraphicsObjectFactoryOpenGl::createQuadTessellatedDisplaced() {
+#if HARDWARE_TESSELLATION_SUPPORTED
+    return std::make_shared<Quad2dTessellatedDisplacedOpenGl>(
+        std::make_shared<TessellatedDisplacedRasterShaderOpenGl>(true));
+#else
+    return nullptr;
+#endif
 }
 
 std::shared_ptr<Polygon2dInterface>

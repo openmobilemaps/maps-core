@@ -42,6 +42,14 @@ CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_C
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_EPSG4326System2D(JNIEnv* jniEnv, jobject /*this*/)
+{
+    try {
+        auto r = ::CoordinateSystemIdentifiers::EPSG4326System2D();
+        return ::djinni::release(::djinni::I32::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT jint JNICALL Java_io_openmobilemaps_mapscore_shared_map_coordinates_CoordinateSystemIdentifiers_EPSG2056(JNIEnv* jniEnv, jobject /*this*/)
 {
     try {

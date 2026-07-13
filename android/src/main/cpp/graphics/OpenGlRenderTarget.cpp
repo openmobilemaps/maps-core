@@ -98,7 +98,12 @@ void OpenGlRenderTarget::bindFramebuffer(const std::shared_ptr<RenderingContextI
     glBindFramebuffer(GL_FRAMEBUFFER, framebufferId);
     glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
     if (usesDepthStencil) {
+        GLboolean depthMask = GL_TRUE;
+        glGetBooleanv(GL_DEPTH_WRITEMASK, &depthMask);
+        glDepthMask(GL_TRUE);
+        glClearDepthf(1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+        glDepthMask(depthMask);
     } else {
         glClear(GL_COLOR_BUFFER_BIT);
     }

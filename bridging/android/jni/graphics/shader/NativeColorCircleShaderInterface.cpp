@@ -30,6 +30,22 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_C
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ColorCircleShaderInterface_00024CppProxy_native_1setCircleStyle(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_fillRed, jfloat j_fillGreen, jfloat j_fillBlue, jfloat j_fillAlpha, jfloat j_strokeRed, jfloat j_strokeGreen, jfloat j_strokeBlue, jfloat j_strokeAlpha, jfloat j_innerRadius)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::ColorCircleShaderInterface>(nativeRef);
+        ref->setCircleStyle(::djinni::F32::toCpp(jniEnv, j_fillRed),
+                            ::djinni::F32::toCpp(jniEnv, j_fillGreen),
+                            ::djinni::F32::toCpp(jniEnv, j_fillBlue),
+                            ::djinni::F32::toCpp(jniEnv, j_fillAlpha),
+                            ::djinni::F32::toCpp(jniEnv, j_strokeRed),
+                            ::djinni::F32::toCpp(jniEnv, j_strokeGreen),
+                            ::djinni::F32::toCpp(jniEnv, j_strokeBlue),
+                            ::djinni::F32::toCpp(jniEnv, j_strokeAlpha),
+                            ::djinni::F32::toCpp(jniEnv, j_innerRadius));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_shader_ColorCircleShaderInterface_00024CppProxy_native_1asShaderProgramInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {

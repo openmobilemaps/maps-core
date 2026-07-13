@@ -14,6 +14,9 @@
 #include "RenderPass.h"
 #include "RenderObject.h"
 
+SkySphereLayer::SkySphereLayer(bool useLocal)
+    : useLocal(useLocal) {}
+
 // SimpleLayerInterface
 
 void SkySphereLayer::update() {
@@ -41,7 +44,7 @@ void SkySphereLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterface, 
     auto selfMailbox = std::make_shared<Mailbox>(scheduler);
     this->mailbox = selfMailbox;
 
-    shader = mapInterface->getShaderFactory()->createSkySphereShader();
+    shader = useLocal ? mapInterface->getShaderFactory()->createSkySphereLocalShader() : mapInterface->getShaderFactory()->createSkySphereShader();
     quad = mapInterface->getGraphicsObjectFactory()->createQuad(shader->asShaderProgramInterface());
     quad->setFrame(Quad3dD(Vec3D(-1, 1, 0),
                            Vec3D(1, 1, 0),
@@ -56,9 +59,7 @@ void SkySphereLayer::onRemoved() {
     this->mapInterface = nullptr;
     this->mailbox = nullptr;
 
-    if (quad->asGraphicsObject()->isReady()) {
-        quad->asGraphicsObject()->clear();
-    }
+    quad->asGraphicsObject()->clear();
     this->quad = nullptr;
     this->shader = nullptr;
 }
@@ -72,11 +73,11 @@ void SkySphereLayer::resume() {
 }
 
 void SkySphereLayer::hide() {
-    isHidden = false;
+    isHidden = true;
 }
 
 void SkySphereLayer::show() {
-    isHidden = true;
+    isHidden = false;
 }
 
 // SkySphereLayerInterface
@@ -110,6 +111,6 @@ void SkySphereLayer::setupSkySphere() {
         std::vector<std::shared_ptr<RenderObjectInterface>> renderObjects = {
                 std::make_shared<RenderObject>(quad->asGraphicsObject(), true)
         };
-        renderPasses = {std::make_shared<RenderPass>(RenderPassConfig(0, false, nullptr), renderObjects)};
+        renderPasses = {std::make_shared<RenderPass>(RenderPassConfig(0, false, nullptr, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none), renderObjects)};
     }
 }

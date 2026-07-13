@@ -32,13 +32,15 @@ public:
     void updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                 const Tiled2dMapVectorTileDataVector &tileData) override;
 
-    void update() override;
+    bool update() override;
 
     virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() override;
 
     virtual void clear() override;
-
     virtual void setup() override;
+    
+    virtual void pause() override;
+    virtual void resume() override;
 
     virtual void setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) override;
 
@@ -51,7 +53,7 @@ private:
 
     void setupLines(const std::vector<std::shared_ptr<GraphicsObjectInterface>> &newLineGraphicsObjects);
 
-    static const int maxNumLineVertices = std::numeric_limits<uint32_t>::max();
+    static const uint64_t maxNumLineVertices = std::numeric_limits<uint32_t>::max();
 
 #ifdef OPENMOBILEMAPS_GL
     static const int maxStylesPerGroup = 32;
@@ -86,4 +88,5 @@ private:
 
 
     bool isSimpleLine;
+    bool hasAnimatedLineStyles = false;
 };

@@ -11,7 +11,6 @@
 import Foundation
 import MapCoreSharedModule
 @preconcurrency import Metal
-import UIKit
 
 class PolygonGroupShader: BaseShader, @unchecked Sendable {
     var polygonStyleBuffer: MTLBuffer?
@@ -33,7 +32,7 @@ class PolygonGroupShader: BaseShader, @unchecked Sendable {
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
         guard let encoder = context.encoder,
-            let pipeline
+            let pipeline = activePipeline
         else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)

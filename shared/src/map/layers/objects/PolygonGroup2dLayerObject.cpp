@@ -20,7 +20,9 @@ PolygonGroup2dLayerObject::PolygonGroup2dLayerObject(const std::shared_ptr<Coord
     : conversionHelper(conversionHelper)
     , polygon(polygon)
     , shader(shader)
-    , renderConfig(std::make_shared<RenderConfig>(polygon->asGraphicsObject(), 0)) {}
+    // Polygon groups expose the same renderable through graphics and masking interfaces:
+    // normal render passes draw it, while stencil write passes ask it to render as mask geometry.
+    , renderConfig(std::make_shared<RenderConfig>(polygon->asGraphicsObject(), polygon->asMaskingObject(), 0)) {}
 
 void PolygonGroup2dLayerObject::update() {}
 

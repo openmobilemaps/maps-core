@@ -24,6 +24,9 @@ public:
      */
     static int32_t EPSG4326();
 
+    /** WGS 84 scaled 2D coordinate system */
+    static int32_t EPSG4326System2D();
+
     /**
      * LV03+
      * https://epsg.io/2056

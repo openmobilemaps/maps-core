@@ -16,7 +16,12 @@ tiled_2d_map_raster_layer_interface = interface +c {
     static create_with_shader(layer_config: tiled_2d_map_layer_config, loaders: list<loader_interface>, shader:shader_program_interface) : tiled_2d_map_raster_layer_interface;
     # the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on
     static create(layer_config: tiled_2d_map_layer_config, loaders: list<loader_interface>) : tiled_2d_map_raster_layer_interface;
+        
+    # the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on
+    static create_displaced(layer_config: tiled_2d_map_layer_config, elevation_config: tiled_2d_map_layer_config, loaders: list<loader_interface>) : tiled_2d_map_raster_layer_interface;
+    
     asLayerInterface(): layer_interface;
+    
     set_callback_handler(handler: tiled_2d_map_raster_layer_callback_interface);
     get_callback_handler() : optional<tiled_2d_map_raster_layer_callback_interface>;
     remove_callback_handler();
@@ -28,6 +33,17 @@ tiled_2d_map_raster_layer_interface = interface +c {
     get_style(): raster_shader_style;
 
     set_min_mag_filter(filter_type: texture_filter_type);
+
+    # When enabled and the layer config's zoom info has mask_tile set, tiles are built from
+    # the tile mask polygons themselves (earcut-tessellated geometry) instead of a rectangular
+    # quad clipped via the stencil buffer. Has no effect when zoom_info.mask_tile is false.
+    set_use_mask_tile_geometry(enabled: bool);
+
+    # Debug helper: pauses tile-source selection/loading/removal without pausing rendered tile graphics.
+    set_tile_loading_paused(paused: bool);
+
+    # Runtime LOD control. Higher values request more detailed tiles earlier; lower values request coarser tiles.
+    set_zoom_level_scale_factor(value: f32);
 
     set_min_zoom_level_identifier(value: optional<i32>);
     get_min_zoom_level_identifier(): optional<i32>;

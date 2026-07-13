@@ -4,6 +4,7 @@
 #import "MCCoord.h"
 #import "MCErrorManager.h"
 #import "MCLayerReadyState.h"
+#import "MCMapCamera3dMode.h"
 #import "MCRectCoord.h"
 #import "MCVec3D.h"
 #import <Foundation/Foundation.h>
@@ -24,7 +25,9 @@
                 height:(float)height
     focusPointAltitude:(float)focusPointAltitude
     focusPointPosition:(nonnull MCCoord *)focusPointPosition
-                  zoom:(float)zoom;
+                  zoom:(float)zoom
+        cameraPosition:(nullable MCVec3D *)cameraPosition
+            cameraMode:(MCMapCamera3dMode)cameraMode;
 
 - (void)setMinZoomLevelIdentifier:(nullable NSNumber *)value;
 
@@ -34,9 +37,14 @@
 
 - (nullable NSNumber *)getMaxZoomLevelIdentifier;
 
+- (void)setZoomLevelScaleFactor:(float)value;
+
 - (void)pause;
 
 - (void)resume;
+
+/** Debug helper: pauses tile selection/loading independently of the pause()/resume() lifecycle state. */
+- (void)setTileLoadingPaused:(BOOL)paused;
 
 - (MCLayerReadyState)isReadyToRenderOffscreen;
 

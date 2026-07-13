@@ -67,6 +67,20 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (BOOL)onHover:(nonnull MCVec2F *)posScreen {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->onHover(::djinni_generated::Vec2F::toCpp(posScreen));
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (BOOL)onHoverComplete {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->onHoverComplete();
+        return ::djinni::Bool::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (BOOL)onMove:(nonnull MCVec2F *)deltaScreen
      confirmed:(BOOL)confirmed
    doubleClick:(BOOL)doubleClick {
@@ -173,6 +187,20 @@ public:
     {
         @autoreleasepool {
             auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onLongPress:(::djinni_generated::Vec2F::fromCpp(c_posScreen))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onHover(const ::Vec2F & c_posScreen) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onHover:(::djinni_generated::Vec2F::fromCpp(c_posScreen))];
+            return ::djinni::Bool::toCpp(objcpp_result_);
+        }
+    }
+    bool onHoverComplete() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() onHoverComplete];
             return ::djinni::Bool::toCpp(objcpp_result_);
         }
     }

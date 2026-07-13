@@ -8,7 +8,11 @@ cpp:
   typename: '::RenderTargetInterface'
   header: '"RenderTargetInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCRenderTargetInterface'
   pointer: true
   hash: '%s.hash'

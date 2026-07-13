@@ -11,7 +11,6 @@
 import Foundation
 import MapCoreSharedModule
 @preconcurrency import Metal
-import UIKit
 
 class IcosahedronShader: BaseShader, @unchecked Sendable {
     private var color = SIMD4<Float>([0.0, 0.0, 0.0, 0.0])
@@ -29,7 +28,7 @@ class IcosahedronShader: BaseShader, @unchecked Sendable {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline else { return }
+        guard let pipeline = activePipeline else { return }
         context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBytes(&color, length: MemoryLayout<SIMD4<Float>>.stride, index: 1)
     }

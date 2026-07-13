@@ -5,13 +5,13 @@
 //  Created by Marco Zimmermann on 22.04.2025.
 //
 
-import MapKit
+import CoreImage
+@preconcurrency import Metal
 
 class RenderToImageRenderPass {
     private var offlineRenderPass: MTLRenderPassDescriptor? = nil
 
     private let device: MTLDevice
-    private var lastSize: CGSize = .zero
 
     // MARK: - Init
 
@@ -21,16 +21,17 @@ class RenderToImageRenderPass {
 
     // MARK: - Public
 
-    public func getRenderpass(size: CGSize) -> MTLRenderPassDescriptor? {
-        if let orp = offlineRenderPass, size == lastSize {
-            return orp
-        }
-
-        offlineRenderPass = getOfflineRenderPass(size: size)
+    public func getRenderpass(size: CGSize, clearColor: MTLClearColor) -> MTLRenderPassDescriptor? {
+        // Always allocate a fresh render pass + texture. Callers like
+        // `IosOffscreenMapRenderHelper` issue two consecutive renders on the same MCMapView;
+        // reusing the same texture between them risks residual state from the first render
+        // bleeding into the second (the caller keeps `getImage()` around between renders).
+        // The allocation cost is dominated by the ensuing tile decoding, so we don't cache.
+        offlineRenderPass = getOfflineRenderPass(size: size, clearColor: clearColor)
         return offlineRenderPass
     }
 
-    public func getImage() -> UIImage? {
+    public func getImage() -> MCPlatformImage? {
         guard let texture = self.offlineRenderPass?.colorAttachments[0].texture else { return nil }
 
         let context = CIContext()
@@ -47,20 +48,26 @@ class RenderToImageRenderPass {
 
     // MARK: - Private implementation details
 
-    private func getOfflineRenderPass(size: CGSize) -> MTLRenderPassDescriptor? {
+    private func getOfflineRenderPass(size: CGSize, clearColor: MTLClearColor) -> MTLRenderPassDescriptor? {
         guard let texture = makeTexture(size: size),
-            let stencil = makeStencilTexture(size: size)
+            let depthStencil = makeDepthStencilTexture(size: size)
         else { return nil }
 
         let passDescriptor = MTLRenderPassDescriptor()
         passDescriptor.colorAttachments[0].texture = texture
         passDescriptor.colorAttachments[0].loadAction = .clear
         passDescriptor.colorAttachments[0].storeAction = .store
-        passDescriptor.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1)
+        passDescriptor.colorAttachments[0].clearColor = clearColor
         // Stencil
-        passDescriptor.stencilAttachment.texture = stencil
+        passDescriptor.stencilAttachment.texture = depthStencil
         passDescriptor.stencilAttachment.loadAction = .clear
         passDescriptor.stencilAttachment.storeAction = .dontCare
+        passDescriptor.stencilAttachment.clearStencil = 0
+        // Depth
+        passDescriptor.depthAttachment.texture = depthStencil
+        passDescriptor.depthAttachment.loadAction = .clear
+        passDescriptor.depthAttachment.storeAction = .dontCare
+        passDescriptor.depthAttachment.clearDepth = 1.0
         return passDescriptor
     }
 
@@ -75,31 +82,15 @@ class RenderToImageRenderPass {
         return device.makeTexture(descriptor: descriptor)
     }
 
-    private func makeStencilTexture(size: CGSize) -> MTLTexture? {
+    private func makeDepthStencilTexture(size: CGSize) -> MTLTexture? {
         let descriptor = MTLTextureDescriptor.texture2DDescriptor(
-            pixelFormat: .stencil8,
+            pixelFormat: MetalContext.depthPixelFormat,
             width: Int(size.width),
             height: Int(size.height),
             mipmapped: false
         )
-
         descriptor.storageMode = .private
         descriptor.usage = [.renderTarget]
         return device.makeTexture(descriptor: descriptor)
-    }
-}
-
-extension CGImage {
-    fileprivate func toImage() -> UIImage? {
-        let w = Double(width)
-        let h = Double(height)
-        UIGraphicsBeginImageContext(CGSize(width: w, height: h))
-        let context = UIGraphicsGetCurrentContext()
-        context?.draw(self, in: CGRect(x: 0, y: 0, width: w, height: h))
-
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-
-        return newImage
     }
 }

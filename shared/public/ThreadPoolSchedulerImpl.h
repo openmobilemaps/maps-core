@@ -12,12 +12,12 @@
 #include "TaskInterface.h"
 #include "TaskConfig.h"
 #include "SchedulerGraphicsTaskCallbacks.h"
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
 #include <deque>
 #include <chrono>
 #include <thread>
-#include <array>
 
 class ThreadPoolSchedulerImpl: public SchedulerInterface {
 public:
