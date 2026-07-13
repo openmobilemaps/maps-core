@@ -60,6 +60,8 @@ abstract class ShaderFactoryInterface {
 
     abstract fun createSkySphereShader(): SkySphereShaderInterface
 
+    abstract fun createSkySphereLocalShader(): SkySphereShaderInterface
+
     abstract fun createElevationInterpolationShader(): ElevationInterpolationShaderInterface
 
     public class CppProxy : ShaderFactoryInterface {
@@ -232,6 +234,12 @@ abstract class ShaderFactoryInterface {
             return native_createSkySphereShader(this.nativeRef)
         }
         private external fun native_createSkySphereShader(_nativeRef: Long): SkySphereShaderInterface
+
+        override fun createSkySphereLocalShader(): SkySphereShaderInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_createSkySphereLocalShader(this.nativeRef)
+        }
+        private external fun native_createSkySphereLocalShader(_nativeRef: Long): SkySphereShaderInterface
 
         override fun createElevationInterpolationShader(): ElevationInterpolationShaderInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

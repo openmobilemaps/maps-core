@@ -13,17 +13,27 @@ import MapCoreSharedModule
 @preconcurrency import Metal
 
 class ClearStencilShader: BaseShader, @unchecked Sendable {
-    lazy var clearMask: MTLDepthStencilState? = {
+    private var clearStates: [UInt8: MTLDepthStencilState] = [:]
+
+    func clearState(writeMask: UInt8) -> MTLDepthStencilState? {
+        if let state = clearStates[writeMask] {
+            return state
+        }
         let descriptor = MTLStencilDescriptor()
         descriptor.stencilCompareFunction = .always
         descriptor.stencilFailureOperation = .zero
         descriptor.depthFailureOperation = .zero
         descriptor.depthStencilPassOperation = .zero
+        descriptor.writeMask = UInt32(writeMask)
         let depthStencilDescriptor = MTLDepthStencilDescriptor()
         depthStencilDescriptor.frontFaceStencil = descriptor
         depthStencilDescriptor.backFaceStencil = descriptor
-        return MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor)
-    }()
+        guard let state = MetalContext.current.device.makeDepthStencilState(descriptor: depthStencilDescriptor) else {
+            return nil
+        }
+        clearStates[writeMask] = state
+        return state
+    }
 
     init() {
         super.init(shader: .clearStencilShader)
@@ -44,6 +54,6 @@ class ClearStencilShader: BaseShader, @unchecked Sendable {
         else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
-        encoder.setDepthStencilState(clearMask)
+        encoder.setDepthStencilState(clearState(writeMask: context.pendingStencilClearMask))
     }
 }

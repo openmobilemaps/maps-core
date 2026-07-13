@@ -76,7 +76,7 @@ extension MCColor {
     }
 
 // MARK: - AppKit Specific Extensions
-#elseif canImport(AppKit)
+#elseif canImport(AppKit) && !canImport(UIKit)
     import AppKit
 
     public extension NSColor {

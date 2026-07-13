@@ -35,6 +35,8 @@ abstract class PolygonLayerInterface {
 
     abstract fun setRenderPassIndex(index: Int)
 
+    abstract fun setBlendMode(blendMode: io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode)
+
     public class CppProxy : PolygonLayerInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -115,5 +117,11 @@ abstract class PolygonLayerInterface {
             native_setRenderPassIndex(this.nativeRef, index)
         }
         private external fun native_setRenderPassIndex(_nativeRef: Long, index: Int)
+
+        override fun setBlendMode(blendMode: io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setBlendMode(this.nativeRef, blendMode)
+        }
+        private external fun native_setBlendMode(_nativeRef: Long, blendMode: io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode)
     }
 }

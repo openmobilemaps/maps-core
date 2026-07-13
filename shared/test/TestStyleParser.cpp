@@ -1,4 +1,6 @@
 #include "GeoJsonTypes.h"
+#include "LineVectorLayerDescription.h"
+#include "RasterVectorLayerDescription.h"
 #include "Tiled2dMapVectorLayerParserHelper.h"
 #include "Tiled2dMapVectorStyleParser.h"
 
@@ -13,6 +15,8 @@
 
 class TestGeoJSONTileDelegate : public GeoJSONTileDelegate, public ActorObject {
   public:
+    virtual ~TestGeoJSONTileDelegate() = default;
+
     bool didLoadCalled = false;
     bool failedToLoadCalled = false;
 
@@ -73,6 +77,51 @@ TEST_CASE("TestStyleParser", "[GeoJson local provider]") {
     REQUIRE(!tile.getFeatures().empty());
 }
 
+TEST_CASE("TestStyleParser", "[Line dash fade and animation speed]") {
+    const std::string jsonString = R"json(
+        {
+          "version": 8,
+          "name": "s",
+          "sources": {
+            "wsource": {
+              "type": "geojson",
+              "data": {
+                "type": "LineString",
+                "coordinates": [[0.0, 0.0], [1.0, 1.0]]
+              }
+            }
+          },
+          "layers": [
+            {
+              "id": "w",
+              "type": "line",
+              "source": "wsource",
+              "paint": {
+                "line-color": "rgb(0, 0, 0)",
+                "line-width": 2.0,
+                "line-dasharray": [1.0, 2.0],
+                "line-dash-fade": 0.25,
+                "line-dash-animation-speed": 1.5
+              }
+            }
+          ]
+        }
+    )json";
+
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
+    auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, nullptr, {}, stringTable, {});
+    REQUIRE(result.mapDescription != nullptr);
+    REQUIRE(result.mapDescription->layers.size() == 1);
+
+    auto layer = std::dynamic_pointer_cast<LineVectorLayerDescription>(result.mapDescription->layers[0]);
+    REQUIRE(layer != nullptr);
+
+    EvaluationContext context(0, 1.0, std::make_shared<FeatureContext>(), nullptr);
+    REQUIRE(layer->style.getLineDashFade(context) == 0.25);
+    REQUIRE(layer->style.getLineDashAnimationSpeed(context) == 1.5);
+    REQUIRE_FALSE(layer->style.isSimpleLine());
+}
+
 static bool equalSpriteSource(const SpriteSourceDescription &a, const SpriteSourceDescription &b) {
     return a.identifier == b.identifier && a.baseUrl == b.baseUrl;
 };
@@ -101,6 +150,69 @@ TEST_CASE("TestStyleParser", "[Multi Sprite]") {
                                                             {"default", "https://example2.com/anotherurl"}};
 
     REQUIRE_THAT(result.mapDescription->sprites, Catch::Matchers::UnorderedRangeEquals(expectedSprites, equalSpriteSource));
+}
+
+TEST_CASE("TestStyleParser", "[Raster texture lookup]") {
+    auto jsonString = TestData::readFileToString("style/raster_texture_lookup.json");
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
+    auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, nullptr, {}, stringTable, {});
+    REQUIRE(result.mapDescription != nullptr);
+    REQUIRE(result.mapDescription->layers.size() == 1);
+
+    auto layer = std::dynamic_pointer_cast<RasterVectorLayerDescription>(result.mapDescription->layers[0]);
+    REQUIRE(layer != nullptr);
+    REQUIRE(layer->textureLookup.has_value());
+    REQUIRE(layer->textureLookup->sprite.sheet == "ramps");
+    REQUIRE(layer->textureLookup->sprite.icon == "hillshade");
+    REQUIRE(layer->textureLookup->zoomMin == 5.0);
+    REQUIRE(layer->textureLookup->zoomMax == 16.0);
+    REQUIRE(layer->textureLookup->mode == RasterTextureLookupMode::MONO);
+}
+
+TEST_CASE("TestStyleParser", "[Raster texture lookup dual]") {
+    auto jsonString = TestData::readFileToString("style/raster_texture_lookup_dual.json");
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
+    auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, nullptr, {}, stringTable, {});
+    REQUIRE(result.mapDescription != nullptr);
+    REQUIRE(result.mapDescription->layers.size() == 1);
+
+    auto layer = std::dynamic_pointer_cast<RasterVectorLayerDescription>(result.mapDescription->layers[0]);
+    REQUIRE(layer != nullptr);
+    REQUIRE(layer->textureLookup.has_value());
+    REQUIRE(layer->textureLookup->sprite.sheet == "ramps");
+    REQUIRE(layer->textureLookup->sprite.icon == "hillshade");
+    REQUIRE(layer->textureLookup->zoomMin == 5.0);
+    REQUIRE(layer->textureLookup->zoomMax == 16.0);
+    REQUIRE(layer->textureLookup->mode == RasterTextureLookupMode::DUAL);
+}
+
+TEST_CASE("TestStyleParser", "[Raster texture lookup quad]") {
+    auto jsonString = TestData::readFileToString("style/raster_texture_lookup_quad.json");
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
+    auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, nullptr, {}, stringTable, {});
+    REQUIRE(result.mapDescription != nullptr);
+    REQUIRE(result.mapDescription->layers.size() == 1);
+
+    auto layer = std::dynamic_pointer_cast<RasterVectorLayerDescription>(result.mapDescription->layers[0]);
+    REQUIRE(layer != nullptr);
+    REQUIRE(layer->textureLookup.has_value());
+    REQUIRE(layer->textureLookup->sprite.sheet == "ramps");
+    REQUIRE(layer->textureLookup->sprite.icon == "hillshade");
+    REQUIRE(layer->textureLookup->zoomMin == 5.0);
+    REQUIRE(layer->textureLookup->zoomMax == 16.0);
+    REQUIRE(layer->textureLookup->mode == RasterTextureLookupMode::QUAD);
+}
+
+TEST_CASE("TestStyleParser", "[Raster texture lookup invalid mode]") {
+    auto jsonString = TestData::readFileToString("style/raster_texture_lookup_invalid_mode.json");
+    std::shared_ptr<StringInterner> stringTable = std::make_shared<StringInterner>(ValueKeys::newStringInterner());
+    auto result = Tiled2dMapVectorLayerParserHelper::parseStyleJsonFromString("test", jsonString, nullptr, {}, stringTable, {});
+    REQUIRE(result.mapDescription != nullptr);
+    REQUIRE(result.mapDescription->layers.size() == 1);
+
+    auto layer = std::dynamic_pointer_cast<RasterVectorLayerDescription>(result.mapDescription->layers[0]);
+    REQUIRE(layer != nullptr);
+    REQUIRE_FALSE(layer->textureLookup.has_value());
 }
 
 TEST_CASE("String interpolation expressions") {

@@ -27,6 +27,7 @@
 #include "Tiled2dMapVectorLayerSymbolDelegateInterface.h"
 #include "CollisionGrid.h"
 #include "RenderObjectInterface.h"
+#include "RenderingContextInterface.h"
 #include "VectorModificationWrapper.h"
 
 //#define DRAW_TEXT_BOUNDING_BOX
@@ -69,12 +70,20 @@ public:
 
     void removeFromCache();
 
+    void pause();
+
+    void resume(const std::shared_ptr<::RenderingContextInterface> &context);
+
     void clear();
 
     void updateLayerDescription(const std::shared_ptr<SymbolVectorLayerDescription> layerDescription);
 
     std::vector<std::shared_ptr< ::RenderObjectInterface>> getRenderObjects();
 private:
+    void setupGraphicsObjects(const std::shared_ptr<::RenderingContextInterface> &context, bool forceAll);
+
+    void rebuildRenderOrderedSymbolObjects();
+    const std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>>& getRenderOrderedSymbolObjects() const;
 
     std::optional<Tiled2dMapVectorSymbolSubLayerPositioningWrapper>
     getPositioning(std::vector<::Vec2D>::const_iterator &iterator, const std::vector<::Vec2D> &collection, const double interpolationValue);
@@ -87,7 +96,7 @@ private:
                                                                             const std::vector<FormattedStringEntry> &text,
                                                                             const std::string &fullText,
                                                                             const ::Vec2D &coordinate,
-                                                                            const std::optional<std::vector<Vec2D>> &lineCoordinates,
+                                                                            const std::shared_ptr<SymbolLineGeometryCache> &lineGeometryCache,
                                                                             const std::vector<std::string> &fontList,
                                                                             const Anchor &textAnchor,
                                                                             const std::optional<double> &angle,
@@ -104,6 +113,7 @@ public:
     uint32_t groupId;
 private:
     std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> symbolObjects;
+    std::vector<std::shared_ptr<Tiled2dMapVectorSymbolObject>> renderOrderedSymbolObjects;
 
     const std::weak_ptr<MapInterface> mapInterface;
     const std::weak_ptr<Tiled2dMapVectorLayer> vectorLayer;
@@ -142,7 +152,7 @@ private:
     std::vector<SpriteIconDescriptor> sprites;
 
     // Simple resolution of sprites names
-    std::unordered_map<SpriteIconId, ResolvedSpriteIconId> spriteLookup; 
+    std::unordered_map<SpriteIconId, ResolvedSpriteIconId> spriteLookup;
     // Metadata for individual sprite images of all sprite sheets. Indexed by ResolvedSpriteIconId.icon
     std::vector<SpriteDesc> spriteIconData;
 
@@ -170,9 +180,7 @@ private:
             iconScales.resize(count * 2, 0.0);
             iconPositions.resize(count * positionSize, 0.0);
             iconTextureCoordinates.resize(count * 4, 0.0);
-            if (is3d) {
-                iconOffsets.resize(count * 2, 0.0);
-            }
+            iconOffsets.resize(count * 2, 0.0);
         }
     };
 
@@ -227,6 +235,6 @@ private:
     UsedKeysCollection usedKeys;
 
 private:
-    bool prepareIconObject(SpriteIconDescriptor &spriteIconDescriptor, size_t iconCount, size_t stretchedIconCount);
+    bool prepareIconObject(SpriteIconDescriptor &spriteIconDescriptor, uint32_t iconCount, uint32_t stretchedIconCount);
 
 };

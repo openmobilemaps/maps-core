@@ -60,6 +60,23 @@ bool NativeTouchInterface::JavaProxy::onLongPress(const ::Vec2F & c_posScreen) {
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::Bool::toCpp(jniEnv, jret);
 }
+bool NativeTouchInterface::JavaProxy::onHover(const ::Vec2F & c_posScreen) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTouchInterface>::get();
+    auto jret = jniEnv->CallBooleanMethod(Handle::get().get(), data.method_onHover,
+                                          ::djinni::get(::djinni_generated::NativeVec2F::fromCpp(jniEnv, c_posScreen)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Bool::toCpp(jniEnv, jret);
+}
+bool NativeTouchInterface::JavaProxy::onHoverComplete() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeTouchInterface>::get();
+    auto jret = jniEnv->CallBooleanMethod(Handle::get().get(), data.method_onHoverComplete);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Bool::toCpp(jniEnv, jret);
+}
 bool NativeTouchInterface::JavaProxy::onMove(const ::Vec2F & c_deltaScreen, bool c_confirmed, bool c_doubleClick) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -181,6 +198,24 @@ CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::TouchInterface>(nativeRef);
         auto r = ref->onLongPress(::djinni_generated::NativeVec2F::toCpp(jniEnv, j_posScreen));
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onHover(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeVec2F::JniType j_posScreen)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::TouchInterface>(nativeRef);
+        auto r = ref->onHover(::djinni_generated::NativeVec2F::toCpp(jniEnv, j_posScreen));
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jboolean JNICALL Java_io_openmobilemaps_mapscore_shared_map_controls_TouchInterface_00024CppProxy_native_1onHoverComplete(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::TouchInterface>(nativeRef);
+        auto r = ref->onHoverComplete();
         return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }

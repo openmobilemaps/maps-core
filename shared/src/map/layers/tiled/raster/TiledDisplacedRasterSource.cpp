@@ -1,0 +1,153 @@
+/*
+ * Copyright (c) 2021 Ubique Innovation AG <https://www.ubique.ch>
+ *
+ *  This Source Code Form is subject to the terms of the Mozilla Public
+ *  License, v. 2.0. If a copy of the MPL was not distributed with this
+ *  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ *  SPDX-License-Identifier: MPL-2.0
+ */
+
+#include "TiledDisplacedRasterSource.h"
+#include "DisplacedTerrainTiled2dMap3dTileSelection.h"
+#include <functional>
+#include <memory>
+#include <mutex>
+
+namespace {
+struct DualTileLoadState {
+    explicit DualTileLoadState(const std::shared_ptr<::djinni::Promise<std::shared_ptr<TextureLoaderResult>>> &promise,
+                               std::function<void(const TextureLoaderResult &, const TextureLoaderResult &)> onBothOk)
+        : promise(promise)
+        , onBothOk(std::move(onBothOk)) {}
+
+    void complete(const TextureLoaderResult &result, bool isElevationResult) {
+        std::lock_guard<std::mutex> lock(mutex);
+        if (resolved) {
+            return;
+        }
+
+        if (isElevationResult) {
+            elevationResult = result;
+            if (result.status != LoaderStatus::OK) {
+                resolved = true;
+                promise->setValue(std::make_shared<TextureLoaderResult>(result));
+                return;
+            }
+        } else {
+            rasterResult = result;
+            if (result.status != LoaderStatus::OK) {
+                resolved = true;
+                promise->setValue(std::make_shared<TextureLoaderResult>(result));
+                return;
+            }
+        }
+
+        if (rasterResult.has_value() && elevationResult.has_value()) {
+            onBothOk(*rasterResult, *elevationResult);
+            resolved = true;
+            promise->setValue(std::make_shared<TextureLoaderResult>(*rasterResult));
+        }
+    }
+
+    std::shared_ptr<::djinni::Promise<std::shared_ptr<TextureLoaderResult>>> promise;
+    std::mutex mutex;
+    std::optional<TextureLoaderResult> rasterResult;
+    std::optional<TextureLoaderResult> elevationResult;
+    std::function<void(const TextureLoaderResult &, const TextureLoaderResult &)> onBothOk;
+    bool resolved = false;
+};
+} // namespace
+
+TiledDisplacedRasterSource::TiledDisplacedRasterSource(const MapConfig &mapConfig,
+                                                       const std::shared_ptr<Tiled2dMapLayerConfig> &layerConfig,
+                                                       const std::shared_ptr<Tiled2dMapLayerConfig> &elevationConfig,
+                                                       const std::shared_ptr<CoordinateConversionHelperInterface> &conversionHelper,
+                                                       const std::shared_ptr<SchedulerInterface> &scheduler,
+                                                       const std::vector<std::shared_ptr<::LoaderInterface>> &loaders,
+                                                       const WeakActor<Tiled2dMapRasterSourceListener> &listener,
+                                                       float screenDensityPpi, std::string layerName)
+    : Tiled2dMapRasterSource(mapConfig, layerConfig, conversionHelper, scheduler, loaders, listener, screenDensityPpi, layerName)
+    , elevationConfig(elevationConfig)
+    , displacedTileSelection(makeDisplacedTerrainTiled2dMap3dTileSelection<RasterSourceBase>()) {}
+
+void TiledDisplacedRasterSource::cancelLoad(Tiled2dMapTileInfo tile, size_t loaderIndex) {
+    const std::string rasterUrl = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+    const std::string elevationUrl = elevationConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+
+    loaders[loaderIndex]->cancel(rasterUrl);
+    if (elevationUrl != rasterUrl) {
+        loaders[loaderIndex]->cancel(elevationUrl);
+    }
+}
+
+::djinni::Future<std::shared_ptr<TextureLoaderResult>> TiledDisplacedRasterSource::loadDataAsync(Tiled2dMapTileInfo tile,
+                                                                                                 size_t loaderIndex) {
+    const std::string rasterUrl = layerConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+    const std::string elevationUrl = elevationConfig->getTileUrl(tile.x, tile.y, tile.t, tile.zoomIdentifier);
+
+    auto promise = std::make_shared<::djinni::Promise<std::shared_ptr<TextureLoaderResult>>>();
+    auto weakSelf = weak_from_this();
+    auto state = std::make_shared<DualTileLoadState>(
+        promise, [weakSelf, tile](const TextureLoaderResult &rasterResult, const TextureLoaderResult &elevationResult) {
+            auto self = std::dynamic_pointer_cast<TiledDisplacedRasterSource>(weakSelf.lock());
+            if (!self) {
+                return;
+            }
+
+            std::lock_guard<std::mutex> lock(self->elevationTextureHoldersMutex);
+            if (rasterResult.status == LoaderStatus::OK && elevationResult.status == LoaderStatus::OK) {
+                self->elevationTextureHolders[tile] = elevationResult.data;
+            }
+        });
+
+    loaders[loaderIndex]->loadTextureAsync(rasterUrl, std::nullopt).then([state](::djinni::Future<::TextureLoaderResult> result) {
+        state->complete(result.get(), false);
+    });
+
+    loaders[loaderIndex]
+        ->loadTextureAsync(elevationUrl, std::nullopt)
+        .then([state](::djinni::Future<::TextureLoaderResult> result) { state->complete(result.get(), true); });
+
+    return promise->getFuture();
+}
+
+const Tiled2dMap3dTileSelection<TiledDisplacedRasterSource::RasterSourceBase> &
+TiledDisplacedRasterSource::get3dTileSelection() const {
+    return *displacedTileSelection;
+}
+
+void TiledDisplacedRasterSource::notifyTilesUpdates() {
+    VectorSet<Tiled2dMapRasterTileInfo> currentTileInfos;
+    currentTileInfos.reserve(currentTiles.size());
+
+    std::lock_guard<std::mutex> lock(elevationTextureHoldersMutex);
+    for (auto it = currentTiles.rbegin(); it != currentTiles.rend(); it++) {
+        const auto &[tileInfo, tileWrapper] = *it;
+
+        auto elevationHolderIt = elevationTextureHolders.find(tileInfo);
+        auto elevationHolder = elevationHolderIt != elevationTextureHolders.end() ? elevationHolderIt->second : nullptr;
+
+        currentTileInfos.insert(Tiled2dMapRasterTileInfo(Tiled2dMapVersionedTileInfo(tileInfo, (size_t)tileWrapper.result.get()),
+                                                         tileWrapper.result, tileWrapper.masks, tileWrapper.state,
+                                                         tileWrapper.tessellationFactor, elevationHolder));
+    }
+
+    rasterLayerActor.message(MailboxDuplicationStrategy::replaceNewest, MFN(&Tiled2dMapRasterSourceListener::onTilesUpdated),
+                             layerConfig->getLayerName(), std::move(currentTileInfos));
+}
+
+void TiledDisplacedRasterSource::onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels,
+                                                       int keepZoomLevelOffset) {
+    Tiled2dMapRasterSource::onVisibleTilesChanged(pyramid, keepMultipleLevels, keepZoomLevelOffset);
+
+    std::lock_guard<std::mutex> lock(elevationTextureHoldersMutex);
+
+    for (auto it = elevationTextureHolders.begin(); it != elevationTextureHolders.end();) {
+        if (currentTiles.find(it->first) == currentTiles.end() && currentlyLoading.find(it->first) == currentlyLoading.end()) {
+            it = elevationTextureHolders.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}

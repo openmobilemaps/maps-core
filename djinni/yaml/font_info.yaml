@@ -8,6 +8,9 @@ cpp:
   typename: '::FontInfo'
   header: '"FontInfo.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCFontInfo'
   pointer: true

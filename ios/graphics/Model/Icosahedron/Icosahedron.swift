@@ -11,7 +11,6 @@
 import Foundation
 import MapCoreSharedModule
 @preconcurrency import Metal
-import UIKit
 
 final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
     private var shader: MCShaderProgramInterface
@@ -39,7 +38,7 @@ final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
     override func render(
         encoder: MTLRenderCommandEncoder,
         context: RenderingContext,
-        renderPass _: MCRenderPassConfig,
+        renderPass: MCRenderPassConfig,
         vpMatrix: Int64,
         mMatrix: Int64,
         origin: MCVec3D,
@@ -76,12 +75,6 @@ final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
 
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
-
         encoder.drawIndexedPrimitives(
             type: .triangle,
             indexCount: indicesCount,
@@ -94,7 +87,7 @@ final class Icosahedron: BaseGraphicsObject, @unchecked Sendable {
 extension Icosahedron: MCMaskingObjectInterface {
     func render(
         asMask context: MCRenderingContextInterface?,
-        renderPass _: MCRenderPassConfig,
+        renderPass: MCRenderPassConfig,
         vpMatrix: Int64,
         mMatrix: Int64,
         origin: MCVec3D,
@@ -123,22 +116,14 @@ extension Icosahedron: MCMaskingObjectInterface {
             }
         #endif
 
-        if let mask = context.polygonMask {
-            encoder.setStencilReferenceValue(0xFF)
-            encoder.setDepthStencilState(mask)
-        }
+        applyMaskWriteState(context: context, renderPass: renderPass)
 
         // stencil prepare pass
-        shader.setupProgram(context)
+        shader.setupMaskProgram(context)
+        defer { shader.finishMaskProgram() }
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         encoder.drawIndexedPrimitives(
             type: .triangle,

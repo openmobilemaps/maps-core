@@ -16,6 +16,7 @@ class Quad2dInterface;
 class Quad2dStretchedInstancedInterface;
 class TextInstancedInterface;
 class TextInterface;
+class TexturedPolygonInterface;
 
 class GraphicsObjectFactoryInterface {
 public:
@@ -23,7 +24,11 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuad(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 
+    virtual /*not-null*/ std::shared_ptr<TexturedPolygonInterface> createTexturedPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+
     virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuadTessellated(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<Quad2dInterface> createQuadTessellatedDisplaced() = 0;
 
     virtual /*not-null*/ std::shared_ptr<Polygon2dInterface> createPolygon(const /*not-null*/ std::shared_ptr<::ShaderProgramInterface> & shader) = 0;
 

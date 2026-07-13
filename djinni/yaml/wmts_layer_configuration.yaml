@@ -8,6 +8,9 @@ cpp:
   typename: '::WmtsLayerConfiguration'
   header: '"WmtsLayerConfiguration.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCWmtsLayerConfiguration'
   pointer: true

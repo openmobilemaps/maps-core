@@ -26,6 +26,9 @@ em::val NativeTiled2dMapRasterLayerInterface::cppProxyMethods() {
         "setStyle",
         "getStyle",
         "setMinMagFilter",
+        "setUseMaskTileGeometry",
+        "setTileLoadingPaused",
+        "setZoomLevelScaleFactor",
         "setMinZoomLevelIdentifier",
         "getMinZoomLevelIdentifier",
         "setMaxZoomLevelIdentifier",
@@ -65,6 +68,17 @@ em::val NativeTiled2dMapRasterLayerInterface::create(const em::val& w_layerConfi
     try {
         auto r = ::Tiled2dMapRasterLayerInterface::create(::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(w_layerConfig),
                ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(w_loaders));
+        return ::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeTiled2dMapRasterLayerInterface>::handleNativeException(e);
+    }
+}
+em::val NativeTiled2dMapRasterLayerInterface::createDisplaced(const em::val& w_layerConfig,const em::val& w_elevationConfig,const em::val& w_loaders) {
+    try {
+        auto r = ::Tiled2dMapRasterLayerInterface::createDisplaced(::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(w_layerConfig),
+                        ::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(w_elevationConfig),
+                        ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(w_loaders));
         return ::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(r);
     }
     catch(const std::exception& e) {
@@ -142,6 +156,30 @@ em::val NativeTiled2dMapRasterLayerInterface::getStyle(const CppType& self) {
 void NativeTiled2dMapRasterLayerInterface::setMinMagFilter(const CppType& self, int32_t w_filterType) {
     try {
         self->setMinMagFilter(::djinni_generated::NativeTextureFilterType::toCpp(w_filterType));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeTiled2dMapRasterLayerInterface::setUseMaskTileGeometry(const CppType& self, bool w_enabled) {
+    try {
+        self->setUseMaskTileGeometry(::djinni::Bool::toCpp(w_enabled));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeTiled2dMapRasterLayerInterface::setTileLoadingPaused(const CppType& self, bool w_paused) {
+    try {
+        self->setTileLoadingPaused(::djinni::Bool::toCpp(w_paused));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeTiled2dMapRasterLayerInterface::setZoomLevelScaleFactor(const CppType& self, float w_value) {
+    try {
+        self->setZoomLevelScaleFactor(::djinni::F32::toCpp(w_value));
     }
     catch(const std::exception& e) {
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
@@ -230,6 +268,7 @@ EMSCRIPTEN_BINDINGS(_tiled_2d_map_raster_layer_interface) {
         .class_function("createWithMask", NativeTiled2dMapRasterLayerInterface::createWithMask)
         .class_function("createWithShader", NativeTiled2dMapRasterLayerInterface::createWithShader)
         .class_function("create", NativeTiled2dMapRasterLayerInterface::create)
+        .class_function("createDisplaced", NativeTiled2dMapRasterLayerInterface::createDisplaced)
         .function("asLayerInterface", NativeTiled2dMapRasterLayerInterface::asLayerInterface)
         .function("setCallbackHandler", NativeTiled2dMapRasterLayerInterface::setCallbackHandler)
         .function("getCallbackHandler", NativeTiled2dMapRasterLayerInterface::getCallbackHandler)
@@ -239,6 +278,9 @@ EMSCRIPTEN_BINDINGS(_tiled_2d_map_raster_layer_interface) {
         .function("setStyle", NativeTiled2dMapRasterLayerInterface::setStyle)
         .function("getStyle", NativeTiled2dMapRasterLayerInterface::getStyle)
         .function("setMinMagFilter", NativeTiled2dMapRasterLayerInterface::setMinMagFilter)
+        .function("setUseMaskTileGeometry", NativeTiled2dMapRasterLayerInterface::setUseMaskTileGeometry)
+        .function("setTileLoadingPaused", NativeTiled2dMapRasterLayerInterface::setTileLoadingPaused)
+        .function("setZoomLevelScaleFactor", NativeTiled2dMapRasterLayerInterface::setZoomLevelScaleFactor)
         .function("setMinZoomLevelIdentifier", NativeTiled2dMapRasterLayerInterface::setMinZoomLevelIdentifier)
         .function("getMinZoomLevelIdentifier", NativeTiled2dMapRasterLayerInterface::getMinZoomLevelIdentifier)
         .function("setMaxZoomLevelIdentifier", NativeTiled2dMapRasterLayerInterface::setMaxZoomLevelIdentifier)

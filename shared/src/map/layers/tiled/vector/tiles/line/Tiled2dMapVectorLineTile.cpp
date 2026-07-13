@@ -59,14 +59,15 @@ void Tiled2dMapVectorLineTile::updateVectorLayerDescription(const std::shared_pt
     }
 }
 
-void Tiled2dMapVectorLineTile::update() {
+bool Tiled2dMapVectorLineTile::update() {
     if (shaders.empty()) {
-        return;
+        hasAnimatedLineStyles = false;
+        return false;
     }
 
     if (!toClear.empty()) {
         for (auto const &line: toClear) {
-            if (line->getLineObject()->isReady()) line->getLineObject()->clear();
+            line->getLineObject()->clear();
         }
         toClear.clear();
     }
@@ -74,7 +75,8 @@ void Tiled2dMapVectorLineTile::update() {
     auto mapInterface = this->mapInterface.lock();
     auto camera = mapInterface ? mapInterface->getCamera() : nullptr;
     if (!mapInterface || !camera) {
-        return;
+        hasAnimatedLineStyles = false;
+        return false;
     }
 
     const double cameraZoom = camera->getZoom();
@@ -99,7 +101,8 @@ void Tiled2dMapVectorLineTile::update() {
     }
 
     if (!inZoomRange) {
-        return;
+        hasAnimatedLineStyles = false;
+        return false;
     }
 
     for (auto const &line: lines) {
@@ -109,11 +112,12 @@ void Tiled2dMapVectorLineTile::update() {
     if (lastAlpha == alpha &&
         lastZoom &&
         ((isStyleZoomDependant && *lastZoom == zoomIdentifier) || !isStyleZoomDependant) && !isStyleStateDependant) {
-        return;
+        return hasAnimatedLineStyles;
     }
 
     lastZoom = zoomIdentifier;
     lastAlpha = alpha;
+    hasAnimatedLineStyles = false;
 
     size_t numStyleGroups = featureGroups.size();
     for (int styleGroupId = 0; styleGroupId < numStyleGroups; styleGroupId++) {
@@ -241,6 +245,21 @@ void Tiled2dMapVectorLineTile::update() {
                     needsUpdate = true;
                 }
 
+                auto dashFade = toHalfFloat(inZoomRange ? lineDescription->style.getLineDashFade(context) : 0.0);
+                if (dashFade != style.dashFade) {
+                    style.dashFade = dashFade;
+                    needsUpdate = true;
+                }
+
+                auto dashAnimationSpeed = inZoomRange ? lineDescription->style.getLineDashAnimationSpeed(context) : 0.0;
+                if (std::abs(dashAnimationSpeed) > std::numeric_limits<float>().epsilon()) {
+                    hasAnimatedLineStyles = true;
+                }
+                if (toHalfFloat(dashAnimationSpeed) != style.dashAnimationSpeed) {
+                    style.dashAnimationSpeed = toHalfFloat(dashAnimationSpeed);
+                    needsUpdate = true;
+                }
+
                 // line caps
                 auto lineCap = lineDescription->style.getLineCap(context);
 
@@ -296,11 +315,13 @@ void Tiled2dMapVectorLineTile::update() {
             }
         }
     }
+
+    return hasAnimatedLineStyles;
 }
 
 void Tiled2dMapVectorLineTile::clear() {
     for (auto const &line: lines) {
-        if (line->getLineObject()->isReady()) line->getLineObject()->clear();
+        line->getLineObject()->clear();
     }
 }
 
@@ -313,6 +334,26 @@ void Tiled2dMapVectorLineTile::setup() {
     for (auto const &line: lines) {
         auto const &lineObject = line->getLineObject();
         if (!lineObject->isReady()) lineObject->setup(context);
+    }
+    auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
+    tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
+}
+
+void Tiled2dMapVectorLineTile::pause() {
+    for (auto const &line: lines) {
+        if (line->getLineObject()->isReady()) line->getLineObject()->pause();
+    }
+}
+
+void Tiled2dMapVectorLineTile::resume() {
+    auto mapInterface = this->mapInterface.lock();
+    if (!mapInterface) {
+        return;
+    }
+    const auto &context = mapInterface->getRenderingContext();
+    for (auto const &line: lines) {
+        auto const &lineObject = line->getLineObject();
+        if (!lineObject->isReady()) lineObject->resume(context);
     }
     auto selfActor = WeakActor<Tiled2dMapVectorTile>(mailbox, shared_from_this());
     tileCallbackInterface.message(MFN(&Tiled2dMapVectorLayerTileCallbackInterface::tileIsReady), tileInfo, description->identifier, selfActor);
@@ -456,7 +497,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                         size_t startOffset = coordinateOffset > 0 ? coordinateOffset - 1 : 0; // always include first coordinate of last split (if any)
 
                         uint64_t newLineVertexCount = LineGeometryBuilder::estimateVertexCount(excludingEndOffset - startOffset);
-                        int vertexCount = subGroupVertexCount[styleGroupIndex];
+                        uint64_t vertexCount = subGroupVertexCount[styleGroupIndex];
 
                         // Check if adding this line would exceed vertex limit for current subgroup
                         // Split into new subgroup if we exceed the limit
@@ -470,7 +511,7 @@ void Tiled2dMapVectorLineTile::setVectorTileData(const Tiled2dMapVectorTileDataV
                         }
 
                         styleGroupLineSubGroupVector[styleGroupIndex].push_back({std::vector<::Vec2D>(coordinates.begin() + startOffset, coordinates.begin() + excludingEndOffset), std::min(maxStylesPerGroup - 1, styleIndex)});
-                        subGroupVertexCount[styleGroupIndex] = (int)subGroupVertexCount[styleGroupIndex] + newLineVertexCount;
+                        subGroupVertexCount[styleGroupIndex] += newLineVertexCount;
                     }
 
                     if (isInteractable) {
@@ -560,7 +601,7 @@ void Tiled2dMapVectorLineTile::addLines(const std::vector<std::vector<std::vecto
     std::vector<std::shared_ptr<RenderObjectInterface>> newRenderObjects;
     for (auto const &object : lines) {
         for (const auto &config : object->getRenderConfig()) {
-            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+            newRenderObjects.push_back(std::make_shared<RenderObject>(config->getGraphicsObject(), config->getMaskingObject()));
         }
     }
     renderObjects = newRenderObjects;

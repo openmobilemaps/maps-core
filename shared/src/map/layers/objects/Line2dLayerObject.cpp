@@ -46,10 +46,30 @@ void Line2dLayerObject::update() {}
 
 std::vector<std::shared_ptr<RenderConfigInterface>> Line2dLayerObject::getRenderConfig() { return renderConfig; }
 
-void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const Vec3D & origin) {
-    std::vector<uint32_t> lineIndices;
-    std::vector<float> lineAttributes;
+void Line2dLayerObject::setPositions(const std::vector<Coord> &positions) {
+    if (positions.empty()) {
+        setPositions(positions, Vec3D(0.0, 0.0, 0.0));
+    }
 
+    // Somewhat arbitrarily pick first line point as origin.
+    Coord origin = positions.front();
+    origin.z = 0.0; // XXX must apparently be zero, otherwise fails to build renderable lines
+    Vec3D renderOrigin = Vec3DHelper::toVec(conversionHelper->convertToRenderSystem(origin));
+    if (is3d) {
+        double sinX, sinY, cosX, cosY;
+        lut::sincos(renderOrigin.x, sinX, cosX);
+        lut::sincos(renderOrigin.y, sinY, cosY);
+        
+        double x =  renderOrigin.z * sinY * cosX;
+        double y =  renderOrigin.z * cosY;
+        double z = -renderOrigin.z * sinY * sinX;
+        renderOrigin = Vec3D(x, y, z);
+    }
+
+    setPositions(positions, renderOrigin);
+}
+
+void Line2dLayerObject::setPositions(const std::vector<Coord> &positions, const Vec3D & origin) {
     std::vector<Vec3D> renderCoords;
     for (auto const &mapCoord : positions) {
         const auto& renderCoord = conversionHelper->convertToRenderSystem(mapCoord);
@@ -74,8 +94,10 @@ void Line2dLayerObject::setStyle(const LineStyle &style_) {
 }
 
 void Line2dLayerObject::setHighlighted(bool highlighted_) {
-    highlighted = highlighted_;
-    setStyle(style, highlighted);
+    if (highlighted != highlighted_) {
+        highlighted = highlighted_;
+        setStyle(style, highlighted);
+    }
 }
 
 void Line2dLayerObject::setStyle(const LineStyle &style, bool highlighted) {

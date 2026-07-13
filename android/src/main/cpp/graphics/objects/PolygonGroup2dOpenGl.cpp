@@ -9,7 +9,6 @@
  */
 
 #include "PolygonGroup2dOpenGl.h"
-#include "RenderVerticesDescription.h"
 #include <cmath>
 #include <cstring>
 
@@ -17,6 +16,8 @@ PolygonGroup2dOpenGl::PolygonGroup2dOpenGl(const std::shared_ptr<::BaseShaderPro
     : shaderProgram(shader) {}
 
 std::shared_ptr<GraphicsObjectInterface> PolygonGroup2dOpenGl::asGraphicsObject() { return shared_from_this(); }
+
+std::shared_ptr<MaskingObjectInterface> PolygonGroup2dOpenGl::asMaskingObject() { return shared_from_this(); }
 
 bool PolygonGroup2dOpenGl::isReady() { return ready; }
 
@@ -26,6 +27,7 @@ PolygonGroup2dOpenGl::setVertices(const ::SharedBytes & vertices, const ::Shared
     ready = false;
     dataReady = false;
 
+    polygonIndicesSize = indices.elementCount;
     polygonIndices.resize(indices.elementCount);
     polygonAttributes.resize(vertices.elementCount);
     polygonOrigin = origin;
@@ -69,6 +71,10 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     }
     glBindBuffer(GL_ARRAY_BUFFER, attribBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * polygonAttributes.size(), &polygonAttributes[0], GL_STATIC_DRAW);
+    if (!clearOnPause) {
+        polygonAttributes = {};
+        dataReady = false;
+    }
 
     size_t floatSize = sizeof(GLfloat);
     size_t stride = 4 * floatSize;
@@ -84,6 +90,10 @@ void PolygonGroup2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterfa
     }
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLushort) * polygonIndices.size(), &polygonIndices[0], GL_STATIC_DRAW);
+    if (!clearOnPause) {
+        polygonIndices = {};
+        dataReady = false;
+    }
 
     glBindVertexArray(0);
 
@@ -123,9 +133,23 @@ void PolygonGroup2dOpenGl::removeGlBuffers() {
 
 void PolygonGroup2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
 
+void PolygonGroup2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context,
+                                        const RenderPassConfig &renderPass,
+                                        int64_t vpMatrix,
+                                        int64_t mMatrix,
+                                        const ::Vec3D &origin,
+                                        double screenPixelAsRealMeterFactor,
+                                        bool isScreenSpaceCoords) {
+    glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+    render(context, renderPass, vpMatrix, mMatrix, origin, false, screenPixelAsRealMeterFactor, isScreenSpaceCoords);
+    glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+}
+
 void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                   int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
                                   bool isMasked, double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
+    disableDepthTest();
+
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || !shaderProgram->isRenderable())
         return;
@@ -134,15 +158,21 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
     GLuint validTarget = 0;
     GLenum zpass = GL_KEEP;
     if (isMasked) {
-        stencilMask += 128;
-        validTarget = isMaskInversed ? 0 : 128;
+        if (renderPass.stencilReadMask != 0) {
+            stencilMask = static_cast<GLuint>(renderPass.stencilReadMask);
+            validTarget = static_cast<GLuint>(renderPass.stencilReadReference);
+        } else {
+            stencilMask += 128;
+            validTarget = isMaskInversed ? 0 : 128;
+        }
     }
     if (renderPass.isPassMasked) {
-        stencilMask += 127;
+        stencilMask |= 127;
         zpass = GL_INCR;
     }
 
     if (stencilMask != 0) {
+        glStencilMask(0xFF);
         glStencilFunc(GL_EQUAL, validTarget, stencilMask);
         glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }
@@ -164,7 +194,7 @@ void PolygonGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterf
 
     shaderProgram->preRender(context, isScreenSpaceCoords);
 
-    glDrawElements(GL_TRIANGLES, polygonIndices.size(), GL_UNSIGNED_SHORT, nullptr);
+    glDrawElements(GL_TRIANGLES, polygonIndicesSize, GL_UNSIGNED_SHORT, nullptr);
 
     glBindVertexArray(0);
 

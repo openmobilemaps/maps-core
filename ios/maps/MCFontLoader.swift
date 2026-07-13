@@ -9,7 +9,6 @@
  */
 
 import MapCoreSharedModule
-import UIKit
 import os
 
 open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
@@ -24,17 +23,35 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
     private let bundle: Bundle
 
     // the bundle to use for searching for fonts
+    //
+    // `resourcePath` is accepted for backwards-compat with the pre-feature/kmp-2 init
+    // signature (e.g. fluid-meteogram's `OpenMobileMapsKmpBridge.createFontLoader`). The
+    // parameter is ignored on this branch — fonts are resolved directly inside the provided
+    // bundle.
+    public convenience init(bundle: Bundle, resourcePath: String?, preload: [String] = []) {
+        self.init(bundle: bundle, preload: preload)
+    }
+
+    // Single-argument Obj-C-exposed init so Kotlin/Native's swiftPMImport can call
+    // `MCFontLoader(bundle: bundle)` without going through an Obj-C bridge class. The Swift
+    // `init(bundle:preload:)` below takes a default-valued `preload: [String] = []` which isn't
+    // visible to Obj-C, so we need an explicit selector here.
+    @objc(initWithBundle:)
+    public convenience init(bundle: Bundle) {
+        self.init(bundle: bundle, preload: [])
+    }
+
     public init(bundle: Bundle, preload: [String] = []) {
         self.bundle = bundle
         pixelsPerInch =
             if Thread.isMainThread {
                 MainActor.assumeIsolated {
-                    UIScreen.pixelsPerInch
+                    Double(MCDisplayMetrics.pixelsPerInch(for: nil))
                 }
             } else {
                 DispatchQueue.main.sync {
                     MainActor.assumeIsolated {
-                        UIScreen.pixelsPerInch
+                        Double(MCDisplayMetrics.pixelsPerInch(for: nil))
                     }
                 }
             }
@@ -73,54 +90,7 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
         if let path = bundle.path(forResource: font.name, ofType: "json") {
             do {
                 let data = try Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
-                let jsonResult = try JSONSerialization.jsonObject(with: data, options: .mutableLeaves)
-                if let jsonResult = jsonResult as? [String: AnyObject] {
-                    let fontInfoJson = jsonResult["info"] as! [String: AnyObject]
-                    let commonJson = jsonResult["common"] as! [String: AnyObject]
-                    let distanceFieldJson = jsonResult["distanceField"] as! [String: AnyObject]
-
-                    let size = double(dict: fontInfoJson, value: "size")
-                    let imageSize = double(dict: commonJson, value: "scaleW")
-
-                    let fontInfo = MCFontWrapper(
-                        name: font.name,
-                        lineHeight: double(dict: commonJson, value: "lineHeight") / size,
-                        base: double(dict: commonJson, value: "base") / size,
-                        bitmapSize: MCVec2D(x: imageSize, y: imageSize),
-                        size: size,
-                        distanceRange: double(dict: distanceFieldJson, value: "distanceRange"))
-
-                    var glyphs: [MCFontGlyph] = []
-
-                    for g in jsonResult["chars"] as! [NSDictionary] {
-                        var glyph: [String: AnyObject] = [:]
-                        for a in g {
-                            glyph[a.key as! String] = a.value as AnyObject
-                        }
-
-                        let character = string(dict: glyph, value: "char")
-
-                        var s0 = double(dict: glyph, value: "x")
-                        var s1 = s0 + double(dict: glyph, value: "width")
-                        var t0 = double(dict: glyph, value: "y")
-                        var t1 = t0 + double(dict: glyph, value: "height")
-
-                        s0 = s0 / imageSize
-                        s1 = s1 / imageSize
-                        t0 = t0 / imageSize
-                        t1 = t1 / imageSize
-
-                        let bearing = MCVec2D(x: double(dict: glyph, value: "xoffset") / size, y: -double(dict: glyph, value: "yoffset") / size)
-
-                        let uv = MCQuad2dD(topLeft: MCVec2D(x: s0, y: t1), topRight: MCVec2D(x: s1, y: t1), bottomRight: MCVec2D(x: s1, y: t0), bottomLeft: MCVec2D(x: s0, y: t0))
-
-                        let glyphGlyhph = MCFontGlyph(
-                            charCode: character, advance: MCVec2D(x: double(dict: glyph, value: "xadvance") / size, y: 0.0), boundingBoxSize: MCVec2D(x: double(dict: glyph, value: "width") / size, y: double(dict: glyph, value: "height") / size),
-                            bearing: bearing, uv: uv)
-                        glyphs.append(glyphGlyhph)
-                    }
-
-                    let fontData = MCFontData(info: fontInfo, glyphs: glyphs)
+                if let fontData = Self.parseFontData(data, fontName: font.name) {
                     fontDataDictionary[font.name] = fontData
 
                     return fontData
@@ -133,11 +103,87 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
         return nil
     }
 
-    private func double(dict: [String: AnyObject], value: String) -> Double {
+    public static func parseFontData(_ data: Data, fontName: String) -> MCFontData? {
+        guard
+            let jsonResult = try? JSONSerialization.jsonObject(with: data, options: .mutableLeaves) as? [String: AnyObject],
+            let fontInfoJson = jsonResult["info"] as? [String: AnyObject],
+            let commonJson = jsonResult["common"] as? [String: AnyObject],
+            let distanceFieldJson = jsonResult["distanceField"] as? [String: AnyObject],
+            let chars = jsonResult["chars"] as? [NSDictionary]
+        else {
+            return nil
+        }
+
+        let size = double(dict: fontInfoJson, value: "size")
+        let imageSize = double(dict: commonJson, value: "scaleW")
+        guard size != 0.0, imageSize != 0.0 else {
+            return nil
+        }
+
+        let fontInfo = MCFontWrapper(
+            name: fontName,
+            lineHeight: double(dict: commonJson, value: "lineHeight") / size,
+            base: double(dict: commonJson, value: "base") / size,
+            bitmapSize: MCVec2D(x: imageSize, y: imageSize),
+            size: size,
+            distanceRange: double(dict: distanceFieldJson, value: "distanceRange"))
+
+        var glyphs: [MCFontGlyph] = []
+        glyphs.reserveCapacity(chars.count)
+
+        for entry in chars {
+            var glyph: [String: AnyObject] = [:]
+            for attribute in entry {
+                guard let key = attribute.key as? String else { continue }
+                glyph[key] = attribute.value as AnyObject
+            }
+
+            let character = string(dict: glyph, value: "char")
+
+            var s0 = double(dict: glyph, value: "x")
+            var s1 = s0 + double(dict: glyph, value: "width")
+            var t0 = double(dict: glyph, value: "y")
+            var t1 = t0 + double(dict: glyph, value: "height")
+
+            s0 = s0 / imageSize
+            s1 = s1 / imageSize
+            t0 = t0 / imageSize
+            t1 = t1 / imageSize
+
+            let bearing = MCVec2D(
+                x: double(dict: glyph, value: "xoffset") / size,
+                y: -double(dict: glyph, value: "yoffset") / size
+            )
+
+            let uv = MCQuad2dD(
+                topLeft: MCVec2D(x: s0, y: t1),
+                topRight: MCVec2D(x: s1, y: t1),
+                bottomRight: MCVec2D(x: s1, y: t0),
+                bottomLeft: MCVec2D(x: s0, y: t0)
+            )
+
+            glyphs.append(
+                MCFontGlyph(
+                    charCode: character,
+                    advance: MCVec2D(x: double(dict: glyph, value: "xadvance") / size, y: 0.0),
+                    boundingBoxSize: MCVec2D(
+                        x: double(dict: glyph, value: "width") / size,
+                        y: double(dict: glyph, value: "height") / size
+                    ),
+                    bearing: bearing,
+                    uv: uv
+                )
+            )
+        }
+
+        return MCFontData(info: fontInfo, glyphs: glyphs)
+    }
+
+    private static func double(dict: [String: AnyObject], value: String) -> Double {
         (dict[value] as? NSNumber)?.doubleValue ?? 0.0
     }
 
-    private func string(dict: [String: AnyObject], value: String) -> String {
+    private static func string(dict: [String: AnyObject], value: String) -> String {
         (dict[value] as? String) ?? ""
     }
 
@@ -146,13 +192,15 @@ open class MCFontLoader: NSObject, MCFontLoaderInterface, @unchecked Sendable {
             return fontData
         }
 
-        let image = UIImage(named: font.name, in: bundle, compatibleWith: nil)
-
-        guard let cgImage = image?.cgImage,
-            let textureHolder = try? TextureHolder(cgImage)
-        else {
-            return nil
+        let textureHolder: TextureHolder?
+        if let path = bundle.path(forResource: font.name, ofType: "png"),
+            let data = try? Data(contentsOf: URL(fileURLWithPath: path), options: .mappedIfSafe)
+        {
+            textureHolder = try? TextureHolder(data)
+        } else {
+            textureHolder = nil
         }
+        guard let textureHolder else { return nil }
 
         fontAtlasDictionary[font.name] = textureHolder
 

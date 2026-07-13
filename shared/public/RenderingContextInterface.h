@@ -10,8 +10,11 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <string>
+#include <vector>
 
 class OpenGlRenderingContextInterface;
+class RenderTargetInterface;
 enum class RenderingCullMode;
 
 class RenderingContextInterface {
@@ -36,8 +39,18 @@ public:
 
     virtual void postRenderStencilMask() = 0;
 
+    virtual void clearStencilMask(int32_t clearMask) = 0;
+
+    virtual void setupStencilWriteMask(int32_t writeMask, int32_t reference) = 0;
+
     /** optional rectangle, remove scissoring when not set */
     virtual void applyScissorRect(const std::optional<::RectI> & scissorRect) = 0;
+
+    virtual /*not-null*/ std::shared_ptr<RenderTargetInterface> getCreateOffscreenRenderTarget(const std::string & name) = 0;
+
+    virtual void deleteOffscreenRenderTarget(const std::string & name) = 0;
+
+    virtual std::vector</*not-null*/ std::shared_ptr<RenderTargetInterface>> getOffscreenRenderTargets() = 0;
 
     virtual /*nullable*/ std::shared_ptr<OpenGlRenderingContextInterface> asOpenGlRenderingContext() = 0;
 };

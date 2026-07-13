@@ -26,6 +26,7 @@ struct NativeCoordinateSystemIdentifiers : ::djinni::JsInterface<::CoordinateSys
     static int32_t RENDERSYSTEM();
     static int32_t EPSG3857();
     static int32_t EPSG4326();
+    static int32_t EPSG4326System2D();
     static int32_t EPSG2056();
     static int32_t EPSG21781();
     static int32_t UnitSphere();

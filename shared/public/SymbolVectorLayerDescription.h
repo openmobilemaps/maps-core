@@ -224,9 +224,9 @@ public:
         return textTransformEvaluator.getResult(context, defaultValue).value;
     }
 
-    Vec2F getTextOffset(const EvaluationContext &context) {
+    FeatureValueEvaluationResult<Vec2F> getTextOffset(const EvaluationContext &context) {
         static const Vec2F defaultValue(0.0, 0.0);
-        return textOffsetEvaluator.getResult(context, defaultValue).value;
+        return textOffsetEvaluator.getResult(context, defaultValue);
     }
 
     double getTextRadialOffset(const EvaluationContext &context) {
@@ -515,9 +515,11 @@ public:
     style(style) {};
 
     std::unique_ptr<VectorLayerDescription> clone() override {
-        return std::make_unique<SymbolVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom, sourceMinZoom, sourceMaxZoom,
-                                                              filter ? filter->clone() : nullptr, style, renderPassIndex,
-                                                              interactable ? interactable : nullptr, selfMasked);
+        auto cloned = std::make_unique<SymbolVectorLayerDescription>(identifier, source, sourceLayer, minZoom, maxZoom, sourceMinZoom, sourceMaxZoom,
+                                                                     filter ? filter->clone() : nullptr, style, renderPassIndex,
+                                                                     interactable ? interactable : nullptr, selfMasked);
+        copyRenderPassOptionsTo(*cloned);
+        return cloned;
     }
 
     virtual UsedKeysCollection getUsedKeys() const override {

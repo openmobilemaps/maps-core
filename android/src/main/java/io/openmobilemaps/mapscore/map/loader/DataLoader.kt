@@ -135,9 +135,7 @@ open class DataLoader(
 
 			override fun onFailure(call: Call, e: IOException) {
 				when {
-					call.isCanceled() -> {
-						// Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
-					}
+					call.isCanceled() -> result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_OTHER, "Cancelled"))
 					e is SocketTimeoutException -> result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_TIMEOUT, null))
 					else -> result.setValue(TextureLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null))
 				}
@@ -169,9 +167,7 @@ open class DataLoader(
 		okHttpClient.newCall(request).enqueue(object : Callback {
 			override fun onFailure(call: Call, e: IOException) {
 				when {
-					call.isCanceled() -> {
-						// Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
-					}
+					call.isCanceled() -> result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_OTHER, "Cancelled"))
 					e is SocketTimeoutException -> result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_TIMEOUT, null))
 					else -> result.setValue(DataLoaderResult(null, null, LoaderStatus.ERROR_NETWORK, null))
 				}

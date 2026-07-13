@@ -12,6 +12,16 @@
             blue:(float)blue
            alpha:(float)alpha;
 
+- (void)setCircleStyle:(float)fillRed
+             fillGreen:(float)fillGreen
+              fillBlue:(float)fillBlue
+             fillAlpha:(float)fillAlpha
+             strokeRed:(float)strokeRed
+           strokeGreen:(float)strokeGreen
+            strokeBlue:(float)strokeBlue
+           strokeAlpha:(float)strokeAlpha
+           innerRadius:(float)innerRadius;
+
 - (nullable id<MCShaderProgramInterface>)asShaderProgramInterface;
 
 @end

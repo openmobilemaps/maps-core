@@ -34,7 +34,7 @@ class AlphaShader: BaseShader, @unchecked Sendable {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline else { return }
+        guard let pipeline = activePipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBuffer(buffer, offset: 0, index: 1)

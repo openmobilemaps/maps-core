@@ -8,6 +8,7 @@
 #include <atomic>
 #include <fstream>
 #include <random>
+#include <sstream>
 #include <thread>
 #include <vector>
 
@@ -17,7 +18,6 @@ std::vector<std::tuple<size_t, Vec2D, int, double, double, int64_t, int64_t>> re
     std::ifstream file(TestData::resolve(filename));
     std::string line;
 
-    std::string threadIdLabel, crossTileIdentifierLabel, coordLabel, zoomIdentifierLabel, xToleranceLabel, yToleranceLabel, animationDurationLabel, animationDelayLabel;
     size_t crossTileIdentifier;
     double coordX;
     double coordY;
@@ -28,7 +28,8 @@ std::vector<std::tuple<size_t, Vec2D, int, double, double, int64_t, int64_t>> re
     std::vector<std::string> tokens;
 
     while (std::getline(file, line)) {
-        std::istringstream iss(line);
+        std::istringstream iss;
+        iss.str(line);
         std::string token;
         tokens.clear();
         while (std::getline(iss, token, ',')) {

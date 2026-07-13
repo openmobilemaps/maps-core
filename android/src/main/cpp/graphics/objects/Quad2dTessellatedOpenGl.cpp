@@ -17,7 +17,7 @@
 Quad2dTessellatedOpenGl::Quad2dTessellatedOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
-bool Quad2dTessellatedOpenGl::isReady() { return ready && (!usesTextureCoords || textureHolder); }
+bool Quad2dTessellatedOpenGl::isReady() { return ready && (!usesTextureCoords || textureAttachment.isAttached()); }
 
 std::shared_ptr<GraphicsObjectInterface> Quad2dTessellatedOpenGl::asGraphicsObject() { return shared_from_this(); }
 
@@ -28,13 +28,30 @@ void Quad2dTessellatedOpenGl::clear() {
     if (ready) {
         removeGlBuffers();
     }
-    if (textureCoordsReady) {
-        removeTextureCoordsGlBuffers();
-    }
-    if (textureHolder) {
-        removeTexture();
-    }
+    removeTextureCoordsGlBuffers();
+    removeTexture();
     ready = false;
+}
+
+void Quad2dTessellatedOpenGl::pause() {
+    if (!clearOnPause) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    removeGlBuffers();
+    removeTextureCoordsGlBuffers();
+    textureAttachment.detach();
+    lookupTextureAttachment.detach();
+    ready = false;
+}
+
+void Quad2dTessellatedOpenGl::resume(const std::shared_ptr<::RenderingContextInterface> &context) {
+    if (!clearOnPause) {
+        return;
+    }
+    textureAttachment.attach();
+    lookupTextureAttachment.attach();
+    setup(context);
 }
 
 void Quad2dTessellatedOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
@@ -156,10 +173,10 @@ void Quad2dTessellatedOpenGl::computeGeometry(bool texCoordsOnly) {
         }
     }
 
-    float tMinX = factorWidth * textureCoordinates.x;
-    float tMaxX = factorWidth * (textureCoordinates.x + textureCoordinates.width);
-    float tMinY = factorHeight * textureCoordinates.y;
-    float tMaxY = factorHeight * (textureCoordinates.y + textureCoordinates.height);
+    float tMinX = textureAttachment.widthFactor() * textureCoordinates.x;
+    float tMaxX = textureAttachment.widthFactor() * (textureCoordinates.x + textureCoordinates.width);
+    float tMinY = textureAttachment.heightFactor() * textureCoordinates.y;
+    float tMaxY = textureAttachment.heightFactor() * (textureCoordinates.y + textureCoordinates.height);
 
     textureCoords = {tMinX, tMinY, tMaxX, tMinY, tMinX, tMaxY, tMaxX, tMaxY};
 }
@@ -213,6 +230,7 @@ void Quad2dTessellatedOpenGl::prepareTextureCoordsGlData(int program) {
     }
 
     textureUniformHandle = glGetUniformLocation(program, "textureSampler");
+    lookupTextureUniformHandle = glGetUniformLocation(program, "lookupTextureSampler");
 
     if (!texCoordBufferGenerated) {
         glGenBuffers(1, &textureCoordsBuffer);
@@ -253,38 +271,48 @@ void Quad2dTessellatedOpenGl::removeTextureCoordsGlBuffers() {
 void Quad2dTessellatedOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                                const std::shared_ptr<TextureHolderInterface> &textureHolder) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (this->textureHolder == textureHolder) {
-        return;
-    }
 
-    if (this->textureHolder != nullptr) {
-        removeTexture();
-    }
-
-    if (textureHolder != nullptr) {
-        texturePointer = textureHolder->attachToGraphics();
-
-        factorHeight = textureHolder->getImageHeight() * 1.0f / textureHolder->getTextureHeight();
-        factorWidth = textureHolder->getImageWidth() * 1.0f / textureHolder->getTextureWidth();
+    const bool newlyAttached = textureAttachment.attach(textureHolder);
+    if (newlyAttached) {
         computeGeometry(true);
 
         if (ready) {
             prepareTextureCoordsGlData(program);
         }
-        this->textureHolder = textureHolder;
     }
+    lookupTextureAttachment.clear();
+}
+
+void Quad2dTessellatedOpenGl::loadDualTexture(const std::shared_ptr<::RenderingContextInterface> &context,
+                                              const std::shared_ptr<TextureHolderInterface> &textureHolder,
+                                              const std::shared_ptr<TextureHolderInterface> &elevationHolder) {
+    loadTexture(context, textureHolder);
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    lookupTextureAttachment.attach(elevationHolder);
+}
+
+void Quad2dTessellatedOpenGl::loadTextures(const std::shared_ptr<::RenderingContextInterface> &context,
+                                           const std::shared_ptr<TextureHolderInterface> &textureHolder,
+                                           const std::shared_ptr<TextureHolderInterface> &lookupHolder,
+                                           const std::shared_ptr<TextureHolderInterface> &elevationHolder) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+
+    const bool newlyAttached = textureAttachment.attach(textureHolder);
+    if (newlyAttached) {
+        computeGeometry(true);
+
+        if (ready) {
+            prepareTextureCoordsGlData(program);
+        }
+    }
+    lookupTextureAttachment.attach(lookupHolder);
 }
 
 void Quad2dTessellatedOpenGl::removeTexture() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (textureHolder) {
-        textureHolder->clearFromGraphics();
-        textureHolder = nullptr;
-        texturePointer = -1;
-        if (textureCoordsReady) {
-            removeTextureCoordsGlBuffers();
-        }
-    }
+    textureAttachment.clear();
+    lookupTextureAttachment.clear();
+    removeTextureCoordsGlBuffers();
 }
 
 void Quad2dTessellatedOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
@@ -298,6 +326,10 @@ void Quad2dTessellatedOpenGl::renderAsMask(const std::shared_ptr<::RenderingCont
 void Quad2dTessellatedOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                           int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                           double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
+    if (disablesDepthTestBeforeRender()) {
+        disableDepthTest();
+    }
+
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || (usesTextureCoords && !textureCoordsReady) || !shaderProgram->isRenderable()) {
         return;
@@ -307,15 +339,21 @@ void Quad2dTessellatedOpenGl::render(const std::shared_ptr<::RenderingContextInt
     GLuint validTarget = 0;
     GLenum zpass = GL_KEEP;
     if (isMasked) {
-        stencilMask += 128;
-        validTarget = isMaskInversed ? 0 : 128;
+        if (renderPass.stencilReadMask != 0) {
+            stencilMask = static_cast<GLuint>(renderPass.stencilReadMask);
+            validTarget = static_cast<GLuint>(renderPass.stencilReadReference);
+        } else {
+            stencilMask += 128;
+            validTarget = isMaskInversed ? 0 : 128;
+        }
     }
     if (renderPass.isPassMasked) {
-        stencilMask += 127;
+        stencilMask |= 127;
         zpass = GL_INCR;
     }
 
     if (stencilMask != 0) {
+        glStencilMask(0xFF);
         glStencilFunc(GL_EQUAL, validTarget, stencilMask);
         glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }
@@ -350,8 +388,12 @@ void Quad2dTessellatedOpenGl::render(const std::shared_ptr<::RenderingContextInt
     glDisable(GL_BLEND);
 }
 
+bool Quad2dTessellatedOpenGl::disablesDepthTestBeforeRender() const {
+    return true;
+}
+
 void Quad2dTessellatedOpenGl::prepareTextureDraw(int program) {
-    if (!textureHolder) {
+    if (!textureAttachment.isAttached()) {
         return;
     }
 
@@ -359,7 +401,7 @@ void Quad2dTessellatedOpenGl::prepareTextureDraw(int program) {
     glActiveTexture(GL_TEXTURE0);
 
     // Bind the texture to this unit.
-    glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
+    glBindTexture(GL_TEXTURE_2D, textureAttachment.texture());
     if (textureFilterType.has_value()) {
         GLint filterParam = *textureFilterType == TextureFilterType::LINEAR ? GL_LINEAR : GL_NEAREST;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
@@ -368,6 +410,19 @@ void Quad2dTessellatedOpenGl::prepareTextureDraw(int program) {
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
     glUniform1i(textureUniformHandle, 0);
+
+    if (lookupTextureAttachment.isAttached() && lookupTextureUniformHandle >= 0) {
+        const int lookupUnit = getLookupTextureUnit();
+        glActiveTexture(GL_TEXTURE0 + lookupUnit);
+        glBindTexture(GL_TEXTURE_2D, lookupTextureAttachment.texture());
+        if (textureFilterType.has_value()) {
+            GLint filterParam = *textureFilterType == TextureFilterType::LINEAR ? GL_LINEAR : GL_NEAREST;
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
+        }
+        glUniform1i(lookupTextureUniformHandle, lookupUnit);
+        glActiveTexture(GL_TEXTURE0);
+    }
 }
 
 void Quad2dTessellatedOpenGl::setDebugLabel(const std::string &label) {

@@ -5,6 +5,7 @@ import type { Color, Vec3D } from "@djinni/maps-core/graphics/common/common"
 import type { GraphicsObjectFactoryInterface, Polygon2dInterface } from "@djinni/maps-core/graphics/objects/graphicsobjects"
 import type { CoordinateConversionHelperInterface, PolygonCoord } from "@djinni/maps-core/map/coordinates/coordinate_system"
 import type { LayerInterface } from "@djinni/maps-core/map/core"
+import type { BlendMode } from "@djinni/maps-core/graphics/shader/shader"
 
 export interface /*record*/ PolygonStyle {
     color: Color;
@@ -35,6 +36,7 @@ export interface PolygonLayerInterface {
     resetSelection(): void;
     setLayerClickable(isLayerClickable: boolean): void;
     setRenderPassIndex(index: number): void;
+    setBlendMode(blendMode: BlendMode): void;
 }
 export interface PolygonLayerInterface_statics {
     create(): PolygonLayerInterface;

@@ -8,7 +8,11 @@ cpp:
   typename: '::PolygonInfo'
   header: '"PolygonInfo.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCPolygonInfo'
   pointer: true
   hash: '%s.hash'

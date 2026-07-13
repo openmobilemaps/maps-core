@@ -8,7 +8,11 @@ cpp:
   typename: '::RectD'
   header: '"RectD.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCRectD'
   pointer: true
   hash: '%s.hash'

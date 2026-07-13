@@ -38,6 +38,8 @@ private:
         bool onClickConfirmed(const ::Vec2F & posScreen) override;
         bool onDoubleClick(const ::Vec2F & posScreen) override;
         bool onLongPress(const ::Vec2F & posScreen) override;
+        bool onHover(const ::Vec2F & posScreen) override;
+        bool onHoverComplete() override;
         bool onMove(const ::Vec2F & deltaScreen, bool confirmed, bool doubleClick) override;
         bool onMoveComplete() override;
         bool onOneFingerDoubleClickMoveComplete() override;
@@ -57,6 +59,8 @@ private:
     const jmethodID method_onClickConfirmed { ::djinni::jniGetMethodID(clazz.get(), "onClickConfirmed", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;)Z") };
     const jmethodID method_onDoubleClick { ::djinni::jniGetMethodID(clazz.get(), "onDoubleClick", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;)Z") };
     const jmethodID method_onLongPress { ::djinni::jniGetMethodID(clazz.get(), "onLongPress", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;)Z") };
+    const jmethodID method_onHover { ::djinni::jniGetMethodID(clazz.get(), "onHover", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;)Z") };
+    const jmethodID method_onHoverComplete { ::djinni::jniGetMethodID(clazz.get(), "onHoverComplete", "()Z") };
     const jmethodID method_onMove { ::djinni::jniGetMethodID(clazz.get(), "onMove", "(Lio/openmobilemaps/mapscore/shared/graphics/common/Vec2F;ZZ)Z") };
     const jmethodID method_onMoveComplete { ::djinni::jniGetMethodID(clazz.get(), "onMoveComplete", "()Z") };
     const jmethodID method_onOneFingerDoubleClickMoveComplete { ::djinni::jniGetMethodID(clazz.get(), "onOneFingerDoubleClickMoveComplete", "()Z") };

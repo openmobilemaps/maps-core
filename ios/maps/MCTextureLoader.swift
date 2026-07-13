@@ -9,14 +9,19 @@
  */
 
 import DjinniSupport
+import Foundation
 import MapCoreSharedModule
 import OSLog
-import UIKit
 
-@available(iOS 14.0, *)
+#if canImport(UIKit)
+    import UIKit
+#elseif canImport(AppKit) && !canImport(UIKit)
+    import AppKit
+#endif
+
 private let logger = Logger(subsystem: "maps-core", category: "MCTextureLoader")
 
-open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
+@objc open class MCTextureLoader: NSObject, MCLoaderInterface, @unchecked Sendable {
     public let session: URLSession
 
     public var isRasterDebugModeEnabled: Bool
@@ -26,7 +31,11 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
 
     public let urlCache = URLCache(memoryCapacity: 100 * 1024 * 1024, diskCapacity: 500 * 1024 * 1024, diskPath: "ch.openmobilemaps.urlcache")
 
-    public init(urlSession: URLSession? = nil) {
+    public convenience override init() {
+        self.init(urlSession: nil)
+    }
+
+    public init(urlSession: URLSession?) {
         if let urlSession {
             session = urlSession
         } else {
@@ -82,7 +91,9 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
             wasCached = true
         }
 
-        var task = session.dataTask(with: urlRequest) { [weak self, wasCached] data, response_, error_ in
+        let canModifyTextureData = canModifyTextureData(for: urlString)
+
+        var task = session.dataTask(with: urlRequest) { [weak self, wasCached, canModifyTextureData] data, response_, error_ in
             guard let self else { return }
 
             self.taskQueue.sync {
@@ -102,11 +113,9 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
             }
 
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
-                // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "Cancelled"))
                 return
-            }
-
-            if response?.statusCode == 404 {
+            } else if response?.statusCode == 404 {
                 if #available(iOS 14.0, *) {
                     logger.debug("Failed to load \(url, privacy: .public): 404, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
                 }
@@ -135,20 +144,23 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
             }
 
             do {
-                if self.isRasterDebugModeEnabled,
-                    let uiImage = UIImage(data: data)
-                {
-                    let renderer = UIGraphicsImageRenderer(size: uiImage.size)
-                    let img = renderer.image { ctx in
-                        self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
-                    }
-                    if let cgImage = img.cgImage,
-                        let textureHolder = try? TextureHolder(cgImage)
+                #if canImport(UIKit)
+                    if self.isRasterDebugModeEnabled,
+                        canModifyTextureData,
+                        let uiImage = UIImage(data: data)
                     {
-                        promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
-                        return
+                        let renderer = UIGraphicsImageRenderer(size: uiImage.size)
+                        let img = renderer.image { ctx in
+                            self.applyDebugWatermark(url: urlString, image: uiImage, wasCached: wasCached, ctx: ctx)
+                        }
+                        if let cgImage = img.cgImage,
+                            let textureHolder = try? TextureHolder(cgImage)
+                        {
+                            promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
+                            return
+                        }
                     }
-                }
+                #endif
 
                 let textureHolder = try TextureHolder(data)
                 promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
@@ -157,30 +169,63 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
                 promise.setValue(.init(data: nil, etag: response?.etag, status: .OK, errorCode: nil))
                 return
             } catch {
-                // If metal can not load this image
-                // try workaround to first load it into UIImage context
-                guard let uiImage = UIImage(data: data) else {
-                    promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL"))
-                    return
-                }
-
-                let renderer = UIGraphicsImageRenderer(size: uiImage.size)
-                let img = renderer.image { ctx in
-                    if self.isRasterDebugModeEnabled {
-                        self.applyDebugWatermark(url: urlString, byteCount: data.count, image: uiImage, wasCached: wasCached, ctx: ctx)
-                    } else {
-                        uiImage.draw(in: .init(origin: .init(), size: uiImage.size))
+                #if canImport(UIKit)
+                    // If metal can not load this image, try to redraw it in a UIKit context.
+                    guard canModifyTextureData else {
+                        promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL"))
+                        return
                     }
-                }
 
-                guard let cgImage = img.cgImage,
-                    let textureHolder = try? TextureHolder(cgImage)
-                else {
-                    promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "UINL"))
-                    return
-                }
+                    guard let uiImage = UIImage(data: data) else {
+                        promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL"))
+                        return
+                    }
 
-                promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
+                    let renderer = UIGraphicsImageRenderer(size: uiImage.size)
+                    let img = renderer.image { ctx in
+                        if self.isRasterDebugModeEnabled {
+                            self.applyDebugWatermark(url: urlString, image: uiImage, wasCached: wasCached, ctx: ctx)
+                        } else {
+                            uiImage.draw(in: .init(origin: .init(), size: uiImage.size))
+                        }
+                    }
+
+                    guard let cgImage = img.cgImage,
+                        let textureHolder = try? TextureHolder(cgImage)
+                    else {
+                        promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "UINL"))
+                        return
+                    }
+
+                    promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
+                #elseif canImport(AppKit) && !canImport(UIKit)
+                    // If metal can not load this image, try to redraw it in a AppKit context.
+                    guard canModifyTextureData else {
+                        promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL"))
+                        return
+                    }
+
+                    guard let nsImage = NSImage(data: data) else {
+                        promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL"))
+                        return
+                    }
+
+                    let img = NSImage(size: nsImage.size, flipped: false) { rect in
+                        nsImage.draw(in: .init(origin: .zero, size: nsImage.size))
+                        return true
+                    }
+
+                    guard let cgImage = img.cgImage(forProposedRect: nil, context: nil, hints: nil),
+                        let textureHolder = try? TextureHolder(cgImage)
+                    else {
+                        promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "UINL"))
+                        return
+                    }
+
+                    promise.setValue(.init(data: textureHolder, etag: response?.etag, status: .OK, errorCode: nil))
+                #else
+                    promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "MNL"))
+                #endif
                 return
             }
         }
@@ -251,11 +296,9 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
             }
 
             if error?.domain == NSURLErrorDomain, error?.code == NSURLErrorCancelled {
-                // Do nothing, since the result is dropped anyway (setting a LoaderStatus will cause the SharedLib to do further computing)
+                promise.setValue(.init(data: nil, etag: response?.etag, status: .ERROR_OTHER, errorCode: "Cancelled"))
                 return
-            }
-
-            if response?.statusCode == 404 {
+            } else if response?.statusCode == 404 {
                 if #available(iOS 14.0, *) {
                     logger.debug("Failed to load \(url, privacy: .public): 404, \(data.map { String(data: $0, encoding: .utf8)?.prefix(1024) ?? "?" } ?? "?")")
                 }
@@ -310,33 +353,139 @@ open class MCTextureLoader: MCLoaderInterface, @unchecked Sendable {
     open func modifyDataTask(task _: inout URLSessionDataTask) {
     }
 
-    func applyDebugWatermark(url: String, byteCount: Int, image: UIImage, wasCached: Bool, ctx: UIGraphicsRendererContext) {
-        let size = image.size
+    open func canModifyTextureData(for url: String) -> Bool {
+        !Self.isLikelyDEMTextureURL(url)
+    }
 
-        image.draw(in: .init(origin: .init(), size: size))
-
-        guard isRasterDebugModeEnabled else { return }
-
-        ctx.cgContext.setFillColor(gray: 0.1, alpha: 0.2)
-        ctx.fill(.init(origin: .init(), size: size), blendMode: .normal)
-
-        ctx.cgContext.setStrokeColor(UIColor.black.cgColor)
-        ctx.cgContext.setLineWidth(5.0)
-        ctx.cgContext.stroke(.init(origin: .init(), size: size).inset(by: .init()))
-
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.alignment = .center
-
-        let attrs: [NSAttributedString.Key: Any] = [
-            NSAttributedString.Key.paragraphStyle: paragraphStyle,
-            NSAttributedString.Key.backgroundColor: wasCached ? UIColor.lightGray.cgColor : UIColor.white.cgColor,
+    private static func isLikelyDEMTextureURL(_ urlString: String) -> Bool {
+        let lowercasedURL = urlString.lowercased()
+        let demMarkers = [
+            "-dem",
+            "terrain-rgb",
+            "terrarium",
+            "mapterhorn",
         ]
+        if demMarkers.contains(where: lowercasedURL.contains) {
+            return true
+        }
 
-        let byteCountString = ByteCountFormatter().string(fromByteCount: Int64(byteCount))
-        let loadedString = wasCached ? "Loaded from Cache" : "Loaded from www"
+        guard let components = URLComponents(string: urlString) else {
+            return false
+        }
 
-        let string = url + "\n" + loadedString + " at: " + ISO8601DateFormatter().string(from: .init()) + "\nSize: " + byteCountString
-        string.draw(with: .init(origin: .init(x: 0, y: 25), size: size).inset(by: .init(top: 5, left: 5, bottom: 5, right: 5)), options: .usesLineFragmentOrigin, attributes: attrs, context: nil)
+        let pathComponents = components.path
+            .lowercased()
+            .split(separator: "/")
+            .map(String.init)
+
+        return pathComponents.contains("dem") || pathComponents.contains("elevation")
+    }
+
+    #if canImport(UIKit)
+        func applyDebugWatermark(url: String, image: UIImage, wasCached: Bool, ctx: UIGraphicsRendererContext) {
+            let size = image.size
+
+            image.draw(in: .init(origin: .init(), size: size))
+
+            guard isRasterDebugModeEnabled else { return }
+
+            ctx.cgContext.setStrokeColor(UIColor.black.cgColor)
+            ctx.cgContext.setLineWidth(2.0)
+            ctx.cgContext.stroke(.init(origin: .init(), size: size).inset(by: .init()))
+
+            let label = Self.rasterDebugOverlayLabel(for: url)
+            let font = UIFont.monospacedSystemFont(ofSize: max(10.0, min(16.0, size.width / 22.0)), weight: .bold)
+            let attrs: [NSAttributedString.Key: Any] = [
+                .font: font,
+                .foregroundColor: UIColor.white,
+            ]
+            let labelSize = (label as NSString).size(withAttributes: attrs)
+            let padding: CGFloat = max(4.0, min(size.width, size.height) * 0.025)
+            let horizontalPadding = padding * 2.0
+            let labelBackgroundColor = wasCached ? UIColor.darkGray.withAlphaComponent(0.85) : UIColor(red: 1, green: 0, blue: 0.55, alpha: 1)
+            let labelRect = CGRect(
+                x: padding,
+                y: padding,
+                width: min(size.width - padding * 2, labelSize.width + horizontalPadding * 2),
+                height: labelSize.height + padding
+            )
+            ctx.cgContext.setFillColor(labelBackgroundColor.cgColor)
+            ctx.cgContext.fill(labelRect)
+
+            label.draw(
+                with: labelRect.insetBy(dx: horizontalPadding, dy: padding / 2),
+                options: .usesLineFragmentOrigin,
+                attributes: attrs,
+                context: nil
+            )
+        }
+    #endif
+
+    private static func rasterDebugOverlayLabel(for urlString: String) -> String {
+        if let label = rasterDebugOverlayLabelFromKeyValuePairs(in: urlString) {
+            return label
+        }
+
+        guard let components = URLComponents(string: urlString) else {
+            return "tile"
+        }
+
+        if let queryItems = components.queryItems {
+            if let x = queryItems.firstValue(named: "x"),
+                let y = queryItems.firstValue(named: "y"),
+                let z = queryItems.firstValue(named: "z")
+            {
+                return "z=\(z) x=\(x) y=\(y)"
+            }
+        }
+
+        let pathComponents = components.path
+            .split(separator: "/")
+            .map(String.init)
+
+        if pathComponents.count >= 3,
+            let z = rasterDebugTileCoordinate(from: pathComponents[pathComponents.count - 3]),
+            let x = rasterDebugTileCoordinate(from: pathComponents[pathComponents.count - 2]),
+            let y = rasterDebugTileCoordinate(from: pathComponents[pathComponents.count - 1])
+        {
+            return "z=\(z) x=\(x) y=\(y)"
+        }
+
+        return "tile"
+    }
+
+    private static func rasterDebugOverlayLabelFromKeyValuePairs(in urlString: String) -> String? {
+        let values =
+            urlString
+            .split(whereSeparator: { $0 == "?" || $0 == "&" })
+            .reduce(into: [String: String]()) { result, part in
+                guard let separatorIndex = part.firstIndex(of: "=") else { return }
+                let key = part[..<separatorIndex].lowercased()
+                let valueStartIndex = part.index(after: separatorIndex)
+                guard key == "x" || key == "y" || key == "z" else { return }
+                result[String(key)] = String(part[valueStartIndex...])
+            }
+
+        guard let x = values["x"], let y = values["y"], let z = values["z"] else {
+            return nil
+        }
+
+        return "z=\(z) x=\(x) y=\(y)"
+    }
+
+    private static func rasterDebugTileCoordinate(from component: String) -> Int? {
+        let stem = (component as NSString).deletingPathExtension
+        let digits = stem.prefix { character in
+            character.unicodeScalars.allSatisfy { CharacterSet.decimalDigits.contains($0) }
+        }
+        guard !digits.isEmpty else { return nil }
+        return Int(String(digits))
+    }
+}
+
+private extension Array where Element == URLQueryItem {
+    func firstValue(named name: String) -> String? {
+        first { $0.name.caseInsensitiveCompare(name) == .orderedSame }?.value
     }
 }
 

@@ -18,11 +18,16 @@ class RenderObject : public RenderObjectInterface {
 public:
     RenderObject(const std::shared_ptr<::GraphicsObjectInterface> graphicsObject);
 
+    RenderObject(const std::shared_ptr<::GraphicsObjectInterface> graphicsObject,
+                 const std::shared_ptr<::MaskingObjectInterface> maskingObject);
+
     RenderObject(const std::shared_ptr<::GraphicsObjectInterface> graphicsObject, bool isScreenSpace);
 
     RenderObject(const std::shared_ptr<::GraphicsObjectInterface> graphicsObject, std::vector<float> modelMatrix);
 
     virtual std::shared_ptr<::GraphicsObjectInterface> getGraphicsObject() override;
+
+    virtual std::shared_ptr<::MaskingObjectInterface> getMaskingObject() override;
 
     virtual bool hasCustomModelMatrix() override;
 
@@ -36,6 +41,7 @@ public:
 
 private:
     std::shared_ptr<GraphicsObjectInterface> graphicsObject;
+    std::shared_ptr<MaskingObjectInterface> maskingObject;
     bool setCustomModelMatrix = false;
     bool screenSpaceCoords = false;
     std::vector<float> modelMatrix;

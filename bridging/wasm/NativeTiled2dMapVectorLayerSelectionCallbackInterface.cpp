@@ -48,6 +48,28 @@ bool NativeTiled2dMapVectorLayerSelectionCallbackInterface::didClickBackgroundCo
     }
 }
 
+bool NativeTiled2dMapVectorLayerSelectionCallbackInterface::JsProxy::didSelectFeature(const ::VectorLayerFeatureInfo & featureInfo,const std::string & layerIdentifier,const ::Coord & coord) {
+    auto ret = callMethod("didSelectFeature", ::djinni_generated::NativeVectorLayerFeatureInfo::fromCpp(featureInfo),
+                                              ::djinni::String::fromCpp(layerIdentifier),
+                                              ::djinni_generated::NativeCoord::fromCpp(coord));
+    checkError(ret);
+    return ::djinni::Bool::toCpp(ret.as<bool>());
+}
+
+bool NativeTiled2dMapVectorLayerSelectionCallbackInterface::JsProxy::didMultiSelectLayerFeatures(const std::vector<::VectorLayerFeatureInfo> & featureInfos,const std::string & layerIdentifier,const ::Coord & coord) {
+    auto ret = callMethod("didMultiSelectLayerFeatures", ::djinni::List<::djinni_generated::NativeVectorLayerFeatureInfo>::fromCpp(featureInfos),
+                                                         ::djinni::String::fromCpp(layerIdentifier),
+                                                         ::djinni_generated::NativeCoord::fromCpp(coord));
+    checkError(ret);
+    return ::djinni::Bool::toCpp(ret.as<bool>());
+}
+
+bool NativeTiled2dMapVectorLayerSelectionCallbackInterface::JsProxy::didClickBackgroundConfirmed(const ::Coord & coord) {
+    auto ret = callMethod("didClickBackgroundConfirmed", ::djinni_generated::NativeCoord::fromCpp(coord));
+    checkError(ret);
+    return ::djinni::Bool::toCpp(ret.as<bool>());
+}
+
 EMSCRIPTEN_BINDINGS(_tiled_2d_map_vector_layer_selection_callback_interface) {
     em::class_<::Tiled2dMapVectorLayerSelectionCallbackInterface>("Tiled2dMapVectorLayerSelectionCallbackInterface")
         .smart_ptr<std::shared_ptr<::Tiled2dMapVectorLayerSelectionCallbackInterface>>("Tiled2dMapVectorLayerSelectionCallbackInterface")

@@ -62,15 +62,8 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         #endif
 
         if isMasked {
-            if stencilState == nil {
-                setupStencilStates()
-            }
-            encoder.setDepthStencilState(stencilState)
-            if maskInverse {
-                encoder.setStencilReferenceValue(0b0000_0000)
-            } else {
-                encoder.setStencilReferenceValue(0b1100_0000)
-            }
+            encoder.setDepthStencilState(maskStencilState(for: pass))
+            encoder.setStencilReferenceValue(maskStencilReference(for: pass))
         }
 
         if pass.isPassMasked {
@@ -86,14 +79,6 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents()
-                .copyMemory(
-                    from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         if shader.usesModelMatrix() {
             if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
@@ -140,7 +125,7 @@ final class Polygon2d: BaseGraphicsObject, @unchecked Sendable {
 extension Polygon2d: MCMaskingObjectInterface {
     func render(
         asMask context: MCRenderingContextInterface?,
-        renderPass _: MCRenderPassConfig,
+        renderPass: MCRenderPassConfig,
         vpMatrix: Int64,
         mMatrix: Int64,
         origin: MCVec3D,
@@ -169,24 +154,14 @@ extension Polygon2d: MCMaskingObjectInterface {
             }
         #endif
 
-        if let mask = context.polygonMask {
-            encoder.setStencilReferenceValue(0xFF)
-            encoder.setDepthStencilState(mask)
-        }
+        applyMaskWriteState(context: context, renderPass: renderPass)
 
         // stencil prepare pass
-        shader.setupProgram(context)
+        shader.setupMaskProgram(context)
+        defer { shader.finishMaskProgram() }
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents()
-                .copyMemory(
-                    from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         if shader.usesModelMatrix() {
             if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
@@ -215,7 +190,7 @@ extension Polygon2d: MCMaskingObjectInterface {
 
 extension Polygon2d: MCPolygon2dInterface {
     func setSubdivisionFactor(_ factor: Int32) {}
-    
+
     func setVertices(
         _ vertices: MCSharedBytes, indices: MCSharedBytes, origin: MCVec3D, is3d: Bool
     ) {

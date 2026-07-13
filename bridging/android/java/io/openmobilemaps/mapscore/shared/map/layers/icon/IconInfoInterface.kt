@@ -30,6 +30,10 @@ abstract class IconInfoInterface {
 
     abstract fun getBlendMode(): io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode
 
+    abstract fun setRotation(angle: Double)
+
+    abstract fun getRotation(): Double
+
     public class CppProxy : IconInfoInterface {
         private val nativeRef: Long
         private val destroyed: AtomicBoolean = AtomicBoolean(false)
@@ -104,5 +108,17 @@ abstract class IconInfoInterface {
             return native_getBlendMode(this.nativeRef)
         }
         private external fun native_getBlendMode(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.shader.BlendMode
+
+        override fun setRotation(angle: Double) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setRotation(this.nativeRef, angle)
+        }
+        private external fun native_setRotation(_nativeRef: Long, angle: Double)
+
+        override fun getRotation(): Double {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getRotation(this.nativeRef)
+        }
+        private external fun native_getRotation(_nativeRef: Long): Double
     }
 }

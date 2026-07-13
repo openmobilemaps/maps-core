@@ -57,6 +57,16 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_til
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_createDisplaced(JNIEnv* jniEnv, jobject /*this*/, ::djinni_generated::NativeTiled2dMapLayerConfig::JniType j_layerConfig, ::djinni_generated::NativeTiled2dMapLayerConfig::JniType j_elevationConfig, jobject j_loaders)
+{
+    try {
+        auto r = ::Tiled2dMapRasterLayerInterface::createDisplaced(::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(jniEnv, j_layerConfig),
+                                                                   ::djinni_generated::NativeTiled2dMapLayerConfig::toCpp(jniEnv, j_elevationConfig),
+                                                                   ::djinni::List<::djinni_generated::NativeLoaderInterface>::toCpp(jniEnv, j_loaders));
+        return ::djinni::release(::djinni_generated::NativeTiled2dMapRasterLayerInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
 CJNIEXPORT ::djinni_generated::NativeLayerInterface::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1asLayerInterface(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
     try {
@@ -130,6 +140,30 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
         ref->setMinMagFilter(::djinni_generated::NativeTextureFilterType::toCpp(jniEnv, j_filterType));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1setUseMaskTileGeometry(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_enabled)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
+        ref->setUseMaskTileGeometry(::djinni::Bool::toCpp(jniEnv, j_enabled));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1setTileLoadingPaused(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jboolean j_paused)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
+        ref->setTileLoadingPaused(::djinni::Bool::toCpp(jniEnv, j_paused));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_tiled_raster_Tiled2dMapRasterLayerInterface_00024CppProxy_native_1setZoomLevelScaleFactor(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jfloat j_value)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Tiled2dMapRasterLayerInterface>(nativeRef);
+        ref->setZoomLevelScaleFactor(::djinni::F32::toCpp(jniEnv, j_value));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

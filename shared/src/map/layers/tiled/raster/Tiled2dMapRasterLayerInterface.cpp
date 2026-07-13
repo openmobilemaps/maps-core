@@ -10,6 +10,7 @@
 
 #include "Tiled2dMapRasterLayerInterface.h"
 #include "Tiled2dMapRasterLayer.h"
+#include "TiledDisplacedRasterLayer.h"
 
 std::shared_ptr<Tiled2dMapRasterLayerInterface>
 Tiled2dMapRasterLayerInterface::create(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
@@ -30,3 +31,11 @@ Tiled2dMapRasterLayerInterface::createWithShader(const std::shared_ptr<::Tiled2d
                                                const std::shared_ptr<::ShaderProgramInterface> &shader) {
     return std::make_shared<Tiled2dMapRasterLayer>(layerConfig, tileLoaders, shader);
 }
+
+std::shared_ptr<Tiled2dMapRasterLayerInterface>
+Tiled2dMapRasterLayerInterface::createDisplaced(const std::shared_ptr<::Tiled2dMapLayerConfig> &layerConfig,
+                                                const std::shared_ptr<::Tiled2dMapLayerConfig> &elevationConfig,
+                                                const std::vector<std::shared_ptr<::LoaderInterface>> & tileLoaders) {
+    return std::make_shared<TiledDisplacedRasterLayer>(layerConfig, elevationConfig, tileLoaders);
+}
+

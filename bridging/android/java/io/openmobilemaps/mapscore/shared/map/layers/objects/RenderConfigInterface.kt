@@ -10,6 +10,8 @@ abstract class RenderConfigInterface {
 
     abstract fun getGraphicsObject(): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface
 
+    abstract fun getMaskingObject(): io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?
+
     abstract fun getRenderIndex(): Int
 
     public class CppProxy : RenderConfigInterface {
@@ -32,6 +34,12 @@ abstract class RenderConfigInterface {
             return native_getGraphicsObject(this.nativeRef)
         }
         private external fun native_getGraphicsObject(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.objects.GraphicsObjectInterface
+
+        override fun getMaskingObject(): io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface? {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getMaskingObject(this.nativeRef)
+        }
+        private external fun native_getMaskingObject(_nativeRef: Long): io.openmobilemaps.mapscore.shared.graphics.objects.MaskingObjectInterface?
 
         override fun getRenderIndex(): Int {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

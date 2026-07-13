@@ -11,7 +11,6 @@
 import Foundation
 import MapCoreSharedModule
 @preconcurrency import Metal
-import UIKit
 import simd
 
 final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
@@ -54,7 +53,8 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
         ss2.stencilFailureOperation = .zero
         ss2.depthFailureOperation = .keep
         ss2.depthStencilPassOperation = .keep
-        ss2.readMask = 0b1111_1111
+        // Masked draw passes only read the geometry-mask bits prepared by mask objects.
+        ss2.readMask = 0b1100_0000
         ss2.writeMask = 0b0000_0000
 
         let s2 = MTLDepthStencilDescriptor()
@@ -75,7 +75,7 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
     override func render(
         encoder: MTLRenderCommandEncoder,
         context: RenderingContext,
-        renderPass _: MCRenderPassConfig,
+        renderPass: MCRenderPassConfig,
         vpMatrix: Int64,
         mMatrix: Int64,
         origin: MCVec3D,
@@ -111,28 +111,29 @@ final class Quad2dStretchedInstanced: BaseGraphicsObject, @unchecked Sendable {
         #endif
 
         if isMasked {
-            if stencilState == nil {
-                setupStencilStates()
-            }
-            encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0b1100_0000)
-        } else if let mask = context.mask, renderAsMask {
-            encoder.setDepthStencilState(mask)
-            encoder.setStencilReferenceValue(0b1100_0000)
+            // Stretched instanced quads keep clipping in stencil so texture stretching remains unchanged.
+            // Inverse reads target the cleared value for outside-of-mask rendering.
+            encoder.setDepthStencilState(maskStencilState(for: renderPass))
+            encoder.setStencilReferenceValue(maskStencilReference(for: renderPass))
+        } else if renderAsMask {
+            applyMaskWriteState(context: context, renderPass: renderPass)
         } else {
             encoder.setDepthStencilState(context.defaultMask)
         }
 
-        shader.setupProgram(context)
+        if renderAsMask {
+            shader.setupMaskProgram(context)
+        } else {
+            shader.setupProgram(context)
+        }
+        defer {
+            if renderAsMask {
+                shader.finishMaskProgram()
+            }
+        }
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         encoder.setVertexBuffer(positionsBuffer, offset: 0, index: 2)
         encoder.setVertexBuffer(scalesBuffer, offset: 0, index: 3)
@@ -184,6 +185,7 @@ extension Quad2dStretchedInstanced: MCMaskingObjectInterface {
         else { return }
 
         renderAsMask = true
+        defer { renderAsMask = false }
 
         render(
             encoder: encoder,

@@ -37,6 +37,7 @@ private:
         bool hasCustomModelMatrix() override;
         bool isScreenSpaceCoords() override;
         std::vector<float> getCustomModelMatrix() override;
+        /*nullable*/ std::shared_ptr<::MaskingObjectInterface> getMaskingObject() override;
         void setHidden(bool hidden) override;
         bool isHidden() override;
 
@@ -49,6 +50,7 @@ private:
     const jmethodID method_hasCustomModelMatrix { ::djinni::jniGetMethodID(clazz.get(), "hasCustomModelMatrix", "()Z") };
     const jmethodID method_isScreenSpaceCoords { ::djinni::jniGetMethodID(clazz.get(), "isScreenSpaceCoords", "()Z") };
     const jmethodID method_getCustomModelMatrix { ::djinni::jniGetMethodID(clazz.get(), "getCustomModelMatrix", "()Ljava/util/ArrayList;") };
+    const jmethodID method_getMaskingObject { ::djinni::jniGetMethodID(clazz.get(), "getMaskingObject", "()Lio/openmobilemaps/mapscore/shared/graphics/objects/MaskingObjectInterface;") };
     const jmethodID method_setHidden { ::djinni::jniGetMethodID(clazz.get(), "setHidden", "(Z)V") };
     const jmethodID method_isHidden { ::djinni::jniGetMethodID(clazz.get(), "isHidden", "()Z") };
 };

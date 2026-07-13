@@ -18,6 +18,8 @@ class SkySphereShaderOpenGl
           public SkySphereShaderInterface,
           public std::enable_shared_from_this<SkySphereShaderOpenGl> {
 public:
+    explicit SkySphereShaderOpenGl(bool useLocal = false);
+
     std::string getProgramName() override;
 
     void setupProgram(const std::shared_ptr<::RenderingContextInterface> &context) override;
@@ -34,7 +36,8 @@ protected:
     std::string getFragmentShader() override;
 
 private:
-    const static std::string programName;
+    const bool useLocal;
+    const std::string programName;
 
     std::mutex dataMutex;
     std::vector<GLfloat> inverseVPMatrix = {1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0};

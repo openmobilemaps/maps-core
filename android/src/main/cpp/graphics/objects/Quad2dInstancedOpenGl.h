@@ -10,18 +10,20 @@
 
 #pragma once
 
+#include "BaseGraphicsObjectOpenGl.h"
 #include "GraphicsObjectInterface.h"
 #include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
 #include "Quad2dInstancedInterface.h"
 #include "ShaderProgramInterface.h"
 #include "BaseShaderProgramOpenGl.h"
+#include "TextureAttachment.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 #include <vector>
 #include <RectD.h>
 
-class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
+class Quad2dInstancedOpenGl : public BaseGraphicsObjectOpenGl,
                      public MaskingObjectInterface,
                      public Quad2dInstancedInterface,
                      public std::enable_shared_from_this<Quad2dInstancedOpenGl> {
@@ -33,8 +35,10 @@ class Quad2dInstancedOpenGl : public GraphicsObjectInterface,
     virtual bool isReady() override;
 
     virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context) override;
-
     virtual void clear() override;
+
+    virtual void pause() override;
+    virtual void resume(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                               int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor,
@@ -106,15 +110,12 @@ protected:
     bool texCoordBufferGenerated = false;
     Vec3D quadsOrigin = Vec3D(0.0, 0.0, 0.0);
 
-    std::shared_ptr<TextureHolderInterface> textureHolder;
-    int texturePointer;
+    TextureAttachment textureAttachment;
 
     bool usesTextureCoords = false;
 
     Quad2dD frame = Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
     RectD textureCoordinates = RectD(0.0, 0.0, 1.0, 1.0);
-    double factorHeight = 1.0;
-    double factorWidth = 1.0;
 
     bool ready = false;
     uint8_t buffersNotReadyResetValue = 0b00111111;

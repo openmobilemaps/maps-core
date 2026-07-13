@@ -31,7 +31,12 @@ struct NativeRenderingContextInterface : ::djinni::JsInterface<::RenderingContex
     static void setupDrawFrame(const CppType& self, int64_t w_vpMatrix,const em::val& w_origin,double w_screenPixelAsRealMeterFactor);
     static void preRenderStencilMask(const CppType& self);
     static void postRenderStencilMask(const CppType& self);
+    static void clearStencilMask(const CppType& self, int32_t w_clearMask);
+    static void setupStencilWriteMask(const CppType& self, int32_t w_writeMask,int32_t w_reference);
     static void applyScissorRect(const CppType& self, const em::val& w_scissorRect);
+    static em::val getCreateOffscreenRenderTarget(const CppType& self, const std::string& w_name);
+    static void deleteOffscreenRenderTarget(const CppType& self, const std::string& w_name);
+    static em::val getOffscreenRenderTargets(const CppType& self);
     static em::val asOpenGlRenderingContext(const CppType& self);
 
 };

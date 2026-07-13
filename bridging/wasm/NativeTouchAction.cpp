@@ -14,6 +14,8 @@ namespace {
             UP : 2,
             SCROLL : 3,
             CANCEL : 4,
+            HOVER : 5,
+            HOVER_EXIT : 6,
         }
     })
 }

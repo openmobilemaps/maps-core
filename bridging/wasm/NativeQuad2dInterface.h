@@ -27,6 +27,8 @@ struct NativeQuad2dInterface : ::djinni::JsInterface<::Quad2dInterface, NativeQu
     static void setSubdivisionFactor(const CppType& self, int32_t w_factor);
     static void setMinMagFilter(const CppType& self, int32_t w_filterType);
     static void loadTexture(const CppType& self, const em::val& w_context,const em::val& w_textureHolder);
+    static void loadDualTexture(const CppType& self, const em::val& w_context,const em::val& w_textureHolder,const em::val& w_elevationHolder);
+    static void loadTextures(const CppType& self, const em::val& w_context,const em::val& w_textureHolder,const em::val& w_lookupHolder,const em::val& w_elevationHolder);
     static void removeTexture(const CppType& self);
     static em::val asGraphicsObject(const CppType& self);
     static em::val asMaskingObject(const CppType& self);

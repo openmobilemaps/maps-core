@@ -6,6 +6,7 @@
 #include "Coord.h"
 #include "ErrorManager.h"
 #include "LayerReadyState.h"
+#include "MapCamera3dMode.h"
 #include "RectCoord.h"
 #include "Vec3D.h"
 #include <cstdint>
@@ -19,7 +20,7 @@ public:
 
     virtual void onVisibleBoundsChanged(const ::RectCoord & visibleBounds, int32_t curT, double zoom) = 0;
 
-    virtual void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom) = 0;
+    virtual void onCameraChange(const std::vector<float> & viewMatrix, const std::vector<float> & projectionMatrix, const ::Vec3D & origin, float verticalFov, float horizontalFov, float width, float height, float focusPointAltitude, const ::Coord & focusPointPosition, float zoom, const std::optional<::Vec3D> & cameraPosition, ::MapCamera3dMode cameraMode) = 0;
 
     virtual void setMinZoomLevelIdentifier(std::optional<int32_t> value) = 0;
 
@@ -29,9 +30,14 @@ public:
 
     virtual std::optional<int32_t> getMaxZoomLevelIdentifier() = 0;
 
+    virtual void setZoomLevelScaleFactor(float value) = 0;
+
     virtual void pause() = 0;
 
     virtual void resume() = 0;
+
+    /** Debug helper: pauses tile selection/loading independently of the pause()/resume() lifecycle state. */
+    virtual void setTileLoadingPaused(bool paused) = 0;
 
     virtual ::LayerReadyState isReadyToRenderOffscreen() = 0;
 

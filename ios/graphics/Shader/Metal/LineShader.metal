@@ -9,24 +9,36 @@
  */
 
 #include <metal_stdlib>
+#include "DataStructures.metal"
 using namespace metal;
+
+// stylingIndex packs the style index and the line side into one float:
+//   stylingIndex = styleIndex * lineStyleSidePackingFactor + lineSide
+// See LineGeometryBuilder::pushLineVertex. Keep this constant in sync with the builder.
+constant float lineStyleSidePackingFactor = 100.0;
+
+static inline int unpackLineStyleGroup(float packed) {
+    return int(round(packed / lineStyleSidePackingFactor));
+}
+
+static inline float unpackLineSide(float packed, int styleGroup) {
+    return packed - float(styleGroup) * lineStyleSidePackingFactor;
+}
 
 struct LineVertexIn {
     float2 position [[attribute(0)]];
     float2 extrude [[attribute(1)]];
-    float lineSide [[attribute(2)]];
-    float lengthPrefix [[attribute(3)]];
-    float lengthCorrection [[attribute(4)]];
-    float stylingIndex [[attribute(5)]];
+    float lengthPrefix [[attribute(2)]];
+    float lengthCorrection [[attribute(3)]];
+    float stylingIndex [[attribute(4)]];
 };
 
 struct LineVertexUnitSphereIn {
     float3 position [[attribute(0)]];
     float3 extrude [[attribute(1)]];
-    float lineSide [[attribute(2)]];
-    float lengthPrefix [[attribute(3)]];
-    float lengthCorrection [[attribute(4)]];
-    float stylingIndex [[attribute(5)]];
+    float lengthPrefix [[attribute(2)]];
+    float lengthCorrection [[attribute(3)]];
+    float stylingIndex [[attribute(4)]];
 };
 
 struct LineVertexOut {
@@ -79,13 +91,15 @@ constant float blurRadiusPx = 1.0;
 
 vertex SimpleLineVertexOut
 unitSphereSimpleLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in]],
-                      constant float4x4 &vpMatrix [[buffer(1)]],
-                      constant float &scalingFactor [[buffer(2)]],
+                      constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
+                      constant float &scalingFactor [[buffer(MC_GLOBAL_SCREEN_PIXEL_FACTOR_BUFFER_INDEX)]],
                       constant half *styling [[buffer(3)]],
                       constant float4 &originOffset [[buffer(4)]],
                       constant float4 &tileOrigin [[buffer(5)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 8;
+    const int styleGroup = unpackLineStyleGroup(vertexIn.stylingIndex);
+    const float lineSide = unpackLineSide(vertexIn.stylingIndex, styleGroup);
+    int styleIndex = (styleGroup & 0xFF) * 8;
     constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + styleIndex);
 
     // extend position in extrude direction by width / 2.0
@@ -97,7 +111,7 @@ unitSphereSimpleLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[st
     SimpleLineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .stylingIndex = styleIndex,
-        .lineSide = vertexIn.lineSide,
+        .lineSide = lineSide,
     };
 
     return out;
@@ -105,13 +119,15 @@ unitSphereSimpleLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[st
 
 vertex SimpleLineVertexOut
 simpleLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
-                      constant float4x4 &vpMatrix [[buffer(1)]],
-                      constant float &scalingFactor [[buffer(2)]],
+                      constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
+                      constant float &scalingFactor [[buffer(MC_GLOBAL_SCREEN_PIXEL_FACTOR_BUFFER_INDEX)]],
                       constant half *styling [[buffer(3)]],
                       constant float4 &originOffset [[buffer(4)]],
                       constant float4 &tileOrigin [[buffer(5)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 8;
+    const int styleGroup = unpackLineStyleGroup(vertexIn.stylingIndex);
+    const float lineSide = unpackLineSide(vertexIn.stylingIndex, styleGroup);
+    int styleIndex = (styleGroup & 0xFF) * 8;
     constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + styleIndex);
 
     // extend position in extrude direction by width / 2.0
@@ -123,7 +139,7 @@ simpleLineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
     SimpleLineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .stylingIndex = styleIndex,
-        .lineSide = vertexIn.lineSide,
+        .lineSide = lineSide,
     };
 
     return out;
@@ -141,10 +157,14 @@ float lineBlurAlpha(float lineSide, float styleWidth, float styleBlur, float sca
           * min(1.0, halfScaledWidth / scaledBlur); // scaling for thin lines to preserve overall "energy"
 }
 
+float positiveModulo(float x, float y) {
+    return x - y * floor(x / y);
+}
+
 fragment half4
 simpleLineGroupFragmentShader(SimpleLineVertexOut in [[stage_in]],
                         constant half *styling [[buffer(1)]],
-                        constant float &scalingFactor [[buffer(3)]])
+                        constant float &scalingFactor [[buffer(MC_GLOBAL_SCREEN_PIXEL_FACTOR_BUFFER_INDEX)]])
 {
   constant SimpleLineStyling *style = (constant SimpleLineStyling *)(styling + in.stylingIndex);
 
@@ -163,13 +183,15 @@ simpleLineGroupFragmentShader(SimpleLineVertexOut in [[stage_in]],
 
 vertex LineVertexOut
 unitSphereLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in]],
-                      constant float4x4 &vpMatrix [[buffer(1)]],
-                      constant float &scalingFactor [[buffer(2)]],
+                      constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
+                      constant float &scalingFactor [[buffer(MC_GLOBAL_SCREEN_PIXEL_FACTOR_BUFFER_INDEX)]],
                       constant half *styling [[buffer(3)]],
                       constant float4 &originOffset [[buffer(4)]],
                       constant float4 &tileOrigin [[buffer(5)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 23;
+    const int styleGroup = unpackLineStyleGroup(vertexIn.stylingIndex);
+    const float lineSide = unpackLineSide(vertexIn.stylingIndex, styleGroup);
+    int styleIndex = (styleGroup & 0xFF) * 23;
     constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
 
     // extend position in extrude direction by width / 2.0
@@ -181,7 +203,7 @@ unitSphereLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
     LineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .stylingIndex = styleIndex,
-        .lineSide = vertexIn.lineSide,
+        .lineSide = lineSide,
         .lengthPrefix = vertexIn.lengthPrefix + vertexIn.lengthCorrection * width,
     };
 
@@ -190,13 +212,15 @@ unitSphereLineGroupVertexShader(const LineVertexUnitSphereIn vertexIn [[stage_in
 
 vertex LineVertexOut
 lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
-                      constant float4x4 &vpMatrix [[buffer(1)]],
-                      constant float &scalingFactor [[buffer(2)]],
+                      constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
+                      constant float &scalingFactor [[buffer(MC_GLOBAL_SCREEN_PIXEL_FACTOR_BUFFER_INDEX)]],
                       constant half *styling [[buffer(3)]],
                       constant float4 &originOffset [[buffer(4)]],
                       constant float4 &tileOrigin [[buffer(5)]])
 {
-    int styleIndex = (int(vertexIn.stylingIndex) & 0xFF) * 23;
+    const int styleGroup = unpackLineStyleGroup(vertexIn.stylingIndex);
+    const float lineSide = unpackLineSide(vertexIn.stylingIndex, styleGroup);
+    int styleIndex = (styleGroup & 0xFF) * 23;
     constant LineStyling *style = (constant LineStyling *)(styling + styleIndex);
 
     // extend position in extrude direction by width / 2.0
@@ -208,7 +232,7 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
     LineVertexOut out {
         .position = vpMatrix * extendedPosition,
         .stylingIndex = styleIndex,
-        .lineSide = vertexIn.lineSide,
+        .lineSide = lineSide,
         .lengthPrefix = vertexIn.lengthPrefix + vertexIn.lengthCorrection * width,
     };
 
@@ -219,8 +243,8 @@ lineGroupVertexShader(const LineVertexIn vertexIn [[stage_in]],
 fragment half4
 lineGroupFragmentShader(LineVertexOut in [[stage_in]],
                         constant half *styling [[buffer(1)]],
-                        constant float &time [[buffer(2)]],
-                        constant float &scalingFactor [[buffer(3)]],
+                        constant float &time [[buffer(MC_GLOBAL_TIME_BUFFER_INDEX)]],
+                        constant float &scalingFactor [[buffer(MC_GLOBAL_SCREEN_PIXEL_FACTOR_BUFFER_INDEX)]],
                         constant float &dashingScalingFactor [[buffer(4)]])
 {
   constant LineStyling *style = (constant LineStyling *)(styling + in.stylingIndex);
@@ -261,7 +285,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
 
     const float timeOffset = time * style->dash_animation_speed * scaledWidth;
       const float skewOffset = (1.0 - skew) * style->width * dashingScalingFactor * 0.5;
-    const float positionInCycle = fmod(in.lengthPrefix + timeOffset + skewOffset, 2.0 * cycleLength) / cycleLength * skew;
+    const float positionInCycle = positiveModulo(in.lengthPrefix + timeOffset + skewOffset, 2.0 * cycleLength) / cycleLength * skew;
 
     const float scalingRatio =  dashingScalingFactor / scalingFactor;
     float2 pos = float2((positionInCycle * 2.0 - 1.0) * scalingRatio, in.lineSide);
@@ -273,7 +297,7 @@ lineGroupFragmentShader(LineVertexOut in [[stage_in]],
 
     const float scaledWidth = style->width * dashingScalingFactor;
     const float timeOffset = time * style->dash_animation_speed * scaledWidth;
-    const float intraDashPos = fmod(in.lengthPrefix + timeOffset, (float)style->dashArray.w * scaledWidth);
+    const float intraDashPos = positiveModulo(in.lengthPrefix + timeOffset, (float)style->dashArray.w * scaledWidth);
 
     // here float has to be used for accuracy
     float4 dashArray = float4(style->dashArray) * scaledWidth;

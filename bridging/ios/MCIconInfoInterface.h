@@ -33,4 +33,8 @@
 
 - (MCBlendMode)getBlendMode;
 
+- (void)setRotation:(double)angle;
+
+- (double)getRotation;
+
 @end

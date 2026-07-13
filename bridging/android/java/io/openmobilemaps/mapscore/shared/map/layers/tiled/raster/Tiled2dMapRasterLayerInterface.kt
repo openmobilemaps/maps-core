@@ -17,6 +17,9 @@ abstract class Tiled2dMapRasterLayerInterface {
 
         @JvmStatic
         external fun create(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): Tiled2dMapRasterLayerInterface
+
+        @JvmStatic
+        external fun createDisplaced(layerConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, elevationConfig: io.openmobilemaps.mapscore.shared.map.layers.tiled.Tiled2dMapLayerConfig, loaders: ArrayList<io.openmobilemaps.mapscore.shared.map.loader.LoaderInterface>): Tiled2dMapRasterLayerInterface
     }
 
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface
@@ -36,6 +39,19 @@ abstract class Tiled2dMapRasterLayerInterface {
     abstract fun getStyle(): io.openmobilemaps.mapscore.shared.graphics.shader.RasterShaderStyle
 
     abstract fun setMinMagFilter(filterType: io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType)
+
+    /**
+     * When enabled and the layer config's zoom info has mask_tile set, tiles are built from
+     * the tile mask polygons themselves (earcut-tessellated geometry) instead of a rectangular
+     * quad clipped via the stencil buffer. Has no effect when zoom_info.mask_tile is false.
+     */
+    abstract fun setUseMaskTileGeometry(enabled: Boolean)
+
+    /** Debug helper: pauses tile-source selection/loading/removal without pausing rendered tile graphics. */
+    abstract fun setTileLoadingPaused(paused: Boolean)
+
+    /** Runtime LOD control. Higher values request more detailed tiles earlier; lower values request coarser tiles. */
+    abstract fun setZoomLevelScaleFactor(value: Float)
 
     abstract fun setMinZoomLevelIdentifier(value: Int?)
 
@@ -123,6 +139,24 @@ abstract class Tiled2dMapRasterLayerInterface {
             native_setMinMagFilter(this.nativeRef, filterType)
         }
         private external fun native_setMinMagFilter(_nativeRef: Long, filterType: io.openmobilemaps.mapscore.shared.graphics.objects.TextureFilterType)
+
+        override fun setUseMaskTileGeometry(enabled: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setUseMaskTileGeometry(this.nativeRef, enabled)
+        }
+        private external fun native_setUseMaskTileGeometry(_nativeRef: Long, enabled: Boolean)
+
+        override fun setTileLoadingPaused(paused: Boolean) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setTileLoadingPaused(this.nativeRef, paused)
+        }
+        private external fun native_setTileLoadingPaused(_nativeRef: Long, paused: Boolean)
+
+        override fun setZoomLevelScaleFactor(value: Float) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setZoomLevelScaleFactor(this.nativeRef, value)
+        }
+        private external fun native_setZoomLevelScaleFactor(_nativeRef: Long, value: Float)
 
         override fun setMinZoomLevelIdentifier(value: Int?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

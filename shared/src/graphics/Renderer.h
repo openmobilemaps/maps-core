@@ -14,7 +14,6 @@
 #include "RenderPassInterface.h"
 #include "ComputePassInterface.h"
 #include <map>
-#include <queue>
 #include <vector>
 
 struct RenderPassInterfaceCompare {

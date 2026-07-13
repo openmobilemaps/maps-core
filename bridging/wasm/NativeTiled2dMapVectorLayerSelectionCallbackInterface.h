@@ -27,6 +27,12 @@ struct NativeTiled2dMapVectorLayerSelectionCallbackInterface : ::djinni::JsInter
     static bool didMultiSelectLayerFeatures(const CppType& self, const em::val& w_featureInfos,const std::string& w_layerIdentifier,const em::val& w_coord);
     static bool didClickBackgroundConfirmed(const CppType& self, const em::val& w_coord);
 
+    struct JsProxy: ::djinni::JsProxyBase, ::Tiled2dMapVectorLayerSelectionCallbackInterface, ::djinni::InstanceTracker<JsProxy> {
+        JsProxy(const em::val& v) : JsProxyBase(v) {}
+        bool didSelectFeature(const ::VectorLayerFeatureInfo & featureInfo,const std::string & layerIdentifier,const ::Coord & coord) override;
+        bool didMultiSelectLayerFeatures(const std::vector<::VectorLayerFeatureInfo> & featureInfos,const std::string & layerIdentifier,const ::Coord & coord) override;
+        bool didClickBackgroundConfirmed(const ::Coord & coord) override;
+    };
 };
 
 } // namespace djinni_generated

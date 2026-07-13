@@ -3,6 +3,7 @@
 
 #import "MCCamera3dConfig.h"
 #import "MCCoord.h"
+#import "MCMapCamera3dMode.h"
 #import <Foundation/Foundation.h>
 
 
@@ -14,5 +15,29 @@
         durationSeconds:(nullable NSNumber *)durationSeconds
              targetZoom:(nullable NSNumber *)targetZoom
        targetCoordinate:(nullable MCCoord *)targetCoordinate;
+
+- (MCMapCamera3dMode)getCameraMode;
+
+- (void)setCameraMode:(MCMapCamera3dMode)mode;
+
+- (BOOL)isPoseCameraActive;
+
+- (void)setPoseCamera:(nonnull MCCoord *)position
+           yawDegrees:(float)yawDegrees
+         pitchDegrees:(float)pitchDegrees
+          rollDegrees:(float)rollDegrees
+   verticalFovDegrees:(float)verticalFovDegrees
+      nearPlaneMeters:(float)nearPlaneMeters
+       farPlaneMeters:(float)farPlaneMeters;
+
+- (void)clearPoseCamera;
+
+- (void)setCustomViewMatrix:(nonnull NSArray<NSNumber *> *)viewMatrix;
+
+- (void)clearCustomViewMatrix;
+
+- (void)setCustomProjectionMatrix:(nonnull NSArray<NSNumber *> *)projectionMatrix;
+
+- (void)clearCustomProjectionMatrix;
 
 @end

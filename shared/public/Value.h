@@ -738,6 +738,10 @@ public:
         }
     }
 
+    InternedString getKey() const {
+        return key;
+    }
+
 private:
     const InternedString key;
 };
@@ -991,7 +995,7 @@ class ZoomValue: public Value {
     };
 
     bool isEqual(const std::shared_ptr<Value> &other) const override {
-        return (std::dynamic_pointer_cast<StaticValue>(other) != nullptr);
+        return std::dynamic_pointer_cast<ZoomValue>(other) != nullptr;
     };
 
     void evaluateZoomRange(ZoomRange& zoomRange) override {
@@ -1143,8 +1147,16 @@ public:
 
     std::unique_ptr<Value> clone() override {
         std::vector<std::pair<double, std::shared_ptr<Value>>> clonedSteps;
-        for (const auto &[step, value] : steps) {
-            clonedSteps.emplace_back(step, value->clone());
+        if (isFast) {
+            clonedSteps.reserve(fastSteps.size());
+            for (const auto &[step, value] : fastSteps) {
+                clonedSteps.emplace_back(step, std::make_shared<StaticValue>(value));
+            }
+        } else {
+            clonedSteps.reserve(steps.size());
+            for (const auto &[step, value] : steps) {
+                clonedSteps.emplace_back(step, value->clone());
+            }
         }
         return std::make_unique<InterpolatedValue>(interpolationBase, std::move(clonedSteps));
     }
@@ -1220,6 +1232,25 @@ public:
         if (auto casted = std::dynamic_pointer_cast<InterpolatedValue>(other)) {
             if (casted->interpolationBase != interpolationBase) {
                 return false;
+            }
+
+            if (isFast != casted->isFast) {
+                return false;
+            }
+
+            if (isFast) {
+                if (fastSteps.size() != casted->fastSteps.size()) {
+                    return false;
+                }
+
+                for (size_t i = 0; i < fastSteps.size(); ++i) {
+                    if (fastSteps[i].first != casted->fastSteps[i].first ||
+                        fastSteps[i].second != casted->fastSteps[i].second) {
+                        return false;
+                    }
+                }
+
+                return true;
             }
 
             if (casted->steps.size() != steps.size()) {
@@ -1579,6 +1610,7 @@ public:
         }
         return (*stops.rbegin()).second->evaluate(context);
     }
+    
     bool isEqual(const std::shared_ptr<Value>& other) const override {
         if (auto casted = std::dynamic_pointer_cast<StepValue>(other)) {
             // Compare the compareValue member
@@ -1912,7 +1944,13 @@ public:
 };
 
 
+class InterpolatedTransposedMatchValue;
+class StepTransposedMatchValue;
+struct TransposedMatchHelpers;
+
 class MatchValue: public Value {
+    friend struct TransposedMatchHelpers;
+
     const std::shared_ptr<Value> compareValue;
     std::vector<std::pair<ValueVariant, std::shared_ptr<Value>>> valueMapping;
     const std::shared_ptr<Value> defaultValue;
@@ -2010,6 +2048,506 @@ public:
             s.second->evaluateZoomRange(zoomRange);
         }
     }
+};
+
+
+struct TransposedMatchHelpers {
+    static std::optional<ValueVariant> staticOutput(const std::shared_ptr<Value> &value) {
+        const auto staticVal = std::dynamic_pointer_cast<StaticValue>(value);
+        if (!staticVal) {
+            return std::nullopt;
+        }
+        return staticVal->evaluate(EvaluationContext(0, 0, nullptr, nullptr));
+    }
+
+    static bool matchHasStaticOutputs(const MatchValue &match) {
+        if (!staticOutput(match.defaultValue)) {
+            return false;
+        }
+        for (const auto &[_, branchValue] : match.valueMapping) {
+            if (!staticOutput(branchValue)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    static std::optional<InternedString> matchPropertyKey(const MatchValue &match) {
+        const auto getProperty = std::dynamic_pointer_cast<GetPropertyValue>(match.compareValue);
+        if (!getProperty || getProperty->getKey() == ValueKeys::ZOOM) {
+            return std::nullopt;
+        }
+        return getProperty->getKey();
+    }
+
+    static void addBranchKey(std::vector<ValueVariant> &keys, const ValueVariant &branchKey) {
+        for (const auto &existing : keys) {
+            if (existing == branchKey) {
+                return;
+            }
+        }
+        keys.push_back(branchKey);
+    }
+
+    static void addBranchKeysFromMatch(std::vector<ValueVariant> &keys, const MatchValue &match) {
+        for (const auto &[branchKey, _] : match.valueMapping) {
+            addBranchKey(keys, branchKey);
+        }
+    }
+
+    static std::vector<ValueVariant> collectMentionedBranchKeys(const std::vector<const MatchValue *> &matches) {
+        std::vector<ValueVariant> keys;
+        for (const MatchValue *match : matches) {
+            if (match) {
+                addBranchKeysFromMatch(keys, *match);
+            }
+        }
+        return keys;
+    }
+
+    static std::optional<ValueVariant> outputForBranchKey(const MatchValue &match, const ValueVariant &branchKey) {
+        for (const auto &[key, branchValue] : match.valueMapping) {
+            if (key == branchKey) {
+                return staticOutput(branchValue);
+            }
+        }
+        return staticOutput(match.defaultValue);
+    }
+
+    static std::optional<ValueVariant> matchDefaultOutput(const MatchValue &match) {
+        return staticOutput(match.defaultValue);
+    }
+};
+
+
+class InterpolatedTransposedMatchValue : public Value {
+    struct Stop {
+        double zoom;
+        std::shared_ptr<MatchValue> match;
+        std::shared_ptr<StaticValue> literal;
+    };
+
+    static std::shared_ptr<InterpolatedValue> buildInterpolator(
+        double interpolationBase,
+        const std::vector<Stop> &stops,
+        const std::function<std::optional<ValueVariant>(const MatchValue &)> &resolveMatchOutput) {
+        std::vector<std::pair<double, std::shared_ptr<Value>>> interpSteps;
+        interpSteps.reserve(stops.size());
+
+        for (const auto &stop : stops) {
+            if (stop.literal) {
+                interpSteps.emplace_back(stop.zoom, stop.literal);
+                continue;
+            }
+
+            const auto output = resolveMatchOutput(*stop.match);
+            if (!output) {
+                return nullptr;
+            }
+            interpSteps.emplace_back(stop.zoom, std::make_shared<StaticValue>(*output));
+        }
+
+        return std::make_shared<InterpolatedValue>(interpolationBase, interpSteps);
+    }
+
+public:
+    static std::shared_ptr<Value> tryCreate(double interpolationBase,
+                                            const std::vector<std::pair<double, std::shared_ptr<Value>>> &steps) {
+        if (steps.empty()) {
+            return nullptr;
+        }
+
+        std::vector<Stop> parsedStops;
+        parsedStops.reserve(steps.size());
+        std::optional<InternedString> propertyKey;
+        bool hasMatchStop = false;
+
+        for (const auto &[zoom, stepValue] : steps) {
+            if (const auto literal = std::dynamic_pointer_cast<StaticValue>(stepValue)) {
+                parsedStops.push_back({ zoom, nullptr, literal });
+                continue;
+            }
+
+            const auto match = std::dynamic_pointer_cast<MatchValue>(stepValue);
+            if (!match || !TransposedMatchHelpers::matchHasStaticOutputs(*match)) {
+                return nullptr;
+            }
+
+            const auto stepKey = TransposedMatchHelpers::matchPropertyKey(*match);
+            if (!stepKey) {
+                return nullptr;
+            }
+
+            if (!propertyKey) {
+                propertyKey = *stepKey;
+            } else if (*propertyKey != *stepKey) {
+                return nullptr;
+            }
+
+            hasMatchStop = true;
+            parsedStops.push_back({ zoom, match, nullptr });
+        }
+
+        if (!hasMatchStop || !propertyKey) {
+            return nullptr;
+        }
+
+        std::vector<const MatchValue *> matchSources;
+        for (const auto &stop : parsedStops) {
+            if (stop.match) {
+                matchSources.push_back(stop.match.get());
+            }
+        }
+        const auto branchKeys = TransposedMatchHelpers::collectMentionedBranchKeys(matchSources);
+
+        auto defaultInterpolator = buildInterpolator(interpolationBase, parsedStops, [](const MatchValue &match) {
+            return TransposedMatchHelpers::matchDefaultOutput(match);
+        });
+        if (!defaultInterpolator) {
+            return nullptr;
+        }
+
+        std::vector<std::pair<ValueVariant, std::shared_ptr<InterpolatedValue>>> branchInterpolators;
+        branchInterpolators.reserve(branchKeys.size());
+
+        for (const auto &branchKey : branchKeys) {
+            auto interpolator = buildInterpolator(interpolationBase, parsedStops, [&branchKey](const MatchValue &match) {
+                return TransposedMatchHelpers::outputForBranchKey(match, branchKey);
+            });
+            if (!interpolator) {
+                return nullptr;
+            }
+
+            branchInterpolators.emplace_back(branchKey, std::move(interpolator));
+        }
+
+        return std::make_shared<InterpolatedTransposedMatchValue>(*propertyKey,
+                                                                  std::move(defaultInterpolator),
+                                                                  std::move(branchInterpolators));
+    }
+
+    InterpolatedTransposedMatchValue(InternedString propertyKey,
+                                     std::shared_ptr<InterpolatedValue> defaultInterpolator,
+                                     std::vector<std::pair<ValueVariant, std::shared_ptr<InterpolatedValue>>> branchInterpolators)
+        : propertyKey(propertyKey)
+        , defaultInterpolator(std::move(defaultInterpolator))
+        , branchInterpolators(std::move(branchInterpolators)) {}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::pair<ValueVariant, std::shared_ptr<InterpolatedValue>>> clonedBranchInterpolators;
+        clonedBranchInterpolators.reserve(branchInterpolators.size());
+        for (const auto &[key, interpolator] : branchInterpolators) {
+            std::shared_ptr<Value> cloned(interpolator->clone());
+            clonedBranchInterpolators.emplace_back(key, std::dynamic_pointer_cast<InterpolatedValue>(cloned));
+        }
+
+        std::shared_ptr<Value> clonedDefault(defaultInterpolator->clone());
+        return std::make_unique<InterpolatedTransposedMatchValue>(propertyKey,
+                                                                  std::dynamic_pointer_cast<InterpolatedValue>(clonedDefault),
+                                                                  std::move(clonedBranchInterpolators));
+    }
+
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys = UsedKeysCollection({ ValueKeys::ZOOM });
+        usedKeys.includeOther(UsedKeysCollection({ propertyKey }));
+        return usedKeys;
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        if (!context.zoomLevel || !context.feature) {
+            return ValueVariant{};
+        }
+
+        const ValueVariant propertyValue = context.feature->getValue(propertyKey);
+
+        for (const auto &[key, interpolator] : branchInterpolators) {
+            if (key == propertyValue) {
+                return interpolator->evaluate(context);
+            }
+        }
+
+        return defaultInterpolator->evaluate(context);
+    }
+
+    void evaluateZoomRange(ZoomRange& zoomRange) override {
+        defaultInterpolator->evaluateZoomRange(zoomRange);
+    }
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        const auto casted = std::dynamic_pointer_cast<InterpolatedTransposedMatchValue>(other);
+        if (!casted) {
+            return false;
+        }
+
+        if (propertyKey != casted->propertyKey) {
+            return false;
+        }
+
+        if (!defaultInterpolator->isEqual(casted->defaultInterpolator)) {
+            return false;
+        }
+
+        if (branchInterpolators.size() != casted->branchInterpolators.size()) {
+            return false;
+        }
+
+        for (size_t i = 0; i < branchInterpolators.size(); ++i) {
+            if (branchInterpolators[i].first != casted->branchInterpolators[i].first) {
+                return false;
+            }
+            if (!branchInterpolators[i].second->isEqual(casted->branchInterpolators[i].second)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+private:
+    InternedString propertyKey;
+    std::shared_ptr<InterpolatedValue> defaultInterpolator;
+    std::vector<std::pair<ValueVariant, std::shared_ptr<InterpolatedValue>>> branchInterpolators;
+};
+
+
+class StepTransposedMatchValue : public Value {
+    struct StepStop {
+        double threshold;
+        std::shared_ptr<MatchValue> match;
+        std::shared_ptr<StaticValue> literal;
+    };
+
+    static std::shared_ptr<StepValue> buildStepValue(
+        const std::optional<ValueVariant> &defaultOutput,
+        const std::vector<StepStop> &stops,
+        const std::function<std::optional<ValueVariant>(const MatchValue &)> &resolveMatchOutput) {
+        if (!defaultOutput) {
+            return nullptr;
+        }
+
+        std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> stepStops;
+        stepStops.reserve(stops.size());
+
+        for (const auto &stop : stops) {
+            const auto threshold = std::make_shared<StaticValue>(stop.threshold);
+            if (stop.literal) {
+                stepStops.emplace_back(threshold, stop.literal);
+                continue;
+            }
+
+            const auto output = resolveMatchOutput(*stop.match);
+            if (!output) {
+                return nullptr;
+            }
+            stepStops.emplace_back(threshold, std::make_shared<StaticValue>(*output));
+        }
+
+        return std::make_shared<StepValue>(std::make_shared<ZoomValue>(),
+                                           stepStops,
+                                           std::make_shared<StaticValue>(*defaultOutput));
+    }
+
+public:
+    static std::shared_ptr<Value> tryCreate(const std::shared_ptr<Value> &compareValue,
+                                            const std::shared_ptr<Value> &defaultValue,
+                                            const std::vector<std::pair<std::shared_ptr<Value>, std::shared_ptr<Value>>> &stops) {
+        if (!std::dynamic_pointer_cast<ZoomValue>(compareValue) || stops.empty()) {
+            return nullptr;
+        }
+
+        std::shared_ptr<StaticValue> defaultLiteral;
+        std::shared_ptr<MatchValue> defaultMatch;
+        if (const auto literal = std::dynamic_pointer_cast<StaticValue>(defaultValue)) {
+            defaultLiteral = literal;
+        } else if (const auto match = std::dynamic_pointer_cast<MatchValue>(defaultValue)) {
+            if (!TransposedMatchHelpers::matchHasStaticOutputs(*match)) {
+                return nullptr;
+            }
+            defaultMatch = match;
+        } else {
+            return nullptr;
+        }
+
+        std::vector<StepStop> parsedStops;
+        parsedStops.reserve(stops.size());
+        std::optional<InternedString> propertyKey;
+        bool hasMatchStop = defaultMatch != nullptr;
+
+        if (defaultMatch) {
+            const auto defaultKey = TransposedMatchHelpers::matchPropertyKey(*defaultMatch);
+            if (!defaultKey) {
+                return nullptr;
+            }
+            propertyKey = *defaultKey;
+        }
+
+        for (const auto &[thresholdValue, stopValue] : stops) {
+            const auto thresholdStatic = std::dynamic_pointer_cast<StaticValue>(thresholdValue);
+            if (!thresholdStatic || !thresholdStatic->isStaticNumber()) {
+                return nullptr;
+            }
+
+            if (const auto literal = std::dynamic_pointer_cast<StaticValue>(stopValue)) {
+                parsedStops.push_back({ thresholdStatic->getStaticDouble(), nullptr, literal });
+                continue;
+            }
+
+            const auto match = std::dynamic_pointer_cast<MatchValue>(stopValue);
+            if (!match || !TransposedMatchHelpers::matchHasStaticOutputs(*match)) {
+                return nullptr;
+            }
+
+            const auto stepKey = TransposedMatchHelpers::matchPropertyKey(*match);
+            if (!stepKey) {
+                return nullptr;
+            }
+
+            if (!propertyKey) {
+                propertyKey = *stepKey;
+            } else if (*propertyKey != *stepKey) {
+                return nullptr;
+            }
+
+            hasMatchStop = true;
+            parsedStops.push_back({ thresholdStatic->getStaticDouble(), match, nullptr });
+        }
+
+        if (!hasMatchStop || !propertyKey) {
+            return nullptr;
+        }
+
+        std::vector<const MatchValue *> matchSources;
+        if (defaultMatch) {
+            matchSources.push_back(defaultMatch.get());
+        }
+        for (const auto &stop : parsedStops) {
+            if (stop.match) {
+                matchSources.push_back(stop.match.get());
+            }
+        }
+        const auto branchKeys = TransposedMatchHelpers::collectMentionedBranchKeys(matchSources);
+
+        std::optional<ValueVariant> defaultStepOutput;
+        if (defaultLiteral) {
+            defaultStepOutput = TransposedMatchHelpers::staticOutput(defaultLiteral);
+        } else {
+            defaultStepOutput = TransposedMatchHelpers::matchDefaultOutput(*defaultMatch);
+        }
+
+        auto defaultStepper = buildStepValue(defaultStepOutput, parsedStops, [](const MatchValue &match) {
+            return TransposedMatchHelpers::matchDefaultOutput(match);
+        });
+        if (!defaultStepper) {
+            return nullptr;
+        }
+
+        std::vector<std::pair<ValueVariant, std::shared_ptr<StepValue>>> branchSteppers;
+        branchSteppers.reserve(branchKeys.size());
+
+        for (const auto &branchKey : branchKeys) {
+            std::optional<ValueVariant> branchDefaultOutput;
+            if (defaultLiteral) {
+                branchDefaultOutput = TransposedMatchHelpers::staticOutput(defaultLiteral);
+            } else {
+                branchDefaultOutput = TransposedMatchHelpers::outputForBranchKey(*defaultMatch, branchKey);
+            }
+
+            auto stepper = buildStepValue(branchDefaultOutput, parsedStops, [&branchKey](const MatchValue &match) {
+                return TransposedMatchHelpers::outputForBranchKey(match, branchKey);
+            });
+            if (!stepper) {
+                return nullptr;
+            }
+
+            branchSteppers.emplace_back(branchKey, std::move(stepper));
+        }
+
+        return std::make_shared<StepTransposedMatchValue>(*propertyKey,
+                                                          std::move(defaultStepper),
+                                                          std::move(branchSteppers));
+    }
+
+    StepTransposedMatchValue(InternedString propertyKey,
+                             std::shared_ptr<StepValue> defaultStepper,
+                             std::vector<std::pair<ValueVariant, std::shared_ptr<StepValue>>> branchSteppers)
+        : propertyKey(propertyKey)
+        , defaultStepper(std::move(defaultStepper))
+        , branchSteppers(std::move(branchSteppers)) {}
+
+    std::unique_ptr<Value> clone() override {
+        std::vector<std::pair<ValueVariant, std::shared_ptr<StepValue>>> clonedBranchSteppers;
+        clonedBranchSteppers.reserve(branchSteppers.size());
+        for (const auto &[key, stepper] : branchSteppers) {
+            std::shared_ptr<Value> cloned(stepper->clone());
+            clonedBranchSteppers.emplace_back(key, std::dynamic_pointer_cast<StepValue>(cloned));
+        }
+
+        std::shared_ptr<Value> clonedDefault(defaultStepper->clone());
+        return std::make_unique<StepTransposedMatchValue>(propertyKey,
+                                                          std::dynamic_pointer_cast<StepValue>(clonedDefault),
+                                                          std::move(clonedBranchSteppers));
+    }
+
+    UsedKeysCollection getUsedKeys() const override {
+        UsedKeysCollection usedKeys = UsedKeysCollection({ ValueKeys::ZOOM });
+        usedKeys.includeOther(UsedKeysCollection({ propertyKey }));
+        return usedKeys;
+    }
+
+    ValueVariant evaluate(const EvaluationContext &context) const override {
+        if (!context.zoomLevel || !context.feature) {
+            return ValueVariant{};
+        }
+
+        const ValueVariant propertyValue = context.feature->getValue(propertyKey);
+
+        for (const auto &[key, stepper] : branchSteppers) {
+            if (key == propertyValue) {
+                return stepper->evaluate(context);
+            }
+        }
+
+        return defaultStepper->evaluate(context);
+    }
+
+    void evaluateZoomRange(ZoomRange& zoomRange) override {
+        defaultStepper->evaluateZoomRange(zoomRange);
+    }
+
+    bool isEqual(const std::shared_ptr<Value> &other) const override {
+        const auto casted = std::dynamic_pointer_cast<StepTransposedMatchValue>(other);
+        if (!casted) {
+            return false;
+        }
+
+        if (propertyKey != casted->propertyKey) {
+            return false;
+        }
+
+        if (!defaultStepper->isEqual(casted->defaultStepper)) {
+            return false;
+        }
+
+        if (branchSteppers.size() != casted->branchSteppers.size()) {
+            return false;
+        }
+
+        for (size_t i = 0; i < branchSteppers.size(); ++i) {
+            if (branchSteppers[i].first != casted->branchSteppers[i].first) {
+                return false;
+            }
+            if (!branchSteppers[i].second->isEqual(casted->branchSteppers[i].second)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+private:
+    InternedString propertyKey;
+    std::shared_ptr<StepValue> defaultStepper;
+    std::vector<std::pair<ValueVariant, std::shared_ptr<StepValue>>> branchSteppers;
 };
 
 
@@ -2414,16 +2952,18 @@ class InFilter : public Value {
 private:
     const std::unordered_set<ValueVariant> values;
     const std::shared_ptr<Value> dynamicValues;
-    InternedString key;
+    const std::shared_ptr<Value> key;
 public:
-    InFilter(InternedString key, const std::unordered_set<ValueVariant> values, const std::shared_ptr<Value> dynamicValues) :values(values), key(key), dynamicValues(dynamicValues) {}
+    InFilter(const std::shared_ptr<Value> key, const std::unordered_set<ValueVariant> values, const std::shared_ptr<Value> dynamicValues)
+            : values(values), key(key), dynamicValues(dynamicValues) {
+    }
 
     std::unique_ptr<Value> clone() override {
         return std::make_unique<InFilter>(key, values, dynamicValues);
     }
 
     UsedKeysCollection getUsedKeys() const override {
-        UsedKeysCollection usedKeys = UsedKeysCollection({ key });
+        UsedKeysCollection usedKeys = key->getUsedKeys();
         if (dynamicValues) {
             auto const setKeys = dynamicValues->getUsedKeys();
             usedKeys.includeOther(setKeys);
@@ -2432,10 +2972,11 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
-        auto const &value = context.feature->getValue(key);
+        auto const &value = key->evaluate(context);
         if (values.count(value) != 0) {
             return true;
         }
+
         if (dynamicValues) {
             bool isString = std::holds_alternative<std::string>(value);
             bool isDouble = std::holds_alternative<double>(value);
@@ -2506,16 +3047,17 @@ class NotInFilter : public Value {
 private:
     const std::unordered_set<ValueVariant> values;
     const std::shared_ptr<Value> dynamicValues;
-    InternedString key;
+    const std::shared_ptr<Value> key;
 public:
-    NotInFilter(InternedString key, const std::unordered_set<ValueVariant> values, const std::shared_ptr<Value> dynamicValues) :values(values), key(key), dynamicValues(dynamicValues) {}
+    NotInFilter(const std::shared_ptr<Value> key, const std::unordered_set<ValueVariant> values, const std::shared_ptr<Value> dynamicValues)
+            : values(values), key(key), dynamicValues(dynamicValues) {}
 
     std::unique_ptr<Value> clone() override {
         return std::make_unique<NotInFilter>(key, values, dynamicValues);
     }
 
     UsedKeysCollection getUsedKeys() const override {
-        UsedKeysCollection usedKeys = UsedKeysCollection({ key });
+        UsedKeysCollection usedKeys = key->getUsedKeys();
         if (dynamicValues) {
             auto const setKeys = dynamicValues->getUsedKeys();
             usedKeys.includeOther(setKeys);
@@ -2524,7 +3066,7 @@ public:
     }
 
     ValueVariant evaluate(const EvaluationContext &context) const override {
-        auto const &value = context.feature->getValue(key);
+        auto const &value = key->evaluate(context);
         if (values.count(value) != 0) {
             return false;
         }

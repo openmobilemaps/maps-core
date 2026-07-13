@@ -26,6 +26,8 @@ struct NativeGraphicsObjectInterface : ::djinni::JsInterface<::GraphicsObjectInt
     static bool isReady(const CppType& self);
     static void setup(const CppType& self, const em::val& w_context);
     static void clear(const CppType& self);
+    static void pause(const CppType& self);
+    static void resume(const CppType& self, const em::val& w_context);
     static void setIsInverseMasked(const CppType& self, bool w_inversed);
     static void setDebugLabel(const CppType& self, const std::string& w_label);
     static void render(const CppType& self, const em::val& w_context,const em::val& w_renderPass,int64_t w_vpMatrix,int64_t w_mMatrix,const em::val& w_origin,bool w_isMasked,double w_screenPixelAsRealMeterFactor,bool w_isScreenSpaceCoords);

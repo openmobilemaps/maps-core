@@ -33,6 +33,8 @@ struct NativeIconInfoInterface : ::djinni::JsInterface<::IconInfoInterface, Nati
     static int32_t getType(const CppType& self);
     static em::val getIconAnchor(const CppType& self);
     static int32_t getBlendMode(const CppType& self);
+    static void setRotation(const CppType& self, double w_angle);
+    static double getRotation(const CppType& self);
 
 };
 

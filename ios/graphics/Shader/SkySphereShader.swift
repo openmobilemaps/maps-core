@@ -11,7 +11,6 @@
 import Foundation
 import MapCoreSharedModule
 @preconcurrency import Metal
-import UIKit
 import simd
 
 class SkySphereShader: BaseShader, @unchecked Sendable {
@@ -24,8 +23,8 @@ class SkySphereShader: BaseShader, @unchecked Sendable {
 
     private var stencilState: MTLDepthStencilState?
 
-    init() {
-        super.init(shader: .skySphereShader)
+    init(useLocal: Bool = false) {
+        super.init(shader: useLocal ? .skySphereLocalShader : .skySphereShader)
     }
 
     override func setupProgram(_: MCRenderingContextInterface?) {
@@ -37,7 +36,7 @@ class SkySphereShader: BaseShader, @unchecked Sendable {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline else { return }
+        guard let pipeline = activePipeline else { return }
         context.setRenderPipelineStateIfNeeded(pipeline)
 
         if let buffer = cameraPositionBuffer?.getNextBuffer(context) {

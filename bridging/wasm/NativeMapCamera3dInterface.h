@@ -25,6 +25,15 @@ struct NativeMapCamera3dInterface : ::djinni::JsInterface<::MapCamera3dInterface
 
     static em::val getCameraConfig(const CppType& self);
     static void setCameraConfig(const CppType& self, const em::val& w_config,const em::val& w_durationSeconds,const em::val& w_targetZoom,const em::val& w_targetCoordinate);
+    static int32_t getCameraMode(const CppType& self);
+    static void setCameraMode(const CppType& self, int32_t w_mode);
+    static bool isPoseCameraActive(const CppType& self);
+    static void setPoseCamera(const CppType& self, const em::val& w_position,float w_yawDegrees,float w_pitchDegrees,float w_rollDegrees,float w_verticalFovDegrees,float w_nearPlaneMeters,float w_farPlaneMeters);
+    static void clearPoseCamera(const CppType& self);
+    static void setCustomViewMatrix(const CppType& self, const em::val& w_viewMatrix);
+    static void clearCustomViewMatrix(const CppType& self);
+    static void setCustomProjectionMatrix(const CppType& self, const em::val& w_projectionMatrix);
+    static void clearCustomProjectionMatrix(const CppType& self);
 
 };
 

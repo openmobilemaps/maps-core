@@ -8,6 +8,9 @@ cpp:
   typename: '::WmtsDimension'
   header: '"WmtsDimension.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCWmtsDimension'
   pointer: true

@@ -38,6 +38,9 @@ coordinate_system_identifiers = interface +c {
     # https://epsg.io/4326
     static EPSG4326(): i32;
 
+    # WGS 84 scaled 2D coordinate system
+    static EPSG4326System2D(): i32;
+
     # LV03+
     # https://epsg.io/2056
     static EPSG2056(): i32;
@@ -67,8 +70,11 @@ coordinate_system_factory = interface +c {
     static get_epsg_2056_system() : map_coordinate_system;
     static get_epsg_3857_system() : map_coordinate_system;
     static get_epsg_4326_system() : map_coordinate_system;
+    static get_epsg_4326_system_2d() : map_coordinate_system;
     static get_epsg_21781_system() : map_coordinate_system;
     static get_unit_sphere_system() : map_coordinate_system;
+
+    static get_system_for(identifier: i32): map_coordinate_system;
 }
 
 coord = record {

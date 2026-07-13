@@ -14,13 +14,13 @@ import MapCoreSharedModule
 
 struct StretchShaderInfoSwift: Equatable {
     let scaleX: Float
-    /** all stretch infos are between 0 and 1 */
+    /// all stretch infos are between 0 and 1
     let stretchX0Begin: Float
     let stretchX0End: Float
     let stretchX1Begin: Float
     let stretchX1End: Float
     let scaleY: Float
-    /** all stretch infos are between 0 and 1 */
+    /// all stretch infos are between 0 and 1
     let stretchY0Begin: Float
     let stretchY0End: Float
     let stretchY1Begin: Float
@@ -79,7 +79,7 @@ class StretchShader: BaseShader, @unchecked Sendable {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline else { return }
+        guard let pipeline = activePipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
         encoder.setFragmentBuffer(alphaBuffer, offset: 0, index: 1)

@@ -8,7 +8,11 @@ cpp:
   typename: '::TessellationMode'
   header: '"TessellationMode.h"'
   byValue: true
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCTessellationMode'
   pointer: false
   hash: '%s.hash'

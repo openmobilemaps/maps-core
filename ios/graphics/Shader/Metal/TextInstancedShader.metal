@@ -22,7 +22,7 @@ struct TextInstancedVertexOut {
 
 vertex TextInstancedVertexOut
 unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                          constant float4x4 &vpMatrix [[buffer(1)]],
+                          constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
                           constant float4x4 &mMatrix [[buffer(2)]],
                           constant float2 *positions [[buffer(3)]],
                           constant float2 *scales [[buffer(4)]],
@@ -31,7 +31,7 @@ unitSphereTextInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                           constant uint16_t *styleIndices [[buffer(7)]],
                           constant packed_float3 *referencePositions [[buffer(8)]],
                           constant float4 &originOffset [[buffer(9)]],
-                          constant float4 &origin [[buffer(10)]],
+                          constant float4 &origin [[buffer(MC_GLOBAL_ORIGIN_BUFFER_INDEX)]],
                           constant float &aspectRatio [[buffer(11)]],
                           constant float *alphas [[buffer(12)]],
                           uint instanceId [[instance_id]])
@@ -165,7 +165,7 @@ unitSphereTextInstancedFragmentShader(TextInstancedVertexOut in [[stage_in]],
 
 vertex TextInstancedVertexOut
 textInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                          constant float4x4 &vpMatrix [[buffer(1)]],
+                          constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
                           constant float4x4 &mMatrix [[buffer(2)]],
                           constant float2 *positions [[buffer(3)]],
                           constant float2 *scales [[buffer(4)]],

@@ -11,6 +11,9 @@ abstract class SkySphereLayerInterface {
     companion object {
         @JvmStatic
         external fun create(): SkySphereLayerInterface
+
+        @JvmStatic
+        external fun createWithLocal(): SkySphereLayerInterface
     }
 
     abstract fun asLayerInterface(): io.openmobilemaps.mapscore.shared.map.LayerInterface

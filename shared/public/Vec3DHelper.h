@@ -62,35 +62,27 @@ inline Vec3D operator-(const Vec3D& vec) {
 class Vec3DHelper {
   public:
     static inline double distance(const ::Vec3D &from, const ::Vec3D &to) {
-        return std::sqrt((from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y) + (from.z - to.z) * (from.z - to.z));
+        return std::sqrt(distanceSquared(from, to));
     }
 
     static inline double distanceSquared(const ::Vec3D &from, const ::Vec3D &to) {
         return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y) + (from.z - to.z) * (from.z - to.z);
     }
 
-    static inline ::Vec3D midpoint(const ::Vec3D &from, const ::Vec3D &to) {
-        return Vec3D((from.x + to.x) / 2.0, (from.y + to.y) / 2.0, (from.z + to.z) / 2.0);
-    }
-
-    static inline double squaredLength(const ::Vec3D &vector) {
-        return vector * vector;
-    }
-
     static inline double length(const ::Vec3D &vector) {
         return std::sqrt(vector * vector);
+    }
+    
+    static inline double lengthSquared(const ::Vec3D &vector) {
+        return vector * vector;
     }
 
     static inline ::Vec3D normalize(const ::Vec3D &vector) {
         return vector / Vec3DHelper::length(vector);
     }
-
-    static inline ::Vec3D toVec(const ::Coord &coordinate) {
-        return Vec3D(coordinate.x, coordinate.y, coordinate.z);
-    }
-
-    static inline ::Coord toCoord(const ::Vec3D &vec, const int32_t systemIdentifier) {
-        return Coord(systemIdentifier, vec.x, vec.y, vec.z);
+    
+    static inline ::Vec3D midpoint(const ::Vec3D &from, const ::Vec3D &to) {
+        return Vec3D((from.x + to.x) / 2.0, (from.y + to.y) / 2.0, (from.z + to.z) / 2.0);
     }
 
     static inline double dotProduct(const Vec3D& A, const Vec3D& B) {
@@ -103,5 +95,13 @@ class Vec3DHelper {
             A.z * B.x - A.x * B.z,
             A.x * B.y - A.y * B.x
         };
+    }
+    
+    static inline ::Vec3D toVec(const ::Coord &coordinate) {
+        return Vec3D(coordinate.x, coordinate.y, coordinate.z);
+    }
+
+    static inline ::Coord toCoord(const ::Vec3D &vec, const int32_t systemIdentifier) {
+        return Coord(systemIdentifier, vec.x, vec.y, vec.z);
     }
 };

@@ -4,7 +4,7 @@
 import type { Vec3D } from "@djinni/maps-core/graphics/common/common"
 import type { Coord, RectCoord } from "@djinni/maps-core/map/coordinates/coordinate_system"
 import type { ErrorManager } from "@djinni/maps-core/map/map_helpers"
-import type { LayerReadyState } from "@djinni/maps-core/map/core"
+import type { LayerReadyState, MapCamera3dMode } from "@djinni/maps-core/map/core"
 
 export interface Tiled2dMapLayerConfig {
     getCoordinateSystemIdentifier(): number;
@@ -68,13 +68,16 @@ export interface /*record*/ Tiled2dMapZoomInfo {
 
 export interface Tiled2dMapSourceInterface {
     onVisibleBoundsChanged(visibleBounds: RectCoord, curT: number, zoom: number): void;
-    onCameraChange(viewMatrix: Array<number>, projectionMatrix: Array<number>, origin: Vec3D, verticalFov: number, horizontalFov: number, width: number, height: number, focusPointAltitude: number, focusPointPosition: Coord, zoom: number): void;
+    onCameraChange(viewMatrix: Array<number>, projectionMatrix: Array<number>, origin: Vec3D, verticalFov: number, horizontalFov: number, width: number, height: number, focusPointAltitude: number, focusPointPosition: Coord, zoom: number, cameraPosition: Vec3D | undefined, cameraMode: MapCamera3dMode): void;
     setMinZoomLevelIdentifier(value: number | undefined): void;
     getMinZoomLevelIdentifier(): number | undefined;
     setMaxZoomLevelIdentifier(value: number | undefined): void;
     getMaxZoomLevelIdentifier(): number | undefined;
+    setZoomLevelScaleFactor(value: number): void;
     pause(): void;
     resume(): void;
+    /** Debug helper: pauses tile selection/loading independently of the pause()/resume() lifecycle state. */
+    setTileLoadingPaused(paused: boolean): void;
     isReadyToRenderOffscreen(): LayerReadyState;
     setErrorManager(errorManager: ErrorManager): void;
     forceReload(): void;

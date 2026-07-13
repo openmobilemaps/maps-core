@@ -16,18 +16,26 @@ auto NativeRenderPassConfig::fromCpp(JNIEnv* jniEnv, const CppType& c) -> ::djin
     auto r = ::djinni::LocalRef<JniType>{jniEnv->NewObject(data.clazz.get(), data.jconstructor,
                                                            ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.renderPassIndex)),
                                                            ::djinni::get(::djinni::Bool::fromCpp(jniEnv, c.isPassMasked)),
-                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetInterface>::fromCpp(jniEnv, c.renderTarget)))};
+                                                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetInterface>::fromCpp(jniEnv, c.renderTarget)),
+                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.stencilReadMask)),
+                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.stencilReadReference)),
+                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.stencilWriteMask)),
+                                                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c.stencilWriteReference)))};
     ::djinni::jniExceptionCheck(jniEnv);
     return r;
 }
 
 auto NativeRenderPassConfig::toCpp(JNIEnv* jniEnv, JniType j) -> CppType {
-    ::djinni::JniLocalScope jscope(jniEnv, 4);
+    ::djinni::JniLocalScope jscope(jniEnv, 8);
     assert(j != nullptr);
     const auto& data = ::djinni::JniClass<NativeRenderPassConfig>::get();
     return {::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_renderPassIndex)),
             ::djinni::Bool::toCpp(jniEnv, jniEnv->GetBooleanField(j, data.field_isPassMasked)),
-            ::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetInterface>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_renderTarget))};
+            ::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetInterface>::toCpp(jniEnv, jniEnv->GetObjectField(j, data.field_renderTarget)),
+            ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_stencilReadMask)),
+            ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_stencilReadReference)),
+            ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_stencilWriteMask)),
+            ::djinni::I32::toCpp(jniEnv, jniEnv->GetIntField(j, data.field_stencilWriteReference))};
 }
 
 } // namespace djinni_generated

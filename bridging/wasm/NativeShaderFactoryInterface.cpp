@@ -48,6 +48,7 @@ em::val NativeShaderFactoryInterface::cppProxyMethods() {
         "createIcosahedronColorShader",
         "createSphereEffectShader",
         "createSkySphereShader",
+        "createSkySphereLocalShader",
         "createElevationInterpolationShader",
     });
     return methods;
@@ -289,6 +290,15 @@ em::val NativeShaderFactoryInterface::createSkySphereShader(const CppType& self)
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeSkySphereShaderInterface>::handleNativeException(e);
     }
 }
+em::val NativeShaderFactoryInterface::createSkySphereLocalShader(const CppType& self) {
+    try {
+        auto r = self->createSkySphereLocalShader();
+        return ::djinni_generated::NativeSkySphereShaderInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeSkySphereShaderInterface>::handleNativeException(e);
+    }
+}
 em::val NativeShaderFactoryInterface::createElevationInterpolationShader(const CppType& self) {
     try {
         auto r = self->createElevationInterpolationShader();
@@ -329,6 +339,7 @@ EMSCRIPTEN_BINDINGS(_shader_factory_interface) {
         .function("createIcosahedronColorShader", NativeShaderFactoryInterface::createIcosahedronColorShader)
         .function("createSphereEffectShader", NativeShaderFactoryInterface::createSphereEffectShader)
         .function("createSkySphereShader", NativeShaderFactoryInterface::createSkySphereShader)
+        .function("createSkySphereLocalShader", NativeShaderFactoryInterface::createSkySphereLocalShader)
         .function("createElevationInterpolationShader", NativeShaderFactoryInterface::createElevationInterpolationShader)
         ;
 }

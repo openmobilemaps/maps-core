@@ -209,7 +209,7 @@ void IconLayer::setupIconObjects(
 
         iconObject->setup(renderingContext);
 
-        if (mask && !mask->asGraphicsObject()->isReady()) {
+        if (mask) {
             mask->asGraphicsObject()->setup(renderingContext);
         }
     }
@@ -239,8 +239,7 @@ void IconLayer::clear() {
         icons.clear();
     }
     if (mask) {
-        if (mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->clear();
+        mask->asGraphicsObject()->clear();
     }
     {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
@@ -251,9 +250,7 @@ void IconLayer::clear() {
 
 void IconLayer::clearSync(const std::vector<std::pair<std::shared_ptr<IconInfoInterface>, std::shared_ptr<IconLayerObject>>> &iconsToClear) {
     for (const auto &icon : iconsToClear) {
-        if (icon.second->getGraphicsObject()->isReady()) {
-            icon.second->getGraphicsObject()->clear();
-        }
+        icon.second->getGraphicsObject()->clear();
     }
 }
 
@@ -272,8 +269,7 @@ void IconLayer::update() {
     }
 
     if (mask) {
-        if (!mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
+        mask->asGraphicsObject()->setup(mapInterface->getRenderingContext());
     }
 
     {
@@ -316,7 +312,7 @@ std::vector<std::shared_ptr<::RenderPassInterface>> IconLayer::buildRenderPasses
         std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
         for (const auto &passEntry : renderPassObjectMap) {
             std::shared_ptr<RenderPass> renderPass =
-                std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget), passEntry.second, mask);
+                std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none), passEntry.second, mask);
             renderPasses.push_back(renderPass);
         }
         return renderPasses;
@@ -328,7 +324,7 @@ void IconLayer::preGenerateRenderPasses() {
     std::map<int, std::vector<std::shared_ptr<RenderObjectInterface>>> newRenderPassObjectMap;
     for (auto const &iconTuple : icons) {
         for (const auto &config : iconTuple.second->getRenderConfig()) {
-            newRenderPassObjectMap[renderPassIndex].push_back(std::make_shared<RenderObject>(config->getGraphicsObject()));
+            newRenderPassObjectMap[renderPassIndex].push_back(std::make_shared<RenderObject>(config->getGraphicsObject(), config->getMaskingObject()));
         }
     }
 
@@ -401,19 +397,32 @@ void IconLayer::onRemoved() {
 void IconLayer::pause() {
     {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
-        clearSync(icons);
+        for (const auto &icon : icons) {
+            icon.second->getGraphicsObject()->pause();
+        }
     }
 
     if (mask) {
-        if (mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->clear();
+        mask->asGraphicsObject()->pause();
     }
 }
 
 void IconLayer::resume() {
+    auto mapInterface = this->mapInterface;
+    if (!mapInterface) {
+        return;
+    }
+    auto renderingContext = mapInterface->getRenderingContext();
     {
         std::lock_guard<std::recursive_mutex> lock(iconsMutex);
-        setupIconObjects(icons);
+        for (const auto &icon : icons) {
+            if (!icon.second->getGraphicsObject()->isReady()) {
+                icon.second->setup(renderingContext);
+            }
+        }
+    }
+    if (mask && !mask->asGraphicsObject()->isReady()) {
+        mask->asGraphicsObject()->resume(renderingContext);
     }
 }
 

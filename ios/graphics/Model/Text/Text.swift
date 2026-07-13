@@ -51,7 +51,7 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
     override func render(
         encoder: MTLRenderCommandEncoder,
         context: RenderingContext,
-        renderPass _: MCRenderPassConfig,
+        renderPass: MCRenderPassConfig,
         vpMatrix: Int64,
         mMatrix: Int64,
         origin: MCVec3D,
@@ -69,11 +69,8 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
         else { return }
 
         if isMasked {
-            if stencilState == nil {
-                setupStencilStates()
-            }
-            encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0b1000_0000)
+            encoder.setDepthStencilState(maskStencilState(for: renderPass))
+            encoder.setStencilReferenceValue(maskStencilReference(for: renderPass))
         } else {
             encoder.setDepthStencilState(context.defaultMask)
         }
@@ -89,12 +86,6 @@ final class Text: BaseGraphicsObject, @unchecked Sendable {
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents().copyMemory(from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         encoder.setFragmentSamplerState(sampler, index: 0)
 

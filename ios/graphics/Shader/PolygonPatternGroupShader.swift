@@ -11,7 +11,6 @@
 import Foundation
 import MapCoreSharedModule
 @preconcurrency import Metal
-import UIKit
 
 class PolygonPatternGroupShader: BaseShader, @unchecked Sendable {
     // MARK: - Variables
@@ -37,7 +36,7 @@ class PolygonPatternGroupShader: BaseShader, @unchecked Sendable {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline else { return }
+        guard let pipeline = activePipeline else { return }
         context.setRenderPipelineStateIfNeeded(pipeline)
     }
 }

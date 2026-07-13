@@ -40,6 +40,15 @@ open class AssetLocalDataProvider(
         }
     }
 
+    private fun spriteAssetPath(spriteId: String, url: String, scale: Int, extension: String): String {
+        val localBase = url.takeIf { it.startsWith("generated/") || it.startsWith("generated-sprites/") }
+            ?.substringBeforeLast(".")
+            ?: "${folderSprite}/${fileNameSprite(spriteId)}"
+        val suffix = scaleSuffix(scale)
+        val scaledBase = if (localBase.endsWith(suffix)) localBase else "${localBase}${suffix}"
+        return "${folderAssetsBase}/${scaledBase}.${extension}"
+    }
+
     protected open fun modifyLoadedStyleJson(styleJson: String): String = styleJson
 
     override fun getStyleJson(): String? {
@@ -62,7 +71,7 @@ open class AssetLocalDataProvider(
         val resultPromise = Promise<TextureLoaderResult>()
 
         coroutineScope.launch(Dispatchers.IO) {
-            val assetPath = "${folderAssetsBase}/${folderSprite}/${fileNameSprite(spriteId)}${scaleSuffix(scale)}.png"
+            val assetPath = spriteAssetPath(spriteId, url, scale, "png")
             val texture = try {
                 val assetStream = assets.open(assetPath)
                 val decodedTexture = BitmapFactory.decodeStream(assetStream)?.let { BitmapTextureHolder(it) }
@@ -87,7 +96,7 @@ open class AssetLocalDataProvider(
         val resultPromise = Promise<DataLoaderResult>()
 
         coroutineScope.launch(Dispatchers.IO) {
-            val assetPath = "${folderAssetsBase}/${folderSprite}/${fileNameSprite(spriteId)}${scaleSuffix(scale)}.json"
+            val assetPath = spriteAssetPath(spriteId, url, scale, "json")
             val spriteJson = try {
                 val assetStream = assets.open(assetPath)
                 val bytes = assetStream.readBytes()

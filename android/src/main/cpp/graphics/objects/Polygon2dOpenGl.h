@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "BaseGraphicsObjectOpenGl.h"
 #include "GraphicsObjectInterface.h"
 #include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
@@ -19,7 +20,7 @@
 #include "opengl_wrapper.h"
 #include <mutex>
 
-class Polygon2dOpenGl : public GraphicsObjectInterface,
+class Polygon2dOpenGl : public BaseGraphicsObjectOpenGl,
                         public MaskingObjectInterface,
                         public Polygon2dInterface,
                         public std::enable_shared_from_this<Polygon2dOpenGl> {

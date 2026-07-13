@@ -13,6 +13,8 @@
 #include "Tiled2dMapVectorTile.h"
 #include "RasterVectorLayerDescription.h"
 #include "Textured2dLayerObject.h"
+#include "RectD.h"
+#include <unordered_map>
 
 class Tiled2dMapVectorRasterTile : public Tiled2dMapVectorTile, public std::enable_shared_from_this<Tiled2dMapVectorRasterTile> {
 public:
@@ -27,13 +29,15 @@ public:
     void updateRasterLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                       const Tiled2dMapVectorTileDataRaster &tileData) override;
 
-    void update() override;
+    bool update() override;
 
     virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() override;
 
     void clear() override;
-
     void setup() override;
+
+    void pause() override;
+    void resume() override;
 
     void setAlpha(float alpha) override;
 
@@ -41,13 +45,19 @@ public:
 
     virtual void setRasterTileData(const Tiled2dMapVectorTileDataRaster &tileData) override;
 
+    void setSpriteData(const std::string &spriteId, const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture) override;
+
     void setupTile(const Tiled2dMapVectorTileDataRaster tileData);
 
     bool performClick(const Coord &coord) override;
 
 private:
+    std::optional<std::pair<std::shared_ptr<TextureHolderInterface>, RectD>> resolveLookupTexture();
+    std::optional<RasterShaderStyle> getTextureLookupStyle(const RasterShaderStyle &baseStyle, double zoomIdentifier);
+
     std::shared_ptr<Textured2dLayerObject> tileObject;
     std::shared_ptr<TextureHolderInterface> tileData;
+    std::unordered_map<std::string, std::pair<std::shared_ptr<SpriteData>, std::shared_ptr<TextureHolderInterface>>> sprites;
 
     UsedKeysCollection usedKeys;
     bool isStyleZoomDependant = true;

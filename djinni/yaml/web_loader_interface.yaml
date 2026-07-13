@@ -8,7 +8,11 @@ cpp:
   typename: '::WebLoaderInterface'
   header: '"WebLoaderInterface.h"'
   byValue: false
+kmp:
+  package: ""
+  bridgePrefix: ""
 objc:
+  module: 'web_loader'
   typename: 'WebLoaderInterface'
   pointer: true
   hash: '%s.hash'

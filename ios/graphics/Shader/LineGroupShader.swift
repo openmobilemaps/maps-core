@@ -11,18 +11,13 @@
 import Foundation
 import MapCoreSharedModule
 @preconcurrency import Metal
-import UIKit
 
 class LineGroupShader: BaseShader, @unchecked Sendable {
     var lineStyleBuffer: MTLBuffer?
-    var time: MultiBuffer<Float>
-
-    var screenPixelAsRealMeterFactor: Float = 1.0
 
     var dashingScaleFactor: Float = 1.0
 
     override init(shader: PipelineType = .lineGroupShader) {
-        time = .init(device: MetalContext.current.device)
         super.init(shader: shader)
     }
 
@@ -33,24 +28,14 @@ class LineGroupShader: BaseShader, @unchecked Sendable {
     }
 
     override func preRender(encoder: MTLRenderCommandEncoder, context: RenderingContext) {
-        guard let pipeline else { return }
+        guard let pipeline = activePipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
-
-        encoder.setVertexBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 2)
 
         encoder.setVertexBuffer(lineStyleBuffer, offset: 0, index: 3)
 
         encoder.setFragmentBuffer(lineStyleBuffer, offset: 0, index: 1)
 
-        if let timeBuffer = time.getNextBuffer(context) {
-            var now = context.time
-            timeBuffer
-                .copyMemory(bytes: &now, length: MemoryLayout<Float>.stride)
-            encoder.setFragmentBuffer(timeBuffer, offset: 0, index: 2)
-        }
-
-        encoder.setFragmentBytes(&screenPixelAsRealMeterFactor, length: MemoryLayout<Float>.stride, index: 3)
         encoder.setFragmentBytes(&dashingScaleFactor, length: MemoryLayout<Float>.stride, index: 4)
 
     }

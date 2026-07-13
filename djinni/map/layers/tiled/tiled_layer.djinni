@@ -3,6 +3,7 @@
 @extern "../../../yaml/layer_ready_state.yaml"
 @extern "../../../yaml/error_manager.yaml"
 @extern "../../../yaml/vec_3_d.yaml"
+@extern "../../../yaml/map_camera_3d_mode.yaml"
 
 tiled_2d_map_layer_config = interface +c +j +o {
     get_coordinate_system_identifier(): i32;
@@ -63,7 +64,7 @@ tiled_2d_map_zoom_info = record {
 
 tiled_2d_map_source_interface = interface +c {
     on_visible_bounds_changed(visible_bounds: rect_coord, cur_t:i32, zoom: f64);
-    on_camera_change(view_matrix: list<f32>, projection_matrix: list<f32>, origin: vec_3_d, vertical_fov: f32, horizontal_fov: f32, width: f32, height: f32, focus_point_altitude: f32, focus_point_position: coord, zoom: f32);
+    on_camera_change(view_matrix: list<f32>, projection_matrix: list<f32>, origin: vec_3_d, vertical_fov: f32, horizontal_fov: f32, width: f32, height: f32, focus_point_altitude: f32, focus_point_position: coord, zoom: f32, camera_position: optional<vec_3_d>, camera_mode: map_camera_3d_mode);
 
     set_min_zoom_level_identifier(value: optional<i32>);
     get_min_zoom_level_identifier(): optional<i32>;
@@ -71,8 +72,13 @@ tiled_2d_map_source_interface = interface +c {
     set_max_zoom_level_identifier(value: optional<i32>);
     get_max_zoom_level_identifier(): optional<i32>;
 
+    set_zoom_level_scale_factor(value: f32);
+
     pause();
     resume();
+
+    # Debug helper: pauses tile selection/loading independently of the pause()/resume() lifecycle state.
+    set_tile_loading_paused(paused: bool);
 
     is_ready_to_render_offscreen() : layer_ready_state;
 
@@ -81,4 +87,3 @@ tiled_2d_map_source_interface = interface +c {
 
     notify_tiles_updates();
 }
-

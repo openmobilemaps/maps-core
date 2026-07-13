@@ -58,6 +58,27 @@ void NativeQuad2dInterface::JavaProxy::loadTexture(const /*not-null*/ std::share
                            ::djinni::get(::djinni_generated::NativeTextureHolderInterface::fromCpp(jniEnv, c_textureHolder)));
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeQuad2dInterface::JavaProxy::loadDualTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder, const /*nullable*/ std::shared_ptr<::TextureHolderInterface> & c_elevationHolder) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeQuad2dInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_loadDualTexture,
+                           ::djinni::get(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, c_context)),
+                           ::djinni::get(::djinni_generated::NativeTextureHolderInterface::fromCpp(jniEnv, c_textureHolder)),
+                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::fromCpp(jniEnv, c_elevationHolder)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativeQuad2dInterface::JavaProxy::loadTextures(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder, const /*nullable*/ std::shared_ptr<::TextureHolderInterface> & c_lookupHolder, const /*nullable*/ std::shared_ptr<::TextureHolderInterface> & c_elevationHolder) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeQuad2dInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_loadTextures,
+                           ::djinni::get(::djinni_generated::NativeRenderingContextInterface::fromCpp(jniEnv, c_context)),
+                           ::djinni::get(::djinni_generated::NativeTextureHolderInterface::fromCpp(jniEnv, c_textureHolder)),
+                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::fromCpp(jniEnv, c_lookupHolder)),
+                           ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::fromCpp(jniEnv, c_elevationHolder)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 void NativeQuad2dInterface::JavaProxy::removeTexture() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -122,6 +143,27 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_
         const auto& ref = ::djinni::objectFromHandleAddress<::Quad2dInterface>(nativeRef);
         ref->loadTexture(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
                          ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, j_textureHolder));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Quad2dInterface_00024CppProxy_native_1loadDualTexture(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, jobject j_textureHolder, jobject j_elevationHolder)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Quad2dInterface>(nativeRef);
+        ref->loadDualTexture(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
+                             ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, j_textureHolder),
+                             ::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::toCpp(jniEnv, j_elevationHolder));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_Quad2dInterface_00024CppProxy_native_1loadTextures(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRenderingContextInterface::JniType j_context, jobject j_textureHolder, jobject j_lookupHolder, jobject j_elevationHolder)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::Quad2dInterface>(nativeRef);
+        ref->loadTextures(::djinni_generated::NativeRenderingContextInterface::toCpp(jniEnv, j_context),
+                          ::djinni_generated::NativeTextureHolderInterface::toCpp(jniEnv, j_textureHolder),
+                          ::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::toCpp(jniEnv, j_lookupHolder),
+                          ::djinni::Optional<std::optional, ::djinni_generated::NativeTextureHolderInterface>::toCpp(jniEnv, j_elevationHolder));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

@@ -8,6 +8,9 @@ cpp:
   typename: '::Tiles2dMapLayerConfig'
   header: '"Tiles2dMapLayerConfig.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCTiles2dMapLayerConfig'
   pointer: true

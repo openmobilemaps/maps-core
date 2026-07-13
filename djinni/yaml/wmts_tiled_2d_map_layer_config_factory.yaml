@@ -8,7 +8,11 @@ cpp:
   typename: '::WmtsTiled2dMapLayerConfigFactory'
   header: '"WmtsTiled2dMapLayerConfigFactory.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCWmtsTiled2dMapLayerConfigFactory'
   pointer: true
   hash: '%s.hash'

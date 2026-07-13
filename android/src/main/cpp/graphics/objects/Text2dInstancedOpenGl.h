@@ -10,17 +10,19 @@
 
 #pragma once
 
+#include "BaseGraphicsObjectOpenGl.h"
 #include "GraphicsObjectInterface.h"
 #include "OpenGlContext.h"
 #include "TextInstancedInterface.h"
 #include "ShaderProgramInterface.h"
 #include "BaseShaderProgramOpenGl.h"
+#include "TextureAttachment.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 #include <vector>
 #include <RectD.h>
 
-class Text2dInstancedOpenGl : public GraphicsObjectInterface,
+class Text2dInstancedOpenGl : public BaseGraphicsObjectOpenGl,
                               public TextInstancedInterface,
                               public std::enable_shared_from_this<Text2dInstancedOpenGl> {
 public:
@@ -31,8 +33,10 @@ public:
     virtual bool isReady() override;
 
     virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context) override;
-
     virtual void clear() override;
+    
+    virtual void pause() override;
+    virtual void resume(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                         int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked,
@@ -81,6 +85,8 @@ protected:
     void removeGlBuffers();
 
     void removeTextureCoordsGlBuffers();
+    
+    void loadTexture(const std::shared_ptr<TextureHolderInterface> &textureHolder);
 
     bool is3d = false;
     std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
@@ -93,6 +99,7 @@ protected:
     int originHandle;
     int positionHandle;
     int isHaloHandle;
+    int textureSamplerHandle;
     int textureFactorHandle;
     int distanceRangeHandle;
     GLuint vao;
@@ -108,8 +115,7 @@ protected:
     Vec3D quadsOrigin = Vec3D(0.0, 0.0, 0.0);
 
     // Font texture
-    std::shared_ptr<TextureHolderInterface> textureHolder;
-    int texturePointer;
+    TextureAttachment textureAttachment;
     // Font metadata
     float distanceRange;
 
@@ -117,8 +123,6 @@ protected:
 
     Quad2dD frame = Quad2dD(Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0), Vec2D(0.0, 0.0));
     RectD textureCoordinates = RectD(0.0, 0.0, 1.0, 1.0);
-    double factorHeight = 1.0;
-    double factorWidth = 1.0;
 
     bool ready = false;
     uint8_t buffersNotReadyResetValue = 0b11111111;

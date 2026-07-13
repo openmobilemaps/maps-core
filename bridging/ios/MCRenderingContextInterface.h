@@ -8,6 +8,7 @@
 #import "MCVec3D.h"
 #import <Foundation/Foundation.h>
 @protocol MCOpenGlRenderingContextInterface;
+@protocol MCRenderTargetInterface;
 
 
 @protocol MCRenderingContextInterface
@@ -32,8 +33,19 @@ screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor;
 
 - (void)postRenderStencilMask;
 
+- (void)clearStencilMask:(int32_t)clearMask;
+
+- (void)setupStencilWriteMask:(int32_t)writeMask
+                    reference:(int32_t)reference;
+
 /** optional rectangle, remove scissoring when not set */
 - (void)applyScissorRect:(nullable MCRectI *)scissorRect;
+
+- (nullable id<MCRenderTargetInterface>)getCreateOffscreenRenderTarget:(nonnull NSString *)name;
+
+- (void)deleteOffscreenRenderTarget:(nonnull NSString *)name;
+
+- (nonnull NSArray<id<MCRenderTargetInterface>> *)getOffscreenRenderTargets;
 
 - (nullable id<MCOpenGlRenderingContextInterface>)asOpenGlRenderingContext;
 

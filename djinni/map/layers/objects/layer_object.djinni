@@ -1,4 +1,5 @@
 @extern "../../../yaml/graphics_object_interface.yaml"
+@extern "../../../yaml/masking_object_interface.yaml"
 
 layer_object_interface = interface +c {
 	update();
@@ -7,5 +8,6 @@ layer_object_interface = interface +c {
 
 render_config_interface = interface +c {
     get_graphics_object(): graphics_object_interface;
+    get_masking_object(): optional<masking_object_interface>;
     get_render_index(): i32;
 }

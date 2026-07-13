@@ -19,6 +19,8 @@ public struct Vertex3DTextureTessellated: Equatable {
     var frameCoord: SIMD2<Float>
     /// The texture coordinates mapped to the vertex in U-V coordinate space
     var textureCoordinate: SIMD2<Float>
+    /// Unit-sphere distance to lower terrain skirt vertices after elevation sampling.
+    var skirtOffset: Float
     /// Returns the descriptor to use when passed to a metal shader
     nonisolated(unsafe) public static let descriptor: MTLVertexDescriptor = {
         let vertexDescriptor = MTLVertexDescriptor()
@@ -30,7 +32,7 @@ public struct Vertex3DTextureTessellated: Equatable {
         vertexDescriptor.attributes[0].format = .float3
         vertexDescriptor.attributes[0].offset = offset
         offset += MemoryLayout<SIMD3<Float>>.stride
-        
+
         // Frame Coord (2D coord to project onto unit sphere)
         vertexDescriptor.attributes[1].bufferIndex = bufferIndex
         vertexDescriptor.attributes[1].format = .float2
@@ -42,7 +44,13 @@ public struct Vertex3DTextureTessellated: Equatable {
         vertexDescriptor.attributes[2].format = .float2
         vertexDescriptor.attributes[2].offset = offset
         offset += MemoryLayout<SIMD2<Float>>.stride
-        
+
+        // Skirt Offset
+        vertexDescriptor.attributes[3].bufferIndex = bufferIndex
+        vertexDescriptor.attributes[3].format = .float
+        vertexDescriptor.attributes[3].offset = offset
+        offset += MemoryLayout<Float>.stride
+
         vertexDescriptor.layouts[0].stride = MemoryLayout<Vertex3DTextureTessellated>.stride
         vertexDescriptor.layouts[0].stepRate = 1
         vertexDescriptor.layouts[0].stepFunction = .perPatchControlPoint
@@ -63,17 +71,20 @@ public struct Vertex3DTextureTessellated: Equatable {
         x: Float, y: Float, z: Float,
         frameX: Float, frameY: Float,
         textureU: Float, textureV: Float,
+        skirtOffset: Float = 0,
     ) {
         position = SIMD3([x, y, z])
         frameCoord = SIMD2([frameX, frameY])
         textureCoordinate = SIMD2([textureU, textureV])
+        self.skirtOffset = skirtOffset
     }
 
-    public init(position: MCVec3D, frameCoordX: Float, frameCoordY: Float, textureU: Float, textureV: Float) {
+    public init(position: MCVec3D, frameCoordX: Float, frameCoordY: Float, textureU: Float, textureV: Float, skirtOffset: Float = 0) {
         self.init(
             x: position.xF, y: position.yF, z: position.zF,
             frameX: frameCoordX, frameY: frameCoordY,
             textureU: textureU, textureV: textureV,
+            skirtOffset: skirtOffset,
         )
     }
 }
@@ -92,11 +103,11 @@ extension Vertex3DTextureTessellated {
     /// The texture U-coordinate mapping
     var textureU: Float { textureCoordinate.x }
     /// The texture V-coordinate mapping
-    var textureV: Float { textureCoordinate.x }
+    var textureV: Float { textureCoordinate.y }
 }
 
 extension Vertex3DTextureTessellated: CustomDebugStringConvertible {
     public var debugDescription: String {
-        "<XYZ: (\(x), \(y), \(z)), FrameCoord: (\(frameCoordX), \(frameCoordY)), UV: (\(textureU), \(textureV))>"
+        "<XYZ: (\(x), \(y), \(z)), FrameCoord: (\(frameCoordX), \(frameCoordY)), UV: (\(textureU), \(textureV)), SkirtOffset: \(skirtOffset)>"
     }
 }

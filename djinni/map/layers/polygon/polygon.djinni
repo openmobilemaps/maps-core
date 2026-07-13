@@ -6,6 +6,7 @@
 @extern "../../../yaml/graphics_object_factory_interface.yaml"
 @extern "../../../yaml/coordinate_conversion_helper_interface.yaml"
 @extern "../../../yaml/polygon_2d_interface.yaml"
+@extern "../../../yaml/blend_mode.yaml"
 
 polygon_style = record {
     color: color;
@@ -37,6 +38,7 @@ polygon_layer_interface = interface +c {
     reset_selection();
     set_layer_clickable(is_layer_clickable: bool);
     set_render_pass_index(index: i32);
+    set_blend_mode(blend_mode: blend_mode);
 }
 
 polygon_mask_object_interface = interface +c {

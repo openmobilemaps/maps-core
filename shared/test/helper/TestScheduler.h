@@ -2,6 +2,7 @@
 #include "TaskConfig.h"
 #include "TaskInterface.h"
 #include <deque>
+#include <mutex>
 #include <queue>
 
 class TestScheduler : public SchedulerInterface {
@@ -12,7 +13,7 @@ class TestScheduler : public SchedulerInterface {
         if (taskConfig.delay <= 0) {
             tasks.push_back(task);
         } else {
-            delayedTasks.emplace(now + taskConfig.delay, task);
+            delayedTasks.emplace(DelayedTask{now + taskConfig.delay, task});
         }
     }
     virtual void addTasks(const std::vector</*not-null*/ std::shared_ptr<TaskInterface>> &tasks) override {

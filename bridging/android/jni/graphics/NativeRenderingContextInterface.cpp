@@ -6,6 +6,7 @@
 #include "NativeColor.h"
 #include "NativeOpenGlRenderingContextInterface.h"
 #include "NativeRectI.h"
+#include "NativeRenderTargetInterface.h"
 #include "NativeRenderingCullMode.h"
 #include "NativeVec2I.h"
 #include "NativeVec3D.h"
@@ -83,6 +84,23 @@ void NativeRenderingContextInterface::JavaProxy::postRenderStencilMask() {
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_postRenderStencilMask);
     ::djinni::jniExceptionCheck(jniEnv);
 }
+void NativeRenderingContextInterface::JavaProxy::clearStencilMask(int32_t c_clearMask) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_clearStencilMask,
+                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_clearMask)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+void NativeRenderingContextInterface::JavaProxy::setupStencilWriteMask(int32_t c_writeMask, int32_t c_reference) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_setupStencilWriteMask,
+                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_writeMask)),
+                           ::djinni::get(::djinni::I32::fromCpp(jniEnv, c_reference)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
 void NativeRenderingContextInterface::JavaProxy::applyScissorRect(const std::optional<::RectI> & c_scissorRect) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
     ::djinni::JniLocalScope jscope(jniEnv, 10);
@@ -90,6 +108,31 @@ void NativeRenderingContextInterface::JavaProxy::applyScissorRect(const std::opt
     jniEnv->CallVoidMethod(Handle::get().get(), data.method_applyScissorRect,
                            ::djinni::get(::djinni::Optional<std::optional, ::djinni_generated::NativeRectI>::fromCpp(jniEnv, c_scissorRect)));
     ::djinni::jniExceptionCheck(jniEnv);
+}
+/*not-null*/ std::shared_ptr<::RenderTargetInterface> NativeRenderingContextInterface::JavaProxy::getCreateOffscreenRenderTarget(const std::string & c_name) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getCreateOffscreenRenderTarget,
+                                         ::djinni::get(::djinni::String::fromCpp(jniEnv, c_name)));
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeRenderTargetInterface::toCpp(jniEnv, jret);
+}
+void NativeRenderingContextInterface::JavaProxy::deleteOffscreenRenderTarget(const std::string & c_name) {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
+    jniEnv->CallVoidMethod(Handle::get().get(), data.method_deleteOffscreenRenderTarget,
+                           ::djinni::get(::djinni::String::fromCpp(jniEnv, c_name)));
+    ::djinni::jniExceptionCheck(jniEnv);
+}
+std::vector</*not-null*/ std::shared_ptr<::RenderTargetInterface>> NativeRenderingContextInterface::JavaProxy::getOffscreenRenderTargets() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderingContextInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getOffscreenRenderTargets);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::List<::djinni_generated::NativeRenderTargetInterface>::toCpp(jniEnv, jret);
 }
 /*nullable*/ std::shared_ptr<::OpenGlRenderingContextInterface> NativeRenderingContextInterface::JavaProxy::asOpenGlRenderingContext() {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -174,12 +217,55 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Renderin
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1clearStencilMask(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jint j_clearMask)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
+        ref->clearStencilMask(::djinni::I32::toCpp(jniEnv, j_clearMask));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1setupStencilWriteMask(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jint j_writeMask, jint j_reference)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
+        ref->setupStencilWriteMask(::djinni::I32::toCpp(jniEnv, j_writeMask),
+                                   ::djinni::I32::toCpp(jniEnv, j_reference));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1applyScissorRect(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeRectI::Boxed::JniType j_scissorRect)
 {
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
         ref->applyScissorRect(::djinni::Optional<std::optional, ::djinni_generated::NativeRectI>::toCpp(jniEnv, j_scissorRect));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1getCreateOffscreenRenderTarget(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_name)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
+        auto r = ref->getCreateOffscreenRenderTarget(::djinni::String::toCpp(jniEnv, j_name));
+        return ::djinni::release(::djinni_generated::NativeRenderTargetInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1deleteOffscreenRenderTarget(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, jstring j_name)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
+        ref->deleteOffscreenRenderTarget(::djinni::String::toCpp(jniEnv, j_name));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1getOffscreenRenderTargets(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderingContextInterface>(nativeRef);
+        auto r = ref->getOffscreenRenderTargets();
+        return ::djinni::release(::djinni::List<::djinni_generated::NativeRenderTargetInterface>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderingContextInterface_00024CppProxy_native_1asOpenGlRenderingContext(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)

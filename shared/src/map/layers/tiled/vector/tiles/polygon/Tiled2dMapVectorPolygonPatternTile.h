@@ -34,17 +34,19 @@ public:
     void updateVectorLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                 const Tiled2dMapVectorTileDataVector &layerFeatures) override;
 
-    void update() override;
+    bool update() override;
 
     virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() override;
 
     virtual void clear() override;
-
     virtual void setup() override;
+    
+    virtual void pause() override;
+    virtual void resume() override;
 
     virtual void setVectorTileData(const Tiled2dMapVectorTileDataVector &tileData) override;
 
-    void setSpriteData(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture) override;
+    void setSpriteData(const std::string &spriteId, const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture) override;
 
     bool onClickConfirmed(const Vec2F &posScreen) override;
 

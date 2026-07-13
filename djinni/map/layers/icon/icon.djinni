@@ -24,6 +24,8 @@ icon_info_interface = interface +c {
     get_type() : icon_type;
     get_icon_anchor() : vec_2_f;
     get_blend_mode() : blend_mode;
+    set_rotation(angle: f64);
+    get_rotation() : f64;
 }
 
 icon_type = enum {

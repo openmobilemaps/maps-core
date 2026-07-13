@@ -8,6 +8,9 @@ cpp:
   typename: '::GroupLine2dInterface'
   header: '"GroupLine2dInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCGroupLine2dInterface'
   pointer: true

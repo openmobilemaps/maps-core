@@ -13,7 +13,7 @@
 #include "BaseShaderProgramOpenGl.h"
 #include "ColorCircleShaderInterface.h"
 #include "ShaderProgramInterface.h"
-#include <vector>
+#include <array>
 
 class ColorCircleShaderOpenGl : public BaseShaderProgramOpenGl,
                                 public ColorCircleShaderInterface,
@@ -31,6 +31,10 @@ class ColorCircleShaderOpenGl : public BaseShaderProgramOpenGl,
 
     virtual void setColor(float red, float green, float blue, float alpha) override;
 
+    virtual void setCircleStyle(float fillRed, float fillGreen, float fillBlue, float fillAlpha,
+                                float strokeRed, float strokeGreen, float strokeBlue, float strokeAlpha,
+                                float innerRadius) override;
+
   protected:
     std::string getVertexShader() override;
 
@@ -38,7 +42,10 @@ class ColorCircleShaderOpenGl : public BaseShaderProgramOpenGl,
 
   private:
     const std::string programName;
+    const bool projectOntoUnitSphere;
 
     std::mutex dataMutex;
-    std::vector<float> color = {0.0, 0.0, 0.0, 0.0};
+    std::array<float, 4> fillColor = {0.0, 0.0, 0.0, 0.0};
+    std::array<float, 4> strokeColor = {0.0, 0.0, 0.0, 0.0};
+    float innerRadius = 1.0f;
 };

@@ -9,13 +9,21 @@ namespace djinni_generated {
 auto NativeRenderPassConfig::toCpp(const JsType& j) -> CppType {
     return {::djinni::I32::Boxed::toCpp(j["renderPassIndex"]),
             ::djinni::Bool::Boxed::toCpp(j["isPassMasked"]),
-            ::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetInterface>::Boxed::toCpp(j["renderTarget"])};
+            ::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetInterface>::Boxed::toCpp(j["renderTarget"]),
+            ::djinni::I32::Boxed::toCpp(j["stencilReadMask"]),
+            ::djinni::I32::Boxed::toCpp(j["stencilReadReference"]),
+            ::djinni::I32::Boxed::toCpp(j["stencilWriteMask"]),
+            ::djinni::I32::Boxed::toCpp(j["stencilWriteReference"])};
 }
 auto NativeRenderPassConfig::fromCpp(const CppType& c) -> JsType {
     em::val js = em::val::object();
     js.set("renderPassIndex", ::djinni::I32::Boxed::fromCpp(c.renderPassIndex));
     js.set("isPassMasked", ::djinni::Bool::Boxed::fromCpp(c.isPassMasked));
     js.set("renderTarget", ::djinni::Optional<std::optional, ::djinni_generated::NativeRenderTargetInterface>::Boxed::fromCpp(c.renderTarget));
+    js.set("stencilReadMask", ::djinni::I32::Boxed::fromCpp(c.stencilReadMask));
+    js.set("stencilReadReference", ::djinni::I32::Boxed::fromCpp(c.stencilReadReference));
+    js.set("stencilWriteMask", ::djinni::I32::Boxed::fromCpp(c.stencilWriteMask));
+    js.set("stencilWriteReference", ::djinni::I32::Boxed::fromCpp(c.stencilWriteReference));
     return js;
 }
 

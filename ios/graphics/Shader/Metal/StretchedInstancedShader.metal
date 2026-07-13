@@ -22,7 +22,7 @@ struct StretchedInstancedVertexOut {
 
 vertex StretchedInstancedVertexOut
 stretchInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                             constant float4x4 &mvpMatrix [[buffer(1)]],
+                             constant float4x4 &mvpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
                              constant float2 *positions [[buffer(2)]],
                              constant float2 *scales [[buffer(3)]],
                              constant float *rotations [[buffer(4)]],

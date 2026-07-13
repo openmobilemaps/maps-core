@@ -27,11 +27,10 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
                                                                      const std::vector<FormattedStringEntry> &text,
                                                                      const std::string &fullText,
                                                                      const ::Vec2D &coordinate,
-                                                                     const std::optional<std::vector<Vec2D>> &lineCoordinates,
+                                                                     const std::shared_ptr<SymbolLineGeometryCache> &lineGeometryCache,
                                                                      const Anchor &textAnchor,
                                                                      const TextJustify &textJustify,
                                                                      const std::shared_ptr<FontLoaderResult> fontResult,
-                                                                     const Vec2F &offset,
                                                                      const double radialOffset,
                                                                      const double lineHeight,
                                                                      const double letterSpacing,
@@ -55,11 +54,10 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
           maxCharacterAngle(maxCharacterAngle),
           textAnchor(textAnchor),
           textJustify(textJustify),
-          offset(offset),
           radialOffset(radialOffset),
           fontResult(fontResult),
           fullText(fullText),
-          lineCoordinates(lineCoordinates),
+          lineGeometryCache(lineGeometryCache),
           referencePoint(Vec3DHelper::toVec(converter->convertToRenderSystem(Vec2DHelper::toCoord(coordinate, systemIdentifier)))),
           animationCoordinator(animationCoordinator),
           stateManager(featureStateManager),
@@ -150,42 +148,19 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
 
     numSymbols = (int)splittedTextInfo.size();
 
-    if(lineCoordinates) {
-        std::transform(lineCoordinates->begin(), lineCoordinates->end(), std::back_inserter(renderLineCoordinates),
-                       [converter, systemIdentifier](const auto& l) {
-            return Vec3DHelper::toVec(converter->convertToRenderSystem(Vec2DHelper::toCoord(l, systemIdentifier)));
-        });
-
-        double sinX, cosX, sinY, cosY;
-
-        if(is3d) {
-            for(auto& c : renderLineCoordinates) {
-                lut::sincos(c.y, sinY, cosY);
-                lut::sincos(c.x, sinX, cosX);
-
-                double x = c.z * sinY * cosX;
-                double y = c.z * cosY;
-                double z = -c.z * sinY * sinX;
-                cartesianRenderLineCoordinates.emplace_back(x, y, z);
-            }
-
-            auto &c = referencePoint;
+    if (lineGeometryCache) {
+        if (is3d) {
+            const auto &c = referencePoint;
+            double sinX, cosX, sinY, cosY;
             lut::sincos(c.y, sinY, cosY);
             lut::sincos(c.x, sinX, cosX);
 
             cartesianReferencePoint.x = c.z * sinY * cosX;
             cartesianReferencePoint.y = c.z * cosY;
             cartesianReferencePoint.z = -c.z * sinY * sinX;
-        }
-
-        screenLineCoordinates = renderLineCoordinates;
-        renderLineCoordinatesCount = renderLineCoordinates.size();
-
-        if(!is3d) {
+        } else {
             currentReferencePointIndex = findReferencePointIndices();
         }
-    } else {
-        renderLineCoordinatesCount = 0;
     }
 
     precomputeMedianIfNeeded();
@@ -215,7 +190,7 @@ Tiled2dMapVectorSymbolLabelObject::Tiled2dMapVectorSymbolLabelObject(const std::
 }
 
 void Tiled2dMapVectorSymbolLabelObject::precomputeMedianIfNeeded() {
-    if(lineCoordinates && (rotationAlignment != SymbolAlignment::VIEWPORT)) {
+    if(lineGeometryCache && (rotationAlignment != SymbolAlignment::VIEWPORT)) {
         return;
     }
 
@@ -285,6 +260,7 @@ void Tiled2dMapVectorSymbolLabelObject::updateLayerDescription(const std::shared
     lastZoomEvaluation = -1;
 
     textSize.invalidate();
+    textOffset.invalidate();
     textRotate.invalidate();
     textPadding.invalidate();
     textAlignment.invalidate();
@@ -294,6 +270,13 @@ void Tiled2dMapVectorSymbolLabelObject::updateLayerDescription(const std::shared
     haloColor.invalidate();
     haloWidth.invalidate();
     haloBlur.invalidate();
+
+    invalidateLayoutCaches();
+}
+
+void Tiled2dMapVectorSymbolLabelObject::invalidateLayoutCaches() {
+    pointLabelLayoutCache.invalidate();
+    lineLabelLayoutCache.invalidate();
 }
 
 int Tiled2dMapVectorSymbolLabelObject::getCharacterCount(){
@@ -338,6 +321,10 @@ void Tiled2dMapVectorSymbolLabelObject::evaluateStyleProperties(const double zoo
 
     if(textSize.isReevaluationNeeded(evalContext)) {
         textSize = description->style.getTextSize(evalContext);
+    }
+
+    if(textOffset.isReevaluationNeeded(evalContext)) {
+        textOffset = description->style.getTextOffset(evalContext);
     }
 
     if(textAlignment.isReevaluationNeeded(evalContext)) {
@@ -417,16 +404,12 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapp
                 setupCameraFor3D(vpMatrix, origin, viewportSize);
                 auto rotatedFactor = updatePropertiesLine(positions, referencePositions, scales, rotations, alphas, countOffset, alphaFactor, zoomIdentifier, scaleFactor, rotation, viewportSize);
 
-                if(rotatedFactor > 0.5 && lineCoordinates) {
-                    std::reverse((*lineCoordinates).begin(), (*lineCoordinates).end());
-                    std::reverse(renderLineCoordinates.begin(), renderLineCoordinates.end());
-                    std::reverse(screenLineCoordinates.begin(), screenLineCoordinates.end());
-                    std::reverse(cartesianRenderLineCoordinates.begin(), cartesianRenderLineCoordinates.end());
+                if(rotatedFactor > 0.5 && lineGeometryCache) {
+                    wasReversed = !wasReversed;
+                    lineLabelLayoutCache.invalidate();
                     if(!is3d) {
                         currentReferencePointIndex = findReferencePointIndices();
                     }
-
-                    wasReversed = !wasReversed;
 
                     countOffset -= characterCount;
 
@@ -444,6 +427,24 @@ void Tiled2dMapVectorSymbolLabelObject::updateProperties(VectorModificationWrapp
 void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, int &countOffset, float alphaFactor, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
 
     const float fontSize = is3d ? textSize.value : (scaleFactor * textSize.value);
+    const float angle = (textAlignment.value == SymbolAlignment::MAP) ? textRotate.value : textRotate.value - rotation;
+
+    Vec2D appliedTextOffset(0.0, 0.0);
+    if (radialOffset != 0) {
+        appliedTextOffset.x = radialOffset;
+        appliedTextOffset.y = -radialOffset;
+    } else {
+        appliedTextOffset.x = textOffset.value.x;
+        appliedTextOffset.y = textOffset.value.y;
+    }
+
+    if (pointLabelLayoutCache.matches(angle, fontSize, appliedTextOffset, textPadding.value, viewportSize, is3d)) {
+        for (int i = 0; i < characterCount; ++i) {
+            alphas[countOffset + i] = alphaFactor;
+        }
+        countOffset += characterCount;
+        return;
+    }
 
     Vec2D boxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
     Vec2D boxMax(std::numeric_limits<float>::lowest(), std::numeric_limits<float>::lowest());
@@ -457,8 +458,6 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     }
 
     auto pen = zero;
-
-    const float angle = (textAlignment.value == SymbolAlignment::MAP) ? textRotate.value : textRotate.value - rotation;
 
     Vec2D anchorOffset(0.0, 0.0);
     float yOffset = 0;
@@ -576,31 +575,22 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
     }
 
     // TODO: currently only shifting to top right
-    Vec2D textOffset(0.0, 0.0);
-    if (radialOffset != 0) {
-        // Text offset is ignored when radial offset is set
-        textOffset.x = radialOffset;
-        textOffset.y = -radialOffset;
-    } else {
-        textOffset.x = offset.x;
-        textOffset.y = offset.y;
-    }
 
     switch (textAnchor) {
         case Anchor::CENTER:
         case Anchor::TOP:
         case Anchor::BOTTOM:
-            anchorOffset.x -= size.x / 2.0 - textOffset.x * fontSize;
+            anchorOffset.x -= size.x / 2.0 - appliedTextOffset.x * fontSize;
             break;
         case Anchor::LEFT:
         case Anchor::TOP_LEFT:
         case Anchor::BOTTOM_LEFT:
-            anchorOffset.x += textOffset.x * fontSize;
+            anchorOffset.x += appliedTextOffset.x * fontSize;
             break;
         case Anchor::RIGHT:
         case Anchor::TOP_RIGHT:
         case Anchor::BOTTOM_RIGHT:
-            anchorOffset.x -= size.x - textOffset.x * fontSize;
+            anchorOffset.x -= size.x - appliedTextOffset.x * fontSize;
             break;
         default:
             break;
@@ -611,21 +601,21 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
         case Anchor::LEFT:
         case Anchor::RIGHT:
             anchorOffset.y = -size.y * 0.5;
-            anchorOffset.y += textOffset.y * fontSize + yOffset;
+            anchorOffset.y += appliedTextOffset.y * fontSize + yOffset;
             break;
         case Anchor::TOP:
         case Anchor::TOP_LEFT:
         case Anchor::TOP_RIGHT:
-            anchorOffset.y += textOffset.y * fontSize + yOffset;
+            anchorOffset.y += appliedTextOffset.y * fontSize + yOffset;
             break;
         case Anchor::BOTTOM:
         case Anchor::BOTTOM_LEFT:
         case Anchor::BOTTOM_RIGHT:
             if (radialOffset != 0.0) {
-                anchorOffset.y -= (lineHeight - fontResult->fontData->info.lineHeight + 1.0 - textOffset.y) * fontSize;
+                anchorOffset.y -= (lineHeight - fontResult->fontData->info.lineHeight + 1.0 - appliedTextOffset.y) * fontSize;
             } else {
                 anchorOffset.y = -1 * size.y;
-                anchorOffset.y -= ((fontResult->fontData->info.lineHeight - fontResult->fontData->info.base) * lineHeight - textOffset.y) * fontSize + yOffset;
+                anchorOffset.y -= ((fontResult->fontData->info.lineHeight - fontResult->fontData->info.base) * lineHeight - appliedTextOffset.y) * fontSize + yOffset;
             }
             break;
         default:
@@ -729,15 +719,50 @@ void Tiled2dMapVectorSymbolLabelObject::updatePropertiesPoint(VectorModification
         boundingBoxCircles = circles;
         boundingBoxViewportAligned = std::nullopt;
     }
+
+    pointLabelLayoutCache.angle = angle;
+    pointLabelLayoutCache.fontSize = fontSize;
+    pointLabelLayoutCache.textOffset = appliedTextOffset;
+    pointLabelLayoutCache.textPadding = textPadding.value;
+    pointLabelLayoutCache.viewportSize = viewportSize;
+    pointLabelLayoutCache.valid = true;
+}
+
+void Tiled2dMapVectorSymbolLabelObject::setupCameraFor3D(const std::vector<float>& vpMatrix, const Vec3D& origin, const Vec2I& viewportSize) {
+    if(!is3d || !lineGeometryCache || lineGeometryCache->empty()) { return; }
+
+    lineGeometryCache->ensureScreenProjection3D(vpMatrix, origin, viewportSize);
+
+    const auto &cc = Vec4D(cartesianReferencePoint.x - origin.x, cartesianReferencePoint.y - origin.y, cartesianReferencePoint.z - origin.z, 1.0);
+    const auto &projected = Matrix::multiply(vpMatrix, cc);
+
+    const double screenXDiffToCenter = projected.x * viewportSize.x / 2.0;
+    const double screenYDiffToCenter = projected.y * viewportSize.y / 2.0;
+
+    referencePointScreen = Vec3D(screenXDiffToCenter + viewportSize.x / 2.0,
+                                 viewportSize.y / 2.0 - screenYDiffToCenter,
+                                 0.0);
+    currentReferencePointIndex = findReferencePointIndices();
 }
 
 double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &referencePositions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, int &countOffset, float alphaFactor, const double zoomIdentifier, const double scaleFactor, const double rotation, const Vec2I &viewportSize) {
-    if(lineCoordinates == std::nullopt) {
+    if(!lineGeometryCache) {
         countOffset += characterCount;
         return 0;
     }
 
-    const double fontSize = scaleFactor * textSize.value;
+    const float fontSize = scaleFactor * textSize.value;
+    const float appliedTextOffsetY = textOffset.value.y;
+    const float scaledTextPadding = is3d ? textPadding.value : scaleFactor * textPadding.value;
+
+    if (!is3d && lineLabelLayoutCache.matches(fontSize, wasReversed, (float)rotation, appliedTextOffsetY, scaledTextPadding)) {
+        for (int i = 0; i < characterCount; ++i) {
+            alphas[countOffset + i] = alphaFactor;
+        }
+        countOffset += characterCount;
+        return 0;
+    }
+
     const double scaleCorrection = is3d ? (1.0 / scaleFactor) : 1.0;
 
     Vec2D boxMin(std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
@@ -782,7 +807,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
             break;
     }
     
-    auto yOffset = offset.y * fontSize;
+    auto yOffset = appliedTextOffsetY * fontSize;
 
     if (wasReversed) {
         yOffset *= -1;
@@ -800,8 +825,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
 
     double maxSymbolRadius = 0.0;
 
-    auto indexBefore = DistanceIndex(0, 0.0);
-    auto indexAfter = DistanceIndex(0, 0.0);
+    auto indexBefore = LineSegmentIndex();
+    auto indexAfter = LineSegmentIndex();
 
     for(auto &i : splittedTextInfo) {
 
@@ -875,7 +900,7 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
             indexAtDistance(currentIndex, currentIndexPoint, advance.x * (1.0 + letterSpacing) * scaleCorrection, currentIndex);
 
             // if we are at the end, and we were at the end (lastIndex), then clear and skip
-            if(currentIndex.index == renderLineCoordinatesCount - 1 && lastIndex.index == currentIndex.index && (lastIndex.percentage == currentIndex.percentage)) {
+            if(currentIndex.index == (int)lineGeometryCache->vertexCount() - 1 && lastIndex.index == currentIndex.index && (lastIndex.percentage == currentIndex.percentage)) {
                 centerPositions.clear();
                 break;
             }
@@ -969,13 +994,12 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
         boxMin.x = std::numeric_limits<float>::max();
 
         isPlaced = false;
+        boundingBoxCircles = std::nullopt;
     }
 
     assert(countOffset == countBefore + characterCount);
 
     if (boxMin.x != std::numeric_limits<float>::max()) {
-        const float scaledTextPadding = is3d ? textPadding.value : scaleFactor * textPadding.value;
-
         std::vector<CircleD> circles;
         Vec2D lastCirclePosition = Vec2D(0, 0);
         size_t count = centerPositions.size();
@@ -993,6 +1017,8 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
             lastCirclePosition.y = newY;
         }
         boundingBoxCircles = circles;
+    } else {
+        boundingBoxCircles = std::nullopt;
     }
     boundingBoxViewportAligned = std::nullopt;
 
@@ -1004,90 +1030,22 @@ double Tiled2dMapVectorSymbolLabelObject::updatePropertiesLine(VectorModificatio
                                  std::abs(averageAngle + 360.0 - recompRotation)),
                         std::abs(averageAngle - (recompRotation + 360.0)));
     }
-    return diff > 95.0 ? 1.0 : 0.0; // flip with margin to prevent rapid flips
-}
 
-void Tiled2dMapVectorSymbolLabelObject::setupCameraFor3D(const std::vector<float>& vpMatrix, const Vec3D& origin, const Vec2I& viewportSize) {
-
-    // only needed for 3d text on line rendering
-    if(!is3d || (renderLineCoordinatesCount == 0)) { return; }
-
-    size_t i = 0;
-    for(const auto& ls : cartesianRenderLineCoordinates) {
-        const auto &cc = Vec4D(ls.x - origin.x, ls.y - origin.y, ls.z - origin.z, 1.0);
-        const auto &projected = Matrix::multiply(vpMatrix, cc);
-
-        // Map from [-1, 1] to screenPixels, with (0,0) being the top left corner
-        double screenXDiffToCenter = projected.x * viewportSize.x / 2.0;
-        double screenYDiffToCenter = projected.y * viewportSize.y / 2.0;
-
-        double posScreenX = screenXDiffToCenter + ((double)viewportSize.x / 2.0);
-        double posScreenY = ((double)viewportSize.y / 2.0) - screenYDiffToCenter;
-
-        // don't care about systemIdentifier, only used for indexAtPoint
-        screenLineCoordinates[i].x = posScreenX;
-        screenLineCoordinates[i].y = posScreenY;
-        ++i;
-    }
-
-    const auto &cc = Vec4D(cartesianReferencePoint.x - origin.x, cartesianReferencePoint.y - origin.y, cartesianReferencePoint.z - origin.z, 1.0);
-    const auto &projected = Matrix::multiply(vpMatrix, cc);
-
-    // Map from [-1, 1] to screenPixels, with (0,0) being the top left corner
-    double screenXDiffToCenter = projected.x * viewportSize.x / 2.0;
-    double screenYDiffToCenter = projected.y * viewportSize.y / 2.0;
-
-    double posScreenX = screenXDiffToCenter + ((double)viewportSize.x / 2.0);
-    double posScreenY = ((double)viewportSize.y / 2.0) - screenYDiffToCenter;
-
-    // don't care about systemIdentifier, only used for findReferencePointIndices
-    referencePointScreen = Vec3D((double)posScreenX, (double)posScreenY, 0.0);
-    currentReferencePointIndex = findReferencePointIndices();
-}
-
-DistanceIndex Tiled2dMapVectorSymbolLabelObject::findReferencePointIndices() {
-    auto point = is3d ? referencePointScreen : referencePoint;
-    auto distance = std::numeric_limits<double>::max();
-
-    auto point2D = Vec2D(point.x, point.y);
-
-    double tMin = 0.0f;
-    int iMin = 0;
-
-    for(int i=1; i < renderLineCoordinatesCount; ++i) {
-        const auto &start = screenLineCoordinates[i-1];
-        const auto &end = screenLineCoordinates[i];
-
-        auto lengthSquared = Vec2DHelper::distanceSquared(Vec2D(start.x, start.y), Vec2D(end.x, end.y));
-
-        double t = 0.0;
-        double dist = 0.0;
-
-        if(lengthSquared > 0) {
-            auto endMinusStart = Vec2D(end.x - start.x, end.y - start.y);
-            auto dot = Vec2D(point.x - start.x, point.y - start.y) * endMinusStart;
-            t = dot / lengthSquared;
-
-            if(t > 1.0) {
-                // outside, so skip computation
-                continue;
-            }
-
-            auto proj = Vec2D(start.x + t * endMinusStart.x, start.y + t * endMinusStart.y);
-            dist = Vec2DHelper::distanceSquared(proj, point2D);
+    const bool needsFlip = diff > 95.0;
+    if (!is3d && !needsFlip) {
+        if (isPlaced) {
+            lineLabelLayoutCache.fontSize = fontSize;
+            lineLabelLayoutCache.rotation = (float)rotation;
+            lineLabelLayoutCache.wasReversed = wasReversed;
+            lineLabelLayoutCache.appliedTextOffsetY = appliedTextOffsetY;
+            lineLabelLayoutCache.scaledTextPadding = scaledTextPadding;
+            lineLabelLayoutCache.valid = true;
         } else {
-            // here t == 0.0
-            dist = Vec2DHelper::distanceSquared(Vec2D(start.x, start.y), point2D);
-        }
-
-        if(dist < distance) {
-            tMin = t;
-            iMin = i-1;
-            distance = dist;
+            lineLabelLayoutCache.invalidate();
         }
     }
 
-    return DistanceIndex(iMin, tMin);
+    return needsFlip ? 1.0 : 0.0; // flip with margin to prevent rapid flips
 }
 
 void Tiled2dMapVectorSymbolLabelObject::writePosition(const double x_, const double y_, const size_t offset, VectorModificationWrapper<float> &buffer) {

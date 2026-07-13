@@ -47,13 +47,15 @@ public:
     virtual void updateRasterLayerDescription(const std::shared_ptr<VectorLayerDescription> &description,
                                          const Tiled2dMapVectorTileDataRaster &layerData);
 
-    virtual void update() = 0;
+    virtual bool update() = 0;
 
     virtual std::vector<std::shared_ptr<RenderObjectInterface>> generateRenderObjects() = 0;
 
     virtual void clear() = 0;
-
     virtual void setup() = 0;
+    
+    virtual void pause() = 0;
+    virtual void resume() = 0;
 
     virtual void setAlpha(float alpha);
 
@@ -63,7 +65,7 @@ public:
 
     virtual void setRasterTileData(const Tiled2dMapVectorTileDataRaster &tileData) {};
 
-    virtual void setSpriteData(const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture) {};
+    virtual void setSpriteData(const std::string &spriteId, const std::shared_ptr<SpriteData> &spriteData, const std::shared_ptr<TextureHolderInterface> &spriteTexture) {};
 
     void setSelectionDelegate(const std::weak_ptr<Tiled2dMapVectorLayerSelectionCallbackInterface> &selectionDelegate);
 

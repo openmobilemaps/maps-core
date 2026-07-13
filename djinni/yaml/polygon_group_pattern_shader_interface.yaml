@@ -8,6 +8,9 @@ cpp:
   typename: '::PolygonGroupPatternShaderInterface'
   header: '"PolygonGroupPatternShaderInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCPolygonGroupPatternShaderInterface'
   pointer: true

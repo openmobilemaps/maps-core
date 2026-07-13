@@ -13,6 +13,8 @@ em::val NativeGraphicsObjectInterface::cppProxyMethods() {
         "isReady",
         "setup",
         "clear",
+        "pause",
+        "resume",
         "setIsInverseMasked",
         "setDebugLabel",
         "render",
@@ -40,6 +42,22 @@ void NativeGraphicsObjectInterface::setup(const CppType& self, const em::val& w_
 void NativeGraphicsObjectInterface::clear(const CppType& self) {
     try {
         self->clear();
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeGraphicsObjectInterface::pause(const CppType& self) {
+    try {
+        self->pause();
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeGraphicsObjectInterface::resume(const CppType& self, const em::val& w_context) {
+    try {
+        self->resume(::djinni_generated::NativeRenderingContextInterface::toCpp(w_context));
     }
     catch(const std::exception& e) {
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
@@ -84,6 +102,8 @@ EMSCRIPTEN_BINDINGS(_graphics_object_interface) {
         .function("isReady", NativeGraphicsObjectInterface::isReady)
         .function("setup", NativeGraphicsObjectInterface::setup)
         .function("clear", NativeGraphicsObjectInterface::clear)
+        .function("pause", NativeGraphicsObjectInterface::pause)
+        .function("resume", NativeGraphicsObjectInterface::resume)
         .function("setIsInverseMasked", NativeGraphicsObjectInterface::setIsInverseMasked)
         .function("setDebugLabel", NativeGraphicsObjectInterface::setDebugLabel)
         .function("render", NativeGraphicsObjectInterface::render)

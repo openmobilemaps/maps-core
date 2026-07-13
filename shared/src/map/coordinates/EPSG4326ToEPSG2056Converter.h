@@ -23,10 +23,10 @@ class EPSG4326ToEPSG2056Converter : public CoordinateConverterInterface {
     EPSG4326ToEPSG2056Converter() {}
 
     virtual Coord convert(const Coord &coordinate) override {
+        static constexpr double degToArcSec = 3600.0;
 
-        // Converts degrees dec to sex and Converts degrees to seconds (sex)
-        double lat = DEGtoSEC(DECtoSEX(coordinate.y));
-        double lng = DEGtoSEC(DECtoSEX(coordinate.x));
+        const double lat = coordinate.y * degToArcSec;
+        const double lng = coordinate.x * degToArcSec;
 
         // Axiliary values (% Bern)
         const double lat_aux = (lat - 169028.66) / 10000.;
@@ -46,26 +46,4 @@ class EPSG4326ToEPSG2056Converter : public CoordinateConverterInterface {
     virtual int32_t getFrom() override { return CoordinateSystemIdentifiers::EPSG4326(); }
 
     virtual int32_t getTo() override { return CoordinateSystemIdentifiers::EPSG2056(); }
-
-  private:
-    inline double DECtoSEX(double angle) const {
-        // Extract DMS
-        const double deg = angle;
-        const double min = (angle - deg) * 60;
-        const double sec = (((angle - deg) * 60) - min) * 60;
-
-        // Result in degrees sex (dd.mmss)
-        return deg + min / 100 + sec / 10000;
-    }
-
-    // Convert Degrees angle to seconds
-    inline double DEGtoSEC(double angle) const {
-        // Extract DMS
-        const double deg = angle;
-        const double min = (angle - deg) * 100;
-        const double sec = (((angle - deg) * 100) - min) * 100;
-
-        // Result in degrees sex (dd.mmss)
-        return sec + min * 60 + deg * 3600;
-    }
 };

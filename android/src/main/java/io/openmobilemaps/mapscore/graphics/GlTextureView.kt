@@ -79,7 +79,7 @@ open class GlTextureView @JvmOverloads constructor(context: Context, attrs: Attr
 
 	override fun onSurfaceTextureDestroyed(surface: SurfaceTexture): Boolean {
 		surfaceAvailable = false
-		pauseGlThread(true)
+		glThread?.doPause(clearSurface = true)
 		return false
 	}
 

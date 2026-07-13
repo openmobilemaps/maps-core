@@ -85,9 +85,7 @@ void PolygonLayer::remove(const PolygonInfo &polygon) {
                     TaskConfig("PolygonLayer_clearPolygon", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
                     [polygonsToClear] {
                         for (const auto polygon: polygonsToClear) {
-                            if (polygon->getPolygonObject()->isReady()) {
-                                polygon->getPolygonObject()->clear();
-                            }
+                            polygon->getPolygonObject()->clear();
                         }
                     }));
         }
@@ -121,20 +119,23 @@ void PolygonLayer::addAll(const std::vector<PolygonInfo> &polygons) {
 
     {
         std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
-        for (const auto &polygon : polygons) {
-
-        #if HARDWARE_TESSELLATION_SUPPORTED
+        for (const auto &polygon: polygons) {
+            #if HARDWARE_TESSELLATION_SUPPORTED
             auto shader = mapInterface->is3d() ? shaderFactory->createPolygonTessellatedShader(mapInterface->is3d()) :
-                shaderFactory->createColorShader();
-            auto polygonGraphicsObject = mapInterface->is3d() ? objectFactory->createPolygonTessellated(shader->asShaderProgramInterface()) :
-                objectFactory->createPolygon(shader->asShaderProgramInterface());
-        #else
+                          shaderFactory->createColorShader();
+            auto polygonGraphicsObject = mapInterface->is3d() ? objectFactory->createPolygonTessellated(
+                    shader->asShaderProgramInterface()) :
+                                         objectFactory->createPolygon(shader->asShaderProgramInterface());
+            #else
             auto shader = mapInterface->is3d() ? shaderFactory->createUnitSphereColorShader() : shaderFactory->createColorShader();
             auto polygonGraphicsObject = objectFactory->createPolygon(shader->asShaderProgramInterface());
-        #endif
-            
+            #endif
+
+            shader->asShaderProgramInterface()->setBlendMode(blendMode);
+
             auto polygonObject =
-                std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject, shader, is3d);
+                    std::make_shared<Polygon2dLayerObject>(mapInterface->getCoordinateConverterHelper(), polygonGraphicsObject,
+                                                           shader, is3d);
 
             polygonObject->setPolygon(polygon.coordinates);
             polygonObject->setColor(polygon.color);
@@ -190,9 +191,7 @@ void PolygonLayer::clear() {
             scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("PolygonLayer_clearLines", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [polygonsToClear]{
                 for (const auto &polygon : polygonsToClear) {
                     for (const auto &p : polygon.second) {
-                        if (p.second->getPolygonObject()->isReady()) {
-                            p.second->getPolygonObject()->clear();
-                        }
+                        p.second->getPolygonObject()->clear();
                     }
                 }
             }));
@@ -211,14 +210,11 @@ void PolygonLayer::pause() {
     std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
     for (const auto &polygon : polygons) {
         for (auto &p : polygon.second) {
-            if (p.second->getPolygonObject()->isReady()) {
-                p.second->getPolygonObject()->clear();
-            }
+            p.second->getPolygonObject()->pause();
         }
     }
     if (mask) {
-        if (mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->clear();
+        mask->asGraphicsObject()->pause();
     }
 }
 
@@ -231,12 +227,12 @@ void PolygonLayer::resume() {
     std::lock_guard<std::recursive_mutex> overlayLock(polygonsMutex);
     for (const auto &polygon : polygons) {
         for (auto &p : polygon.second) {
-            std::get<1>(p)->getPolygonObject()->setup(renderingContext);
+            std::get<1>(p)->getPolygonObject()->resume(renderingContext);
         }
     }
     if (mask) {
         if (!mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->setup(renderingContext);
+            mask->asGraphicsObject()->resume(renderingContext);
     }
 }
 
@@ -254,14 +250,14 @@ void PolygonLayer::generateRenderPasses() {
         for (auto const &object : p.second) {
             for (auto config : object.second->getRenderConfig()) {
                 renderPassObjectMap[renderPassIndex].push_back(
-                    std::make_shared<RenderObject>(config->getGraphicsObject()));
+                    std::make_shared<RenderObject>(config->getGraphicsObject(), config->getMaskingObject()));
             }
         }
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass =
-            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget), passEntry.second, mask);
+            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
     {
@@ -449,4 +445,14 @@ void PolygonLayer::setLayerClickable(bool isLayerClickable) {
 void PolygonLayer::setRenderPassIndex(int32_t index) {
     renderPassIndex = index;
     generateRenderPasses();
+}
+
+void PolygonLayer::setBlendMode(::BlendMode blendMode) {
+    this->blendMode = blendMode;
+    std::lock_guard<std::recursive_mutex> lock(polygonsMutex);
+    for (auto const &polygon : polygons) {
+        for (auto &p : polygon.second) {
+            p.second->getShaderProgram()->setBlendMode(blendMode);
+        }
+    }
 }

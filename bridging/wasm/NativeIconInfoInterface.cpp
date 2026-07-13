@@ -22,6 +22,8 @@ em::val NativeIconInfoInterface::cppProxyMethods() {
         "getType",
         "getIconAnchor",
         "getBlendMode",
+        "setRotation",
+        "getRotation",
     });
     return methods;
 }
@@ -113,6 +115,23 @@ int32_t NativeIconInfoInterface::getBlendMode(const CppType& self) {
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeBlendMode>::handleNativeException(e);
     }
 }
+void NativeIconInfoInterface::setRotation(const CppType& self, double w_angle) {
+    try {
+        self->setRotation(::djinni::F64::toCpp(w_angle));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+double NativeIconInfoInterface::getRotation(const CppType& self) {
+    try {
+        auto r = self->getRotation();
+        return ::djinni::F64::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::F64>::handleNativeException(e);
+    }
+}
 
 EMSCRIPTEN_BINDINGS(_icon_info_interface) {
     em::class_<::IconInfoInterface>("IconInfoInterface")
@@ -128,6 +147,8 @@ EMSCRIPTEN_BINDINGS(_icon_info_interface) {
         .function("getType", NativeIconInfoInterface::getType)
         .function("getIconAnchor", NativeIconInfoInterface::getIconAnchor)
         .function("getBlendMode", NativeIconInfoInterface::getBlendMode)
+        .function("setRotation", NativeIconInfoInterface::setRotation)
+        .function("getRotation", NativeIconInfoInterface::getRotation)
         ;
 }
 

@@ -43,9 +43,15 @@ rendering_context_interface = interface +c +j +o {
     setup_draw_frame(vp_matrix: i64, origin: vec_3_d, screenPixelAsRealMeterFactor: f64);
     pre_render_stencil_mask();
     post_render_stencil_mask();
+    clear_stencil_mask(clear_mask: i32);
+    setup_stencil_write_mask(write_mask: i32, reference: i32);
 
     # optional rectangle, remove scissoring when not set
     apply_scissor_rect(scissor_rect: optional<rect_i>);
+
+    get_create_offscreen_render_target(name: string): render_target_interface;
+    delete_offscreen_render_target(name: string);
+    get_offscreen_render_targets(): list<render_target_interface>;
 
     as_open_gl_rendering_context(): optional<open_gl_rendering_context_interface>;
 }
@@ -73,6 +79,7 @@ render_object_interface = interface +c +j +o {
     has_custom_model_matrix() : bool;
     is_screen_space_coords() : bool;
     get_custom_model_matrix() : list<f32>;
+    get_masking_object(): optional<masking_object_interface>;
     set_hidden(hidden: bool);
     is_hidden(): bool;
 }
@@ -106,6 +113,10 @@ render_pass_config = record {
     render_pass_index: i32;
     is_pass_masked: bool;
     render_target: optional<render_target_interface>;
+    stencil_read_mask: i32;
+    stencil_read_reference: i32;
+    stencil_write_mask: i32;
+    stencil_write_reference: i32;
 }
 
 renderer_interface = interface +c +j +o {

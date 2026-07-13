@@ -9,6 +9,7 @@
 #include "Vec3D.h"
 #include <cstdint>
 #include <memory>
+#include <optional>
 
 class GraphicsObjectInterface;
 class MaskingObjectInterface;
@@ -26,6 +27,17 @@ public:
     virtual void setMinMagFilter(TextureFilterType filterType) = 0;
 
     virtual void loadTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder) = 0;
+
+    virtual void loadDualTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder, const /*nullable*/ std::shared_ptr<TextureHolderInterface> & elevationHolder) = 0;
+
+    /**
+     * Explicit binding for the color texture plus an optional lookup sprite (sampled in the fragment stage)
+     * and an optional elevation heightmap (sampled in the vertex/tessellation stage). This lets displaced
+     * raster tiles use the raster texture lookup, which load_dual_texture cannot express because it only
+     * carries a single secondary texture (interpreted as elevation by displaced quads). Non-displaced quads
+     * keep the default behaviour and treat lookupHolder like the load_dual_texture secondary texture.
+     */
+    virtual void loadTextures(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const /*not-null*/ std::shared_ptr<TextureHolderInterface> & textureHolder, const /*nullable*/ std::shared_ptr<TextureHolderInterface> & lookupHolder, const /*nullable*/ std::shared_ptr<TextureHolderInterface> & elevationHolder) = 0;
 
     virtual void removeTexture() = 0;
 

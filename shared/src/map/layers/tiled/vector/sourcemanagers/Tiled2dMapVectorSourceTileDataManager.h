@@ -23,11 +23,13 @@ class Tiled2dMapVectorSourceTileDataManager : public Tiled2dMapVectorLayerTileCa
 public:
     using Tiled2dMapVectorSourceDataManager::Tiled2dMapVectorSourceDataManager;
 
-    virtual void update();
+    virtual bool update();
 
     virtual void pause() override;
 
     virtual void resume() override;
+
+    virtual void clear() override;
 
     virtual void setAlpha(float alpha) override;
 
@@ -85,6 +87,7 @@ protected:
 
     std::unordered_set<std::string> interactableLayers;
 
+    std::unordered_map<std::string, std::pair<std::shared_ptr<SpriteData>, std::shared_ptr<TextureHolderInterface>>> sprites;
     std::shared_ptr<SpriteData> spriteData;
     std::shared_ptr<TextureHolderInterface> spriteTexture;
 

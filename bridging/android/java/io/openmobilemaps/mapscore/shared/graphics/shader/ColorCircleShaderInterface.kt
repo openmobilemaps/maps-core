@@ -10,6 +10,8 @@ abstract class ColorCircleShaderInterface {
 
     abstract fun setColor(red: Float, green: Float, blue: Float, alpha: Float)
 
+    abstract fun setCircleStyle(fillRed: Float, fillGreen: Float, fillBlue: Float, fillAlpha: Float, strokeRed: Float, strokeGreen: Float, strokeBlue: Float, strokeAlpha: Float, innerRadius: Float)
+
     abstract fun asShaderProgramInterface(): ShaderProgramInterface
 
     public class CppProxy : ColorCircleShaderInterface {
@@ -32,6 +34,12 @@ abstract class ColorCircleShaderInterface {
             native_setColor(this.nativeRef, red, green, blue, alpha)
         }
         private external fun native_setColor(_nativeRef: Long, red: Float, green: Float, blue: Float, alpha: Float)
+
+        override fun setCircleStyle(fillRed: Float, fillGreen: Float, fillBlue: Float, fillAlpha: Float, strokeRed: Float, strokeGreen: Float, strokeBlue: Float, strokeAlpha: Float, innerRadius: Float) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setCircleStyle(this.nativeRef, fillRed, fillGreen, fillBlue, fillAlpha, strokeRed, strokeGreen, strokeBlue, strokeAlpha, innerRadius)
+        }
+        private external fun native_setCircleStyle(_nativeRef: Long, fillRed: Float, fillGreen: Float, fillBlue: Float, fillAlpha: Float, strokeRed: Float, strokeGreen: Float, strokeBlue: Float, strokeAlpha: Float, innerRadius: Float)
 
         override fun asShaderProgramInterface(): ShaderProgramInterface {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }

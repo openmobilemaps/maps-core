@@ -14,6 +14,7 @@
 #include "Logger.h"
 #include "TouchEvent.h"
 #include "TouchInterface.h"
+#include "Vec2FHelper.h"
 #include <cmath>
 
 DefaultTouchHandler::DefaultTouchHandler(std::shared_ptr<SchedulerInterface> scheduler, float density)
@@ -61,6 +62,22 @@ void DefaultTouchHandler::onTouchEvent(const TouchEvent &touchEvent) {
 
     std::lock_guard<std::recursive_mutex> lock(stateMutex);
 
+    switch (touchEvent.touchAction) {
+    case TouchAction::HOVER: {
+        if (!touchEvent.pointers.empty()) {
+            touchPosition = touchEvent.pointers[0];
+            handleHover(touchPosition);
+        }
+        return;
+    }
+    case TouchAction::HOVER_EXIT: {
+        handleHoverComplete();
+        return;
+    }
+    default:
+        break;
+    }
+
     if (touchEvent.pointers.size() == 1) {
 
         switch (touchEvent.touchAction) {
@@ -100,6 +117,9 @@ void DefaultTouchHandler::onTouchEvent(const TouchEvent &touchEvent) {
             handleTouchCancel();
             break;
         }
+        case TouchAction::HOVER:
+        case TouchAction::HOVER_EXIT:
+            break;
         }
 
     } else if (touchEvent.pointers.size() == 2) {
@@ -140,6 +160,9 @@ void DefaultTouchHandler::onTouchEvent(const TouchEvent &touchEvent) {
             handleTouchCancel();
             break;
         }
+        case TouchAction::HOVER:
+        case TouchAction::HOVER_EXIT:
+            break;
         }
 
     } else {
@@ -149,23 +172,24 @@ void DefaultTouchHandler::onTouchEvent(const TouchEvent &touchEvent) {
     }
 }
 
-double distance(std::vector<float> &pointer) {
-    return sqrt((pointer[0] - pointer[2]) * (pointer[0] - pointer[2]) + (pointer[1] - pointer[3]) * (pointer[1] - pointer[3]));
-}
-
-bool multiTouchMoved(std::tuple<Vec2F, Vec2F> &pointer1, std::tuple<Vec2F, Vec2F> &pointer2, float value) {
-    float diffA =
-        (float)sqrt((std::get<0>(pointer1).x - std::get<0>(pointer2).x) * (std::get<0>(pointer1).x - std::get<0>(pointer2).x) +
-                    (std::get<0>(pointer1).y - std::get<0>(pointer1).y) * (std::get<0>(pointer1).y - std::get<0>(pointer1).y));
-    float diffB =
-        (float)sqrt((std::get<1>(pointer1).x - std::get<1>(pointer1).x) * (std::get<1>(pointer1).x - std::get<1>(pointer1).x) +
-                    (std::get<1>(pointer1).y - std::get<1>(pointer1).y) * (std::get<1>(pointer1).y - std::get<1>(pointer1).y));
+static bool multiTouchMoved(std::tuple<Vec2F, Vec2F> &pointer1, std::tuple<Vec2F, Vec2F> &pointer2, float value) {
+    float diffA = Vec2FHelper::distance(std::get<0>(pointer1), std::get<0>(pointer2));
+    float diffB = Vec2FHelper::distance(std::get<1>(pointer1), std::get<1>(pointer2));
     return (diffA > value || diffB > value);
 }
 
 void DefaultTouchHandler::handleTouchDown(Vec2F position) {
 
     std::lock_guard<std::recursive_mutex> lock(stateMutex);
+
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener]: listeners) {
+            if (listener->onHoverComplete()) {
+                break;
+            }
+        }
+    }
 
     if (state == ONE_FINGER_UP_AFTER_CLICK && stateTime >= DateHelper::currentTimeMillis() - DOUBLE_TAP_TIMEOUT) {
         state = ONE_FINGER_DOUBLE_CLICK_DOWN;
@@ -178,8 +202,9 @@ void DefaultTouchHandler::handleTouchDown(Vec2F position) {
     stateTime = DateHelper::currentTimeMillis();
     auto strongScheduler = scheduler.lock();
     if (strongScheduler) {
+        // WEB_EXTRAS: throughout this file, execute delayed tasks in main thread, aka GRAPHICS queue. With COMPUTATION, selection delegate (and potentially other click callbacks) would be invoked from background thread, accessing em::val from wrong thread.
         strongScheduler->addTask(std::make_shared<LambdaTask>(
-                                                              TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                                              TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
                                                               [this] { checkState(); }));
     }
     {
@@ -199,8 +224,7 @@ void DefaultTouchHandler::handleMove(Vec2F delta) {
 #ifdef ENABLE_TOUCH_LOGGING
     LogDebug <<= "TouchHandler: handle move";
 #endif
-    std::vector<float> diffPointer = {touchStartPosition.x, touchStartPosition.y, touchPosition.x, touchPosition.y};
-    if (distance(diffPointer) > clickDistancePx) {
+    if (Vec2FHelper::distance(touchStartPosition, touchPosition) > clickDistancePx) {
 #ifdef ENABLE_TOUCH_LOGGING
         LogDebug <<= "TouchHandler: moved large distance";
 #endif
@@ -285,7 +309,7 @@ void DefaultTouchHandler::handleTouchUp() {
             auto strongScheduler = scheduler.lock();
             if (strongScheduler) {
                 strongScheduler->addTask(std::make_shared<LambdaTask>(
-                                                                      TaskConfig("DoubleTapTask", DOUBLE_TAP_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                                                      TaskConfig("DoubleTapTask", DOUBLE_TAP_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
                                                                       [this] { checkState(); }));
             }
         }
@@ -321,7 +345,7 @@ void DefaultTouchHandler::handleTouchUp() {
             auto strongScheduler = scheduler.lock();
             if (strongScheduler) {
                 strongScheduler->addTask(std::make_shared<LambdaTask>(
-                                                                      TaskConfig("OneFingerAfterTwoTask", TWO_FINGER_TOUCH_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                                                      TaskConfig("OneFingerAfterTwoTask", TWO_FINGER_TOUCH_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
                                                                       [this] { checkState(); }));
             }
         }
@@ -373,6 +397,44 @@ void DefaultTouchHandler::handleTouchCancel() {
     stateTime = DateHelper::currentTimeMillis();
 }
 
+void DefaultTouchHandler::handleHover(Vec2F position) {
+
+    std::lock_guard<std::recursive_mutex> lock(stateMutex);
+
+    if (state != IDLE) {
+        return;
+    }
+
+    stateTime = DateHelper::currentTimeMillis();
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener]: listeners) {
+            if (listener->onHover(position)) {
+                break;
+            }
+        }
+    }
+}
+
+void DefaultTouchHandler::handleHoverComplete() {
+
+    std::lock_guard<std::recursive_mutex> lock(stateMutex);
+
+    if (state != IDLE) {
+        return;
+    }
+
+    stateTime = DateHelper::currentTimeMillis();
+    {
+        std::lock_guard<std::recursive_mutex> lock(listenerMutex);
+        for (auto &[index, listener]: listeners) {
+            if (listener->onHoverComplete()) {
+                break;
+            }
+        }
+    }
+}
+
 void DefaultTouchHandler::handleTwoFingerDown() {
 
     std::lock_guard<std::recursive_mutex> lock(stateMutex);
@@ -392,7 +454,7 @@ void DefaultTouchHandler::handleTwoFingerDown() {
     auto strongScheduler = scheduler.lock();
     if (strongScheduler) {
         strongScheduler->addTask(std::make_shared<LambdaTask>(
-                                                              TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                                              TaskConfig("LongPressTask", LONG_PRESS_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
                                                               [this] { checkState(); }));
     }
     {
@@ -442,7 +504,7 @@ void DefaultTouchHandler::handleTwoFingerUp(std::tuple<Vec2F, Vec2F> doubleTouch
         auto strongScheduler = scheduler.lock();
         if (strongScheduler) {
             strongScheduler->addTask(std::make_shared<LambdaTask>(
-                                                                  TaskConfig("OneFingerAfterTwoTask", TWO_FINGER_TOUCH_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::COMPUTATION),
+                                                                  TaskConfig("OneFingerAfterTwoTask", TWO_FINGER_TOUCH_TIMEOUT, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS),
                                                                   [this] { checkState(); }));
         }
         {

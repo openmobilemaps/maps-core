@@ -3,6 +3,7 @@
 
 #include "NativePolygonGroup2dInterface.h"  // my header
 #include "NativeGraphicsObjectInterface.h"
+#include "NativeMaskingObjectInterface.h"
 #include "NativeSharedBytes.h"
 #include "NativeVec3D.h"
 
@@ -34,6 +35,14 @@ void NativePolygonGroup2dInterface::JavaProxy::setVertices(const ::SharedBytes &
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni_generated::NativeGraphicsObjectInterface::toCpp(jniEnv, jret);
 }
+/*not-null*/ std::shared_ptr<::MaskingObjectInterface> NativePolygonGroup2dInterface::JavaProxy::asMaskingObject() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativePolygonGroup2dInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_asMaskingObject);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni_generated::NativeMaskingObjectInterface::toCpp(jniEnv, jret);
+}
 
 CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_PolygonGroup2dInterface_00024CppProxy_nativeDestroy(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
 {
@@ -58,6 +67,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objec
         const auto& ref = ::djinni::objectFromHandleAddress<::PolygonGroup2dInterface>(nativeRef);
         auto r = ref->asGraphicsObject();
         return ::djinni::release(::djinni_generated::NativeGraphicsObjectInterface::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_objects_PolygonGroup2dInterface_00024CppProxy_native_1asMaskingObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::PolygonGroup2dInterface>(nativeRef);
+        auto r = ref->asMaskingObject();
+        return ::djinni::release(::djinni_generated::NativeMaskingObjectInterface::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

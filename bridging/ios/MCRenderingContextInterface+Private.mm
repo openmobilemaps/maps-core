@@ -10,6 +10,7 @@
 #import "MCColor+Private.h"
 #import "MCOpenGlRenderingContextInterface+Private.h"
 #import "MCRectI+Private.h"
+#import "MCRenderTargetInterface+Private.h"
 #import "MCRenderingCullMode+Private.h"
 #import "MCVec2I+Private.h"
 #import "MCVec3D+Private.h"
@@ -90,9 +91,43 @@ screenPixelAsRealMeterFactor:(double)screenPixelAsRealMeterFactor {
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)clearStencilMask:(int32_t)clearMask {
+    try {
+        _cppRefHandle.get()->clearStencilMask(::djinni::I32::toCpp(clearMask));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setupStencilWriteMask:(int32_t)writeMask
+                    reference:(int32_t)reference {
+    try {
+        _cppRefHandle.get()->setupStencilWriteMask(::djinni::I32::toCpp(writeMask),
+                                                   ::djinni::I32::toCpp(reference));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)applyScissorRect:(nullable MCRectI *)scissorRect {
     try {
         _cppRefHandle.get()->applyScissorRect(::djinni::Optional<std::optional, ::djinni_generated::RectI>::toCpp(scissorRect));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nullable id<MCRenderTargetInterface>)getCreateOffscreenRenderTarget:(nonnull NSString *)name {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getCreateOffscreenRenderTarget(::djinni::String::toCpp(name));
+        return ::djinni_generated::RenderTargetInterface::fromCpp(objcpp_result_);
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)deleteOffscreenRenderTarget:(nonnull NSString *)name {
+    try {
+        _cppRefHandle.get()->deleteOffscreenRenderTarget(::djinni::String::toCpp(name));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (nonnull NSArray<id<MCRenderTargetInterface>> *)getOffscreenRenderTargets {
+    try {
+        auto objcpp_result_ = _cppRefHandle.get()->getOffscreenRenderTargets();
+        return ::djinni::List<::djinni_generated::RenderTargetInterface>::fromCpp(objcpp_result_);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -163,10 +198,43 @@ public:
             [djinni_private_get_proxied_objc_object() postRenderStencilMask];
         }
     }
+    void clearStencilMask(int32_t c_clearMask) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() clearStencilMask:(::djinni::I32::fromCpp(c_clearMask))];
+        }
+    }
+    void setupStencilWriteMask(int32_t c_writeMask, int32_t c_reference) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() setupStencilWriteMask:(::djinni::I32::fromCpp(c_writeMask))
+                                                                  reference:(::djinni::I32::fromCpp(c_reference))];
+        }
+    }
     void applyScissorRect(const std::optional<::RectI> & c_scissorRect) override
     {
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() applyScissorRect:(::djinni::Optional<std::optional, ::djinni_generated::RectI>::fromCpp(c_scissorRect))];
+        }
+    }
+    /*not-null*/ std::shared_ptr<::RenderTargetInterface> getCreateOffscreenRenderTarget(const std::string & c_name) override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getCreateOffscreenRenderTarget:(::djinni::String::fromCpp(c_name))];
+            return ::djinni_generated::RenderTargetInterface::toCpp(objcpp_result_);
+        }
+    }
+    void deleteOffscreenRenderTarget(const std::string & c_name) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() deleteOffscreenRenderTarget:(::djinni::String::fromCpp(c_name))];
+        }
+    }
+    std::vector</*not-null*/ std::shared_ptr<::RenderTargetInterface>> getOffscreenRenderTargets() override
+    {
+        @autoreleasepool {
+            auto objcpp_result_ = [djinni_private_get_proxied_objc_object() getOffscreenRenderTargets];
+            return ::djinni::List<::djinni_generated::RenderTargetInterface>::toCpp(objcpp_result_);
         }
     }
     /*nullable*/ std::shared_ptr<::OpenGlRenderingContextInterface> asOpenGlRenderingContext() override

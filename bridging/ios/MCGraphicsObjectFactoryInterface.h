@@ -13,13 +13,18 @@
 @protocol MCQuad2dStretchedInstancedInterface;
 @protocol MCTextInstancedInterface;
 @protocol MCTextInterface;
+@protocol MCTexturedPolygonInterface;
 
 
 @protocol MCGraphicsObjectFactoryInterface
 
 - (nullable id<MCQuad2dInterface>)createQuad:(nullable id<MCShaderProgramInterface>)shader;
 
+- (nullable id<MCTexturedPolygonInterface>)createTexturedPolygon:(nullable id<MCShaderProgramInterface>)shader;
+
 - (nullable id<MCQuad2dInterface>)createQuadTessellated:(nullable id<MCShaderProgramInterface>)shader;
+
+- (nullable id<MCQuad2dInterface>)createQuadTessellatedDisplaced;
 
 - (nullable id<MCPolygon2dInterface>)createPolygon:(nullable id<MCShaderProgramInterface>)shader;
 

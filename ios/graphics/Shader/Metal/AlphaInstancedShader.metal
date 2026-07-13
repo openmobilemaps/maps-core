@@ -22,7 +22,7 @@ struct InstancedVertexOut {
 
 vertex InstancedVertexOut
 unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                           constant float4x4 &vpMatrix [[buffer(1)]],
+                           constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
                            constant float4x4 &mMatrix [[buffer(2)]],
                            constant packed_float3 *positions [[buffer(3)]],
                            constant float2 *scales [[buffer(4)]],
@@ -31,7 +31,7 @@ unitSphereAlphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
                            constant float *alphas [[buffer(7)]],
                            constant float2 *offsets [[buffer(8)]],
                            constant float4 &originOffset [[buffer(9)]],
-                           constant float4 &origin [[buffer(10)]],
+                           constant float4 &origin [[buffer(MC_GLOBAL_ORIGIN_BUFFER_INDEX)]],
                            uint instanceId [[instance_id]])
 {
     const float3 position = positions[instanceId];
@@ -93,7 +93,7 @@ unitSphereAlphaInstancedFragmentShader(InstancedVertexOut in [[stage_in]],
 
 vertex InstancedVertexOut
 alphaInstancedVertexShader(const VertexIn vertexIn [[stage_in]],
-                           constant float4x4 &vpMatrix [[buffer(1)]],
+                           constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
                            constant float4x4 &mMatrix [[buffer(2)]],
                            constant float2 * positions [[buffer(3)]],
                            constant float2 *scales [[buffer(4)]],

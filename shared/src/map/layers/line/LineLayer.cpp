@@ -18,8 +18,10 @@
 #include "RenderObject.h"
 #include "RenderPass.h"
 #include "SizeType.h"
-#include <map>
 #include <algorithm>
+#include <cmath>
+#include <limits>
+#include <map>
 
 LineLayer::LineLayer()
     : isHidden(false){};
@@ -100,7 +102,7 @@ void LineLayer::add(const std::shared_ptr<LineInfoInterface> &line) {
 
     const auto &lineStyle = line->getStyle();
     lineObject->setStyle(lineStyle);
-    bool isAnimatedLineStyle = lineStyle.dashAnimationSpeed > 0.0;
+    bool isAnimatedLineStyle = std::abs(lineStyle.dashAnimationSpeed) > std::numeric_limits<float>::epsilon();
 
     bool is3d = mapInterface->is3d();
 
@@ -167,9 +169,7 @@ void LineLayer::clear() {
             auto linesToClear = lines;
             scheduler->addTask(std::make_shared<LambdaTask>(TaskConfig("LineLayer_clearLines", 0, TaskPriority::NORMAL, ExecutionEnvironment::GRAPHICS), [linesToClear]{
                 for (const auto &line : linesToClear) {
-                    if (line.second->getLineObject()->isReady()) {
-                        line.second->getLineObject()->clear();
-                    }
+                    line.second->getLineObject()->clear();
                 }
             }));
         }
@@ -199,17 +199,15 @@ void LineLayer::generateRenderPasses() {
     for (auto const &lineTuple : lines) {
         for (auto config : lineTuple.second->getRenderConfig()) {
             if (!lineTuple.first->getCoordinates().empty()) {
-                std::vector<float> modelMatrix =
-                    mapInterface->getCamera()->getInvariantModelMatrix(lineTuple.first->getCoordinates()[0], false, false);
                 renderPassObjectMap[renderPassIndex].push_back(
-                    std::make_shared<RenderObject>(config->getGraphicsObject()));
+                    std::make_shared<RenderObject>(config->getGraphicsObject(), config->getMaskingObject()));
             }
         }
     }
     std::vector<std::shared_ptr<RenderPassInterface>> newRenderPasses;
     for (const auto &passEntry : renderPassObjectMap) {
         std::shared_ptr<RenderPass> renderPass =
-            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget), passEntry.second, mask);
+            std::make_shared<RenderPass>(RenderPassConfig(passEntry.first, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none), passEntry.second, mask);
         newRenderPasses.push_back(renderPass);
     }
     {
@@ -282,11 +280,10 @@ void LineLayer::onRemoved() {
 void LineLayer::pause() {
     std::lock_guard<std::recursive_mutex> overlayLock(linesMutex);
     for (const auto &line : lines) {
-        line.second->getLineObject()->clear();
+        line.second->getLineObject()->pause();
     }
     if (mask) {
-        if (mask->asGraphicsObject()->isReady())
-            mask->asGraphicsObject()->clear();
+        mask->asGraphicsObject()->clear();
     }
 }
 
@@ -298,7 +295,7 @@ void LineLayer::resume() {
     }
     std::lock_guard<std::recursive_mutex> overlayLock(linesMutex);
     for (const auto &line : lines) {
-        line.second->getLineObject()->setup(renderingContext);
+        line.second->getLineObject()->resume(renderingContext);
     }
     if (maskGraphicsObject && !maskGraphicsObject->isReady()) {
         maskGraphicsObject->setup(renderingContext);

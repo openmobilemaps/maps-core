@@ -11,6 +11,8 @@
 
 + (nullable MCSkySphereLayerInterface *)create;
 
++ (nullable MCSkySphereLayerInterface *)createWithLocal;
+
 - (nullable id<MCLayerInterface>)asLayerInterface;
 
 /** Expects a texture with x: right ascension (longitude), y: declination (latitude) */

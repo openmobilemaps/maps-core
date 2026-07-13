@@ -8,6 +8,9 @@ cpp:
   typename: '::SymbolPlacement'
   header: '"SymbolPlacement.h"'
   byValue: true
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCSymbolPlacement'
   pointer: false

@@ -8,7 +8,11 @@ cpp:
   typename: '::LineLayerInterface'
   header: '"LineLayerInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCLineLayerInterface'
   pointer: true
   hash: '%s.hash'

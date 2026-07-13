@@ -18,6 +18,8 @@ touch_interface = interface +c +j +o {
     on_click_confirmed(pos_screen: vec_2_f) : bool;
     on_double_click(pos_screen: vec_2_f) : bool;
     on_long_press(pos_screen: vec_2_f) : bool;
+    on_hover(pos_screen: vec_2_f) : bool;
+    on_hover_complete() : bool;
     on_move(delta_screen: vec_2_f, confirmed: bool, double_click: bool) : bool;
     on_move_complete() : bool;
     on_one_finger_double_click_move_complete() : bool;
@@ -34,10 +36,12 @@ touch_event = record {
     touch_action: touch_action;
 }
 
-touch_action = enum { 
+touch_action = enum {
     down;
     move;
     up;
     scroll;
     cancel;
+    hover;
+    hover_exit;
 }

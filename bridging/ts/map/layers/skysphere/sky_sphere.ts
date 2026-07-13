@@ -11,6 +11,7 @@ export interface SkySphereLayerInterface {
 }
 export interface SkySphereLayerInterface_statics {
     create(): SkySphereLayerInterface;
+    createWithLocal(): SkySphereLayerInterface;
 }
 
 export interface SkySphere_statics {

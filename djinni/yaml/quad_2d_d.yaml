@@ -8,7 +8,11 @@ cpp:
   typename: '::Quad2dD'
   header: '"Quad2dD.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCQuad2dD'
   pointer: true
   hash: '%s.hash'

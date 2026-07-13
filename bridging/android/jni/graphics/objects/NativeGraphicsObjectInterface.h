@@ -36,6 +36,8 @@ private:
         bool isReady() override;
         void setup(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context) override;
         void clear() override;
+        void pause() override;
+        void resume(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context) override;
         void setIsInverseMasked(bool inversed) override;
         void setDebugLabel(const std::string & label) override;
         void render(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & context, const ::RenderPassConfig & renderPass, int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked, double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) override;
@@ -48,6 +50,8 @@ private:
     const jmethodID method_isReady { ::djinni::jniGetMethodID(clazz.get(), "isReady", "()Z") };
     const jmethodID method_setup { ::djinni::jniGetMethodID(clazz.get(), "setup", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;)V") };
     const jmethodID method_clear { ::djinni::jniGetMethodID(clazz.get(), "clear", "()V") };
+    const jmethodID method_pause { ::djinni::jniGetMethodID(clazz.get(), "pause", "()V") };
+    const jmethodID method_resume { ::djinni::jniGetMethodID(clazz.get(), "resume", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;)V") };
     const jmethodID method_setIsInverseMasked { ::djinni::jniGetMethodID(clazz.get(), "setIsInverseMasked", "(Z)V") };
     const jmethodID method_setDebugLabel { ::djinni::jniGetMethodID(clazz.get(), "setDebugLabel", "(Ljava/lang/String;)V") };
     const jmethodID method_render { ::djinni::jniGetMethodID(clazz.get(), "render", "(Lio/openmobilemaps/mapscore/shared/graphics/RenderingContextInterface;Lio/openmobilemaps/mapscore/shared/graphics/RenderPassConfig;JJLio/openmobilemaps/mapscore/shared/graphics/common/Vec3D;ZDZ)V") };

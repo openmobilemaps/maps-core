@@ -11,19 +11,17 @@
 import Foundation
 import MapCoreSharedModule
 @preconcurrency import Metal
-import UIKit
 import simd
 
 final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
     private var verticesBuffer: MTLBuffer?
-    
+
     private var tessellationFactorsBuffer: MTLBuffer?
-    private var originBuffers: MultiBuffer<simd_float4>
-    
     private var is3d = false
     private var subdivisionFactor: Int32 = 0
 
     private var texture: MTLTexture?
+    private var lookupTexture: MTLTexture?
 
     private var shader: MCShaderProgramInterface
 
@@ -44,7 +42,6 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         label: String = "Quad2dTessellated"
     ) {
         self.shader = shader
-        originBuffers = .init(device: metalContext.device)
         nearestSampler = metalContext.samplerLibrary.value(
             Sampler.magNearest.rawValue)!
         super
@@ -53,15 +50,14 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
                 sampler: metalContext.samplerLibrary.value(
                     Sampler.magLinear.rawValue)!,
                 label: label)
-        
-        
-        let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits;
-        
+
+        let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits
+
         var tessellationFactors = MTLQuadTessellationFactorsHalf(
             edgeTessellationFactor: (factorH, factorH, factorH, factorH),
             insideTessellationFactor: (factorH, factorH)
-        );
-            
+        )
+
         self.tessellationFactorsBuffer.copyOrCreate(
             bytes: &tessellationFactors,
             length: MemoryLayout<MTLQuadTessellationFactorsHalf>.stride,
@@ -74,7 +70,8 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         ss2.stencilFailureOperation = .zero
         ss2.depthFailureOperation = .keep
         ss2.depthStencilPassOperation = .keep
-        ss2.readMask = 0b1111_1111
+        // Masked draw passes only read the geometry-mask bits prepared by mask objects.
+        ss2.readMask = 0b1100_0000
         ss2.writeMask = 0b0000_0000
 
         let s2 = MTLDepthStencilDescriptor()
@@ -128,15 +125,14 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         #endif
 
         if isMasked {
-            if stencilState == nil {
-                setupStencilStates()
-            }
-            encoder.setDepthStencilState(stencilState)
-            encoder.setStencilReferenceValue(0b1100_0000)
-        } else if let mask = context.mask, renderAsMask {
-            encoder.setDepthStencilState(mask)
-            encoder.setStencilReferenceValue(0b1100_0000)
+            // Tessellated quads apply masking after tessellation through the shared stencil contract.
+            // Inverse reads target the cleared value for outside-of-mask rendering.
+            encoder.setDepthStencilState(maskStencilState(for: renderPass))
+            encoder.setStencilReferenceValue(maskStencilReference(for: renderPass))
+        } else if renderAsMask {
+            applyMaskWriteState(context: context, renderPass: renderPass)
         } else if renderPass.isPassMasked {
+            // Self-masked passes use the low stencil bit independently of geometry-mask reads.
             if renderPassStencilState == nil {
                 renderPassStencilState = self.renderPassMaskStencilState()
             }
@@ -147,18 +143,19 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
             encoder.setDepthStencilState(context.defaultMask)
         }
 
-        shader.setupProgram(context)
+        if renderAsMask {
+            shader.setupMaskProgram(context)
+        } else {
+            shader.setupProgram(context)
+        }
+        defer {
+            if renderAsMask {
+                shader.finishMaskProgram()
+            }
+        }
         shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
 
         encoder.setVertexBuffer(verticesBuffer, offset: 0, index: 0)
-
-        let vpMatrixBuffer = vpMatrixBuffers.getNextBuffer(context)
-        if let matrixPointer = UnsafeRawPointer(bitPattern: Int(vpMatrix)) {
-            vpMatrixBuffer?.contents()
-                .copyMemory(
-                    from: matrixPointer, byteCount: 64)
-        }
-        encoder.setVertexBuffer(vpMatrixBuffer, offset: 0, index: 1)
 
         if shader.usesModelMatrix() {
             if let mMatrixPointer = UnsafeRawPointer(bitPattern: Int(mMatrix)) {
@@ -187,46 +184,40 @@ final class Quad2dTessellated: BaseGraphicsObject, @unchecked Sendable {
         if let texture {
             encoder.setFragmentTexture(texture, index: 0)
         }
-        
-        let originBuffer = originBuffers.getNextBuffer(context)
-        if let bufferPointer = originBuffer?.contents()
-            .assumingMemoryBound(
-                to: simd_float4.self)
-        {
-            bufferPointer.pointee.x = Float(origin.x)
-            bufferPointer.pointee.y = Float(origin.y)
-            bufferPointer.pointee.z = Float(origin.z)
-        } else {
-            fatalError()
+        if let lookupTexture {
+            encoder.setFragmentTexture(lookupTexture, index: 1)
+        } else if let texture {
+            encoder.setFragmentTexture(texture, index: 1)
         }
-        encoder.setVertexBuffer(originBuffer, offset: 0, index: 4)
-        
+
         encoder.setVertexBytes(&self.is3d, length: MemoryLayout<Bool>.stride, index: 5)
-        
+
         encoder.setTessellationFactorBuffer(tessellationFactorsBuffer, offset: 0, instanceStride: 0)
-        
+
         #if HARDWARE_TESSELLATION_WIREFRAME_METAL
-        let wireframePipeline = MetalContext.current.pipelineLibrary.value(
-            Pipeline(
-                type: .quadTessellatedWireframeShader,
-                blendMode: (shader as? BaseShader)?.blendMode ?? .NORMAL)
-        )
-        if let wireframePipeline {
-            context.setRenderPipelineStateIfNeeded(wireframePipeline)
-        }
-        encoder.setTriangleFillMode(.lines)
-        encoder.drawPatches(
-            numberOfPatchControlPoints: 4,
-            patchStart: 0,
-            patchCount: 1,
-            patchIndexBuffer: nil,
-            patchIndexBufferOffset: 0,
-            instanceCount: 1,
-            baseInstance: 0)
-        encoder.setTriangleFillMode(.fill)
-        shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
+            if !renderAsMask {
+                let wireframePipeline = MetalContext.current.pipelineLibrary.value(
+                    Pipeline(
+                        type: .quadTessellatedWireframeShader,
+                        blendMode: (shader as? BaseShader)?.blendMode ?? .NORMAL)
+                )
+                if let wireframePipeline {
+                    context.setRenderPipelineStateIfNeeded(wireframePipeline)
+                }
+                encoder.setTriangleFillMode(.lines)
+                encoder.drawPatches(
+                    numberOfPatchControlPoints: 4,
+                    patchStart: 0,
+                    patchCount: 1,
+                    patchIndexBuffer: nil,
+                    patchIndexBufferOffset: 0,
+                    instanceCount: 1,
+                    baseInstance: 0)
+                encoder.setTriangleFillMode(.fill)
+                shader.preRender(context, isScreenSpaceCoords: isScreenSpaceCoords)
+            }
         #endif
-        
+
         encoder.drawPatches(
             numberOfPatchControlPoints: 4,
             patchStart: 0,
@@ -254,6 +245,7 @@ extension Quad2dTessellated: MCMaskingObjectInterface {
         else { return }
 
         renderAsMask = true
+        defer { renderAsMask = false }
 
         render(
             encoder: encoder,
@@ -284,14 +276,14 @@ extension Quad2dTessellated: MCQuad2dInterface {
         lock.withCritical {
             if self.subdivisionFactor != factor {
                 self.subdivisionFactor = factor
-                
-                let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits;
-                
+
+                let factorH = Half(pow(2, Float(self.subdivisionFactor))).bits
+
                 var tessellationFactors = MTLQuadTessellationFactorsHalf(
                     edgeTessellationFactor: (factorH, factorH, factorH, factorH),
                     insideTessellationFactor: (factorH, factorH)
-                );
-                    
+                )
+
                 self.tessellationFactorsBuffer.copyOrCreate(
                     bytes: &tessellationFactors,
                     length: MemoryLayout<MTLQuadTessellationFactorsHalf>.stride,
@@ -317,7 +309,7 @@ extension Quad2dTessellated: MCQuad2dInterface {
                 return MCVec3D(x: x, y: y, z: 0)
             }
         }
-        
+
         /*
          The quad is made out of 4 vertices as following
          B----C
@@ -352,7 +344,7 @@ extension Quad2dTessellated: MCQuad2dInterface {
                 textureU: textureCoordinates.xF + textureCoordinates.widthF,
                 textureV: textureCoordinates.yF + textureCoordinates.heightF),  // D
         ]
-    
+
         lock.withCritical {
             self.is3d = is3d
             self.originOffset = origin
@@ -374,12 +366,39 @@ extension Quad2dTessellated: MCQuad2dInterface {
         }
         lock.withCritical {
             texture = textureHolder.texture
+            lookupTexture = nil
         }
+    }
+
+    func loadDualTexture(
+        _ context: MCRenderingContextInterface?,
+        textureHolder: MCTextureHolderInterface?,
+        elevationHolder: MCTextureHolderInterface?
+    ) {
+        guard let textureHolder = textureHolder as? TextureHolder else {
+            fatalError("unexpected TextureHolder")
+        }
+        let lookupHolder = elevationHolder as? TextureHolder
+        lock.withCritical {
+            texture = textureHolder.texture
+            lookupTexture = lookupHolder?.texture
+        }
+    }
+
+    func loadTextures(
+        _ context: MCRenderingContextInterface?,
+        textureHolder: MCTextureHolderInterface?,
+        lookupHolder: MCTextureHolderInterface?,
+        elevationHolder: MCTextureHolderInterface?
+    ) {
+        // The tessellated (non-displaced) quad has no elevation stage; only the lookup sprite is used.
+        loadDualTexture(context, textureHolder: textureHolder, elevationHolder: lookupHolder)
     }
 
     func removeTexture() {
         lock.withCritical {
             texture = nil
+            lookupTexture = nil
         }
     }
 

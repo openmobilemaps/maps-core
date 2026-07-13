@@ -54,6 +54,8 @@ class PolygonLayer : public PolygonLayerInterface,
 
     virtual void setRenderPassIndex(int32_t index) override;
 
+    virtual void setBlendMode(::BlendMode blendMode) override;
+
     // LayerInterface
     virtual void setMaskingObject(const std::shared_ptr<::MaskingObjectInterface> & maskingObject) override;
 
@@ -108,6 +110,8 @@ class PolygonLayer : public PolygonLayerInterface,
 
     std::atomic<bool> isHidden;
     std::atomic<bool> isLayerClickable = true;
+
+    BlendMode blendMode = BlendMode::NORMAL;
 
     int32_t renderPassIndex = 0;
 };

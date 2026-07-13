@@ -47,6 +47,12 @@ Tiled2dMapVectorLayerInterface::createExplicitly(const std::string &layerName,
         }
 
         if (!(localStyleJson.has_value() && *localStyleJson) && !parserResult) {
+            if (!styleJson.has_value()) {
+                // No `localStyleJson`, no local provider result, and no remote `styleJson`
+                // either — nothing to parse. Previously this path dereferenced the empty
+                // `*styleJson` optional and aborted via `std::bad_optional_access`.
+                return nullptr;
+            }
             return std::make_shared<Tiled2dMapVectorLayer>(layerName, *styleJson, loaders, fontLoader, customZoomInfo, symbolDelegate, urlParams, localDataProvider);
         }
 

@@ -9,6 +9,7 @@
  */
 
 #include <metal_stdlib>
+#include "DataStructures.metal"
 using namespace metal;
 
 struct IcosahedronVertexIn {
@@ -23,7 +24,7 @@ struct IcosahedronVertexOut {
 
 vertex IcosahedronVertexOut
 icosahedronVertexShader(const IcosahedronVertexIn vertexIn [[stage_in]],
-                 constant float4x4 &mvpMatrix [[buffer(1)]])
+                 constant float4x4 &mvpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]])
 {
     const float phi = (vertexIn.position.y - 180.0) * M_PI_F / 180.0;
     const float th = (vertexIn.position.x - 90.0) * M_PI_F / 180.0;

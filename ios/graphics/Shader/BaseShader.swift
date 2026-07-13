@@ -17,6 +17,8 @@ open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
     internal let shader: PipelineType
 
     open var pipeline: MTLRenderPipelineState?
+    open var maskPipeline: MTLRenderPipelineState?
+    private var usesMaskPipeline = false
 
     public init(shader: PipelineType) {
         self.shader = shader
@@ -36,6 +38,21 @@ open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
         }
     }
 
+    open func setupMaskProgram(_: MCRenderingContextInterface?) {
+        if maskPipeline == nil {
+            maskPipeline = MetalContext.current.pipelineLibrary.value(Pipeline(type: shader, blendMode: blendMode, colorWriteMask: .none))
+        }
+        usesMaskPipeline = true
+    }
+
+    open func finishMaskProgram() {
+        usesMaskPipeline = false
+    }
+
+    internal var activePipeline: MTLRenderPipelineState? {
+        usesMaskPipeline ? maskPipeline : pipeline
+    }
+
     open func preRender(
         _ context: MCRenderingContextInterface?,
         isScreenSpaceCoords: Bool
@@ -43,6 +60,7 @@ open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
         guard let context = context as? RenderingContext,
             let encoder = context.encoder
         else { return }
+        context.bindGlobalRenderVpMatrix(isScreenSpaceCoords: isScreenSpaceCoords)
         preRender(encoder: encoder, context: context)
     }
 
@@ -50,7 +68,7 @@ open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
         encoder _: MTLRenderCommandEncoder,
         context: RenderingContext
     ) {
-        guard let pipeline else { return }
+        guard let pipeline = activePipeline else { return }
 
         context.setRenderPipelineStateIfNeeded(pipeline)
     }
@@ -60,6 +78,7 @@ open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
             guard newBlendMode != self.blendMode else { return }
             self.blendMode = newBlendMode
             self.pipeline = nil
+            self.maskPipeline = nil
         }
 
         if Thread.isMainThread {
@@ -69,5 +88,19 @@ open class BaseShader: MCShaderProgramInterface, @unchecked Sendable {
         } else {
             DispatchQueue.main.async(execute: updateBlock)
         }
+    }
+}
+
+extension MCShaderProgramInterface {
+    func setupMaskProgram(_ context: MCRenderingContextInterface?) {
+        if let shader = self as? BaseShader {
+            shader.setupMaskProgram(context)
+        } else {
+            setupProgram(context)
+        }
+    }
+
+    func finishMaskProgram() {
+        (self as? BaseShader)?.finishMaskProgram()
     }
 }

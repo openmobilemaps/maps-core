@@ -23,6 +23,23 @@
                                  y:y];
 }
 
+- (BOOL)isEqual:(id)other
+{
+    if (![other isKindOfClass:[MCVec2I class]]) {
+        return NO;
+    }
+    MCVec2I *typedOther = (MCVec2I *)other;
+    return self.x == typedOther.x &&
+            self.y == typedOther.y;
+}
+
+- (NSUInteger)hash
+{
+    return NSStringFromClass([self class]).hash ^
+            (NSUInteger)self.x ^
+            (NSUInteger)self.y;
+}
+
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {

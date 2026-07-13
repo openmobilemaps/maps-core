@@ -3,12 +3,14 @@
 
 #include "NativeRenderConfigInterface.h"  // my header
 #include "NativeGraphicsObjectInterface.h"
+#include "NativeMaskingObjectInterface.h"
 
 namespace djinni_generated {
 
 em::val NativeRenderConfigInterface::cppProxyMethods() {
     static const em::val methods = em::val::array(std::vector<std::string> {
         "getGraphicsObject",
+        "getMaskingObject",
         "getRenderIndex",
     });
     return methods;
@@ -21,6 +23,15 @@ em::val NativeRenderConfigInterface::getGraphicsObject(const CppType& self) {
     }
     catch(const std::exception& e) {
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeGraphicsObjectInterface>::handleNativeException(e);
+    }
+}
+em::val NativeRenderConfigInterface::getMaskingObject(const CppType& self) {
+    try {
+        auto r = self->getMaskingObject();
+        return ::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>>::handleNativeException(e);
     }
 }
 int32_t NativeRenderConfigInterface::getRenderIndex(const CppType& self) {
@@ -38,6 +49,7 @@ EMSCRIPTEN_BINDINGS(_render_config_interface) {
         .smart_ptr<std::shared_ptr<::RenderConfigInterface>>("RenderConfigInterface")
         .function("nativeDestroy", &NativeRenderConfigInterface::nativeDestroy)
         .function("getGraphicsObject", NativeRenderConfigInterface::getGraphicsObject)
+        .function("getMaskingObject", NativeRenderConfigInterface::getMaskingObject)
         .function("getRenderIndex", NativeRenderConfigInterface::getRenderIndex)
         ;
 }

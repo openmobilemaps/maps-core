@@ -10,7 +10,9 @@
 
 #pragma once
 
+#include "BaseGraphicsObjectOpenGl.h"
 #include "GraphicsObjectInterface.h"
+#include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
 #include "OpenGlHelper.h"
 #include "PolygonGroup2dInterface.h"
@@ -20,9 +22,10 @@
 #include "opengl_wrapper.h"
 #include <mutex>
 
-class PolygonGroup2dOpenGl : public GraphicsObjectInterface,
+class PolygonGroup2dOpenGl : public BaseGraphicsObjectOpenGl,
+                             public MaskingObjectInterface,
                              public PolygonGroup2dInterface,
-                             public std::enable_shared_from_this<GraphicsObjectInterface> {
+                             public std::enable_shared_from_this<PolygonGroup2dOpenGl> {
   public:
     PolygonGroup2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
@@ -33,6 +36,8 @@ class PolygonGroup2dOpenGl : public GraphicsObjectInterface,
     virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
+
+    virtual std::shared_ptr<MaskingObjectInterface> asMaskingObject() override;
 
     // GraphicsObjectInterface
 
@@ -45,6 +50,10 @@ class PolygonGroup2dOpenGl : public GraphicsObjectInterface,
     virtual void render(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                         int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, bool isMasked,
                         double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) override;
+
+    virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
+                              int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin,
+                              double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) override;
 
     virtual void setIsInverseMasked(bool inversed) override;
 
@@ -67,6 +76,7 @@ protected:
     GLuint attribBuffer;
     std::vector<GLfloat> polygonAttributes;
     GLuint indexBuffer;
+    size_t polygonIndicesSize;
     std::vector<GLushort> polygonIndices;
     bool glDataBuffersGenerated = false;
     Vec3D polygonOrigin = Vec3D(0.0, 0.0, 0.0);

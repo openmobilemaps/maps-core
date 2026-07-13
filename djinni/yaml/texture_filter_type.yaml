@@ -8,7 +8,11 @@ cpp:
   typename: '::TextureFilterType'
   header: '"TextureFilterType.h"'
   byValue: true
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCTextureFilterType'
   pointer: false
   hash: '%s.hash'

@@ -37,6 +37,7 @@ class TextInstancedShaderOpenGl : public BaseShaderProgramOpenGl,
 protected:
     const bool projectOntoUnitSphere;
     const std::string programName;
+    std::optional<GLint> aspectRatioHandle;
 
     virtual std::string getFragmentShader() override;
 

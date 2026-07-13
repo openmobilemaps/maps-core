@@ -13,5 +13,7 @@ public:
 
     virtual void setColor(float red, float green, float blue, float alpha) = 0;
 
+    virtual void setCircleStyle(float fillRed, float fillGreen, float fillBlue, float fillAlpha, float strokeRed, float strokeGreen, float strokeBlue, float strokeAlpha, float innerRadius) = 0;
+
     virtual /*not-null*/ std::shared_ptr<ShaderProgramInterface> asShaderProgramInterface() = 0;
 };

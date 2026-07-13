@@ -18,9 +18,15 @@ class TessellatedRasterShaderOpenGl : public RasterShaderOpenGl {
 public:
     TessellatedRasterShaderOpenGl(bool projectOntoUnitSphere);
 
+    std::string getProgramName() override;
+
     void setupProgram(const std::shared_ptr<RenderingContextInterface> &context) override;
 
+    void setTexturedPolygonMode();
+
 protected:
+    explicit TessellatedRasterShaderOpenGl(const std::string &programName);
+
     std::string getVertexShader() override;
 
     virtual std::string getControlShader();
@@ -30,4 +36,8 @@ protected:
 #if HARDWARE_TESSELLATION_WIREFRAME_OPENGL
     virtual std::string getGeometryShader();
 #endif
+
+private:
+    bool texturedPolygonMode = false;
+    std::string texturedPolygonProgramName;
 };

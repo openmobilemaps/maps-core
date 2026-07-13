@@ -17,6 +17,10 @@
 
 - (BOOL)onLongPress:(nonnull MCVec2F *)posScreen;
 
+- (BOOL)onHover:(nonnull MCVec2F *)posScreen;
+
+- (BOOL)onHoverComplete;
+
 - (BOOL)onMove:(nonnull MCVec2F *)deltaScreen
      confirmed:(BOOL)confirmed
    doubleClick:(BOOL)doubleClick;

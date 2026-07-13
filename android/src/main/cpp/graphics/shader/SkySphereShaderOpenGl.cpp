@@ -11,7 +11,9 @@
 #include "SkySphereShaderOpenGl.h"
 #include "OpenGlContext.h"
 
-const std::string SkySphereShaderOpenGl::programName = "UBMAP_SkySphereShaderOpenGl";
+SkySphereShaderOpenGl::SkySphereShaderOpenGl(bool useLocal)
+    : useLocal(useLocal)
+    , programName(useLocal ? "UBMAP_SkySphereLocalShaderOpenGl" : "UBMAP_SkySphereShaderOpenGl") {}
 
 std::string SkySphereShaderOpenGl::getProgramName() {
     return programName;
@@ -74,8 +76,51 @@ std::string SkySphereShaderOpenGl::getVertexShader() {
 }
 
 std::string SkySphereShaderOpenGl::getFragmentShader() {
+    if (useLocal) {
+        return OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
+                                      precision highp float;
+                                      uniform vec4 uOriginOffset;
+                                      uniform vec4 uCameraPosition;
+                                      uniform mat4 uInverseVPMatrix;
+                                      uniform sampler2D textureSampler;
+
+                                      in vec2 v_screenPos;
+                                      in vec2 v_textureScaleFactors;
+                                      out vec4 fragmentColor;
+
+                                      const float PI = 3.141592653589793;
+
+                                      void main() {
+                                          vec4 posCart = uInverseVPMatrix * vec4(v_screenPos.x, v_screenPos.y, 1.0, 1.0);
+                                          posCart /= posCart.w;
+
+                                          vec3 dirCamera = normalize(posCart.xyz - uCameraPosition.xyz);
+
+                                          vec3 localUp = normalize(uCameraPosition.xyz);
+                                          vec3 referenceNorth = abs(localUp.y) > 0.99 ? vec3(1.0, 0.0, 0.0) : vec3(0.0, 1.0, 0.0);
+                                          vec3 localEast = normalize(cross(referenceNorth, localUp));
+                                          vec3 localNorth = normalize(cross(localUp, localEast));
+                                          vec3 dirLocal = vec3(
+                                                  dot(dirCamera, localEast),
+                                                  dot(dirCamera, localUp),
+                                                  dot(dirCamera, localNorth)
+                                          );
+
+                                          float rasc = atan(dirLocal.z, dirLocal.x) + PI;
+                                          float decl = asin(dirLocal.y);
+
+                                          vec2 texCoords = vec2(
+                                                  -(rasc / (2.0 * PI)) + 1.0,
+                                                  -decl / PI + 0.5
+                                          ) * v_textureScaleFactors;
+
+                                          fragmentColor = texture(textureSampler, texCoords);
+                                      }
+        );
+    }
+
     return OMMVersionedGlesShaderCodeWithFrameUBO(320 es, 300 es,
-                                      precision mediump float;
+                                      precision highp float;
                                       uniform vec4 uOriginOffset;
                                       uniform vec4 uCameraPosition;
                                       uniform mat4 uInverseVPMatrix;

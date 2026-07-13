@@ -26,6 +26,22 @@ textureCoordinates:(nonnull MCRectD *)textureCoordinates
 - (void)loadTexture:(nullable id<MCRenderingContextInterface>)context
       textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder;
 
+- (void)loadDualTexture:(nullable id<MCRenderingContextInterface>)context
+          textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder
+        elevationHolder:(nullable id<MCTextureHolderInterface>)elevationHolder;
+
+/**
+ * Explicit binding for the color texture plus an optional lookup sprite (sampled in the fragment stage)
+ * and an optional elevation heightmap (sampled in the vertex/tessellation stage). This lets displaced
+ * raster tiles use the raster texture lookup, which load_dual_texture cannot express because it only
+ * carries a single secondary texture (interpreted as elevation by displaced quads). Non-displaced quads
+ * keep the default behaviour and treat lookupHolder like the load_dual_texture secondary texture.
+ */
+- (void)loadTextures:(nullable id<MCRenderingContextInterface>)context
+       textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder
+        lookupHolder:(nullable id<MCTextureHolderInterface>)lookupHolder
+     elevationHolder:(nullable id<MCTextureHolderInterface>)elevationHolder;
+
 - (void)removeTexture;
 
 - (nullable id<MCGraphicsObjectInterface>)asGraphicsObject;

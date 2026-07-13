@@ -8,6 +8,9 @@ cpp:
   typename: '::DataLoadRequest'
   header: '"DataLoadRequest.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCDataLoadRequest'
   pointer: true

@@ -17,7 +17,7 @@
 PolygonPatternGroup2dOpenGl::PolygonPatternGroup2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
-bool PolygonPatternGroup2dOpenGl::isReady() { return ready && textureHolder && !buffersNotReady; }
+bool PolygonPatternGroup2dOpenGl::isReady() { return ready && textureAttachment.isAttached() && !buffersNotReady; }
 
 std::shared_ptr<GraphicsObjectInterface> PolygonPatternGroup2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
@@ -109,10 +109,28 @@ void PolygonPatternGroup2dOpenGl::clear() {
     if (ready) {
         removeGlBuffers();
     }
-    if (textureHolder) {
-        removeTexture();
-    }
+    textureAttachment.clear();
     ready = false;
+}
+
+void PolygonPatternGroup2dOpenGl::pause() {
+    if (!clearOnPause) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    if (ready) {
+        removeGlBuffers();
+    }
+    textureAttachment.detach();
+    ready = false;
+}
+
+void PolygonPatternGroup2dOpenGl::resume(const std::shared_ptr<::RenderingContextInterface> &context) {
+    if (!clearOnPause) {
+        return;
+    }
+    textureAttachment.attach();
+    setup(context);
 }
 
 void PolygonPatternGroup2dOpenGl::removeGlBuffers() {
@@ -127,23 +145,12 @@ void PolygonPatternGroup2dOpenGl::removeGlBuffers() {
 void PolygonPatternGroup2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                                const std::shared_ptr<TextureHolderInterface> &textureHolder) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (textureHolder != nullptr) {
-        texturePointer = textureHolder->attachToGraphics();
-
-        factorHeight = textureHolder->getImageHeight() * 1.0f / textureHolder->getTextureHeight();
-        factorWidth = textureHolder->getImageWidth() * 1.0f / textureHolder->getTextureWidth();
-
-        this->textureHolder = textureHolder;
-    }
+    textureAttachment.attach(textureHolder);
 }
 
 void PolygonPatternGroup2dOpenGl::removeTexture() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (textureHolder) {
-        textureHolder->clearFromGraphics();
-        textureHolder = nullptr;
-        texturePointer = -1;
-    }
+    textureAttachment.clear();
 }
 
 void PolygonPatternGroup2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
@@ -158,8 +165,10 @@ void
 PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                                     int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin,
                                     bool isMasked, double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
+    disableDepthTest();
+
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (!ready || buffersNotReady || !textureHolder || !shaderProgram->isRenderable()) {
+    if (!ready || buffersNotReady || !textureAttachment.isAttached() || !shaderProgram->isRenderable()) {
         return;
     }
 
@@ -168,15 +177,21 @@ PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInte
     GLuint validTarget = 0;
     GLenum zpass = GL_KEEP;
     if (isMasked) {
-        stencilMask += 128;
-        validTarget = isMaskInversed ? 0 : 128;
+        if (renderPass.stencilReadMask != 0) {
+            stencilMask = static_cast<GLuint>(renderPass.stencilReadMask);
+            validTarget = static_cast<GLuint>(renderPass.stencilReadReference);
+        } else {
+            stencilMask += 128;
+            validTarget = isMaskInversed ? 0 : 128;
+        }
     }
     if (renderPass.isPassMasked) {
-        stencilMask += 127;
+        stencilMask |= 127;
         zpass = GL_INCR;
     }
 
     if (stencilMask != 0) {
+        glStencilMask(0xFF);
         glStencilFunc(GL_EQUAL, validTarget, stencilMask);
         glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }
@@ -187,7 +202,7 @@ PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInte
     prepareTextureDraw(program);
 
     auto textureFactorHandle = glGetUniformLocation(program, "uTextureFactor");
-    glUniform2f(textureFactorHandle, factorWidth, factorHeight);
+    glUniform2f(textureFactorHandle, textureAttachment.widthFactor(), textureAttachment.heightFactor());
 
     auto scalingFactorHandle = glGetUniformLocation(program, "uScalingFactor");
     glUniform2f(scalingFactorHandle, scalingFactor.x, scalingFactor.y);
@@ -218,7 +233,7 @@ PolygonPatternGroup2dOpenGl::render(const std::shared_ptr<::RenderingContextInte
 }
 
 void PolygonPatternGroup2dOpenGl::prepareTextureDraw(int program) {
-    if (!textureHolder) {
+    if (!textureAttachment.isAttached()) {
         return;
     }
 
@@ -226,7 +241,13 @@ void PolygonPatternGroup2dOpenGl::prepareTextureDraw(int program) {
     glActiveTexture(GL_TEXTURE0);
 
     // Bind the texture to this unit.
-    glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
+    glBindTexture(GL_TEXTURE_2D, textureAttachment.texture());
+
+    // Disable mipmap filtering -- mipmap is used for icons (which are in same
+    // texture atlas) but leads very visible texture bleeding on borders of
+    // patterns here
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
     int textureUniformHandle = glGetUniformLocation(program, "uTextureSampler");

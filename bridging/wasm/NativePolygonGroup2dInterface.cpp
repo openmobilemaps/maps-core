@@ -3,6 +3,7 @@
 
 #include "NativePolygonGroup2dInterface.h"  // my header
 #include "NativeGraphicsObjectInterface.h"
+#include "NativeMaskingObjectInterface.h"
 #include "NativeSharedBytes.h"
 #include "NativeVec3D.h"
 
@@ -12,6 +13,7 @@ em::val NativePolygonGroup2dInterface::cppProxyMethods() {
     static const em::val methods = em::val::array(std::vector<std::string> {
         "setVertices",
         "asGraphicsObject",
+        "asMaskingObject",
     });
     return methods;
 }
@@ -35,6 +37,15 @@ em::val NativePolygonGroup2dInterface::asGraphicsObject(const CppType& self) {
         return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeGraphicsObjectInterface>::handleNativeException(e);
     }
 }
+em::val NativePolygonGroup2dInterface::asMaskingObject(const CppType& self) {
+    try {
+        auto r = self->asMaskingObject();
+        return ::djinni_generated::NativeMaskingObjectInterface::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeMaskingObjectInterface>::handleNativeException(e);
+    }
+}
 
 EMSCRIPTEN_BINDINGS(_polygon_group_2d_interface) {
     em::class_<::PolygonGroup2dInterface>("PolygonGroup2dInterface")
@@ -42,6 +53,7 @@ EMSCRIPTEN_BINDINGS(_polygon_group_2d_interface) {
         .function("nativeDestroy", &NativePolygonGroup2dInterface::nativeDestroy)
         .function("setVertices", NativePolygonGroup2dInterface::setVertices)
         .function("asGraphicsObject", NativePolygonGroup2dInterface::asGraphicsObject)
+        .function("asMaskingObject", NativePolygonGroup2dInterface::asMaskingObject)
         ;
 }
 

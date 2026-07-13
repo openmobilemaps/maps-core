@@ -89,7 +89,7 @@ static std::shared_ptr<Value> tryParseStringInterpolationValue(const nlohmann::j
     std::vector<std::string> parts;
     std::vector<InternedString> keys;
 
-    auto partBegin = 0;
+    std::string::size_type partBegin = 0;
     auto exprBegin = findNotEscaped(s, '{', partBegin);
     auto exprLast = findNotEscaped(s, '}', exprBegin);
 
@@ -194,7 +194,7 @@ std::shared_ptr<Value> Tiled2dMapVectorStyleParser::parseValue(nlohmann::json js
 
             // Example: [ "in", "admin_level", 2, 4 ]
             //          [ "in", ["get", "subclass"], ["literal", ["allotments", "forest", "glacier", "golf_course", "park"]]]
-        } else if ((isExpression(json[0], inExpression) || isExpression(json[0], notInExpression)) && (json[1].is_string() || (json[1].is_array() && json[1][0] == getExpression))) {
+        } else if ((isExpression(json[0], inExpression) || isExpression(json[0], notInExpression))) {
             std::unordered_set<ValueVariant> values;
             std::shared_ptr<Value> dynamicValues;
 
@@ -204,8 +204,11 @@ std::shared_ptr<Value> Tiled2dMapVectorStyleParser::parseValue(nlohmann::json js
                     for (auto it = json[2][1].begin(); it != json[2][1].end(); it++) {
                         values.insert(getVariant(*it));
                     }
-                // Example:  ["in", ["get", "plz"], ["global-state", "favoritesPlz"]],
-                } else if ((json[2][0] == globalStateExpression || json[2][0] == featureStateExpression ) && json[2][1].is_string()) {
+                    // Example:  ["in", ["get", "plz"], ["global-state", "favoritesPlz"]],
+                } else if ((json[2][0] == globalStateExpression
+                        || json[2][0] == featureStateExpression
+                        || json[2][0] == getExpression)
+                        && json[2][1].is_string()) {
                     dynamicValues = parseValue(json[2]);
                 } else {
                     for (auto it = json[2].begin(); it != json[2].end(); it++) {
@@ -218,17 +221,14 @@ std::shared_ptr<Value> Tiled2dMapVectorStyleParser::parseValue(nlohmann::json js
                 }
             }
 
-            std::string key;
-            if (json[1].is_string()){
-                key = json[1];
-            } else {
-                key = json[1][1];
-            }
+            std::shared_ptr<Value> key = (json[1].is_string())
+                    ? std::make_shared<MaybeGetPropertyValue>(stringTable.add(json[1]), json[1])
+                    : parseValue(json[1]);
 
             if (isExpression(json[0], inExpression)) {
-                return std::make_shared<InFilter>(stringTable.add(key), values, dynamicValues);
+                return std::make_shared<InFilter>(key, values, dynamicValues);
             } else {
-                return std::make_shared<NotInFilter>(stringTable.add(key), values, dynamicValues);
+                return std::make_shared<NotInFilter>(key, values, dynamicValues);
             }
 
         // Example: [ "!=", "intermittent", 1 ]
@@ -343,6 +343,10 @@ std::shared_ptr<Value> Tiled2dMapVectorStyleParser::parseValue(nlohmann::json js
                 steps.push_back({json[3 + i].get<double>(), parseValue(json[3 + i + 1])});
             }
 
+            if (auto specialized = InterpolatedTransposedMatchValue::tryCreate(interpolationBase, steps)) {
+                return specialized;
+            }
+
             return std::make_shared<InterpolatedValue>(interpolationBase, steps);
         }
 
@@ -431,6 +435,10 @@ std::shared_ptr<Value> Tiled2dMapVectorStyleParser::parseValue(nlohmann::json js
                 auto const v = parseValue(*it);
                 auto const value = parseValue(*(it + 1));
                 stops.push_back({v, value});
+            }
+
+            if (auto specialized = StepTransposedMatchValue::tryCreate(compareValue, defaultValue, stops)) {
+                return specialized;
             }
 
             return std::make_shared<StepValue>(compareValue, stops, defaultValue);

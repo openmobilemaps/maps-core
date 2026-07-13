@@ -40,7 +40,7 @@ public:
                                  const std::vector<FormattedStringEntry> &text,
                                  const std::string &fullText,
                                  const ::Vec2D &coordinate,
-                                 const std::optional<std::vector<Vec2D>> &lineCoordinates,
+                                 const std::shared_ptr<SymbolLineGeometryCache> &lineGeometryCache,
                                  const std::vector<std::string> &fontList,
                                  const Anchor &textAnchor,
                                  const std::optional<double> &angle,
@@ -73,6 +73,7 @@ public:
     std::optional<ResolvedSpriteIconId> getUpdatedSpriteIconRef(const double zoomIdentifier, const std::unordered_map<SpriteIconId, ResolvedSpriteIconId> &spriteData);
     std::optional<ResolvedSpriteIconId> getSpriteIconRef() const;
     void resetLastIconProperties();
+    void resetLastTextProperties();
     void updateIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &offsets, VectorModificationWrapper<float> &textureCoordinates, uint32_t &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, int64_t now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::vector<SpriteDesc> &spriteIconData);
     void updateStretchIconProperties(VectorModificationWrapper<float> &positions, VectorModificationWrapper<float> &scales, VectorModificationWrapper<float> &rotations, VectorModificationWrapper<float> &alphas, VectorModificationWrapper<float> &stretchInfos, VectorModificationWrapper<float> &textureCoordinates, uint32_t &countOffset, const double zoomIdentifier, const double scaleFactor, const double rotation, int64_t now, const Vec2I viewPortSize, const std::shared_ptr<TextureHolderInterface> spriteTexture, const std::vector<SpriteDesc> &spriteIconData);
 
@@ -121,6 +122,8 @@ public:
 
 private:
     double lastZoomEvaluation = -1;
+    bool lastEvaluationChangedProperties = false;
+
     void evaluateStyleProperties(const double zoomIdentifier, const std::unordered_map<SpriteIconId, ResolvedSpriteIconId> *spriteLookup);
     void resolveIconImage(const std::unordered_map<SpriteIconId, ResolvedSpriteIconId> &spriteLookup);
 

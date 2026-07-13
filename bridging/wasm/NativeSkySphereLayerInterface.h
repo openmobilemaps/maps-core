@@ -24,6 +24,7 @@ struct NativeSkySphereLayerInterface : ::djinni::JsInterface<::SkySphereLayerInt
     static em::val cppProxyMethods();
 
     static em::val create();
+    static em::val createWithLocal();
     static em::val asLayerInterface(const CppType& self);
     static void setTexture(const CppType& self, const em::val& w_texture);
 

@@ -4,6 +4,7 @@
 #include "NativeRenderObjectInterface.h"  // my header
 #include "Marshal.hpp"
 #include "NativeGraphicsObjectInterface.h"
+#include "NativeMaskingObjectInterface.h"
 
 namespace djinni_generated {
 
@@ -46,6 +47,14 @@ std::vector<float> NativeRenderObjectInterface::JavaProxy::getCustomModelMatrix(
     auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getCustomModelMatrix);
     ::djinni::jniExceptionCheck(jniEnv);
     return ::djinni::List<::djinni::F32>::toCpp(jniEnv, jret);
+}
+/*nullable*/ std::shared_ptr<::MaskingObjectInterface> NativeRenderObjectInterface::JavaProxy::getMaskingObject() {
+    auto jniEnv = ::djinni::jniGetThreadEnv();
+    ::djinni::JniLocalScope jscope(jniEnv, 10);
+    const auto& data = ::djinni::JniClass<::djinni_generated::NativeRenderObjectInterface>::get();
+    auto jret = jniEnv->CallObjectMethod(Handle::get().get(), data.method_getMaskingObject);
+    ::djinni::jniExceptionCheck(jniEnv);
+    return ::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>::toCpp(jniEnv, jret);
 }
 void NativeRenderObjectInterface::JavaProxy::setHidden(bool c_hidden) {
     auto jniEnv = ::djinni::jniGetThreadEnv();
@@ -104,6 +113,15 @@ CJNIEXPORT jobject JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_Rende
         const auto& ref = ::djinni::objectFromHandleAddress<::RenderObjectInterface>(nativeRef);
         auto r = ref->getCustomModelMatrix();
         return ::djinni::release(::djinni::List<::djinni::F32>::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
+}
+
+CJNIEXPORT ::djinni_generated::NativeMaskingObjectInterface::Boxed::JniType JNICALL Java_io_openmobilemaps_mapscore_shared_graphics_RenderObjectInterface_00024CppProxy_native_1getMaskingObject(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::RenderObjectInterface>(nativeRef);
+        auto r = ref->getMaskingObject();
+        return ::djinni::release(::djinni::Optional<std::optional, ::djinni_generated::NativeMaskingObjectInterface>::fromCpp(jniEnv, r));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 

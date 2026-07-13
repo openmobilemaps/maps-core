@@ -9,6 +9,7 @@
 #import "MCCoord+Private.h"
 #import "MCErrorManager+Private.h"
 #import "MCLayerReadyState+Private.h"
+#import "MCMapCamera3dMode+Private.h"
 #import "MCRectCoord+Private.h"
 #import "MCVec3D+Private.h"
 #include <exception>
@@ -54,7 +55,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                 height:(float)height
     focusPointAltitude:(float)focusPointAltitude
     focusPointPosition:(nonnull MCCoord *)focusPointPosition
-                  zoom:(float)zoom {
+                  zoom:(float)zoom
+        cameraPosition:(nullable MCVec3D *)cameraPosition
+            cameraMode:(MCMapCamera3dMode)cameraMode {
     try {
         _cppRefHandle.get()->onCameraChange(::djinni::List<::djinni::F32>::toCpp(viewMatrix),
                                             ::djinni::List<::djinni::F32>::toCpp(projectionMatrix),
@@ -65,7 +68,9 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
                                             ::djinni::F32::toCpp(height),
                                             ::djinni::F32::toCpp(focusPointAltitude),
                                             ::djinni_generated::Coord::toCpp(focusPointPosition),
-                                            ::djinni::F32::toCpp(zoom));
+                                            ::djinni::F32::toCpp(zoom),
+                                            ::djinni::Optional<std::optional, ::djinni_generated::Vec3D>::toCpp(cameraPosition),
+                                            ::djinni::Enum<::MapCamera3dMode, MCMapCamera3dMode>::toCpp(cameraMode));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
@@ -95,6 +100,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)setZoomLevelScaleFactor:(float)value {
+    try {
+        _cppRefHandle.get()->setZoomLevelScaleFactor(::djinni::F32::toCpp(value));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)pause {
     try {
         _cppRefHandle.get()->pause();
@@ -104,6 +115,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
 - (void)resume {
     try {
         _cppRefHandle.get()->resume();
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)setTileLoadingPaused:(BOOL)paused {
+    try {
+        _cppRefHandle.get()->setTileLoadingPaused(::djinni::Bool::toCpp(paused));
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

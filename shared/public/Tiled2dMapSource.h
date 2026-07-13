@@ -23,6 +23,8 @@
 #include "QuadCoord.h"
 #include "SchedulerInterface.h"
 #include "TileState.h"
+#include "Tiled2dMap3dTileDetailSelector.h"
+#include "Tiled2dMap3dTileSelection.h"
 #include "Tiled2dMapLayerConfig.h"
 #include "Tiled2dMapSourceInterface.h"
 #include "Tiled2dMapVersionedTileInfo.h"
@@ -33,6 +35,8 @@
 #include "gpc.h"
 #include <atomic>
 #include <cmath>
+#include <deque>
+#include <limits>
 #include <map>
 #include <mutex>
 #include <set>
@@ -103,7 +107,14 @@ template <class R> struct TileWrapper {
         , masks(std::move(masks))
         , tileBounds(std::move(tileBounds))
         , tilePolygon(std::move(tilePolygon))
-        , tessellationFactor(tessellationFactor){};
+        , tessellationFactor(tessellationFactor) {};
+};
+
+struct Tiled2dMapZoomLevelGeometry final {
+    double tileWidthAdj;
+    double tileHeightAdj;
+    double boundsLeft;
+    double boundsTop;
 };
 
 class Tiled2dMapSourceReadyInterface {
@@ -138,13 +149,16 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     virtual void onCameraChange(const std::vector<float> &viewMatrix, const std::vector<float> &projectionMatrix,
                                 const ::Vec3D &origin, float verticalFov, float horizontalFov, float width, float height,
-                                float focusPointAltitude, const ::Coord &focusPointPosition, float zoom) override;
+                                float focusPointAltitude, const ::Coord &focusPointPosition, float zoom,
+                                const std::optional<::Vec3D> &cameraPosition, ::MapCamera3dMode cameraMode) override;
 
     virtual bool isTileVisible(const Tiled2dMapTileInfo &tileInfo);
 
     virtual void pause() override;
 
     virtual void resume() override;
+
+    void setTileLoadingPaused(bool paused) override;
 
     void setMinZoomLevelIdentifier(std::optional<int32_t> value) override;
 
@@ -154,6 +168,8 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     std::optional<int32_t> getMaxZoomLevelIdentifier() override;
 
+    void setZoomLevelScaleFactor(float value) override;
+
     virtual ::LayerReadyState isReadyToRenderOffscreen() override;
 
     virtual void setErrorManager(const std::shared_ptr<::ErrorManager> &errorManager) override;
@@ -161,6 +177,8 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
     virtual void forceReload() override;
 
     virtual void reloadTiles();
+
+    void setMaskTileGeometryTileSelectionOptimizationEnabled(bool enabled);
 
     void setTileReady(const Tiled2dMapVersionedTileInfo &tile) override;
 
@@ -182,6 +200,12 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     virtual R postLoadingTask(L loadedData, Tiled2dMapTileInfo tile) = 0;
 
+    virtual bool shouldKeepSeedLevelIn3dPyramid() const { return true; }
+    virtual double get3dCullingElevationOffsetMin() const { return -500.0; }
+    virtual double get3dCullingElevationOffsetMax() const { return 0.0; }
+    virtual const Tiled2dMap3dTileDetailSelector &get3dTileDetailSelector() const { return tileDetailSelector; }
+    virtual const Tiled2dMap3dTileSelection<Tiled2dMapSource<L, R>> &get3dTileSelection() const { return *tileSelection; }
+
     ::Vec3D transformToView(const ::Coord &position, const std::vector<float> &vpMatrix, const Vec3D &origin);
     ::Vec3D projectToScreen(const ::Vec3D &point, const std::vector<float> &vpMatrix);
 
@@ -194,7 +218,9 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
 
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfos;
     std::vector<Tiled2dMapZoomLevelInfo> zoomLevelInfosWithVirtual;
-    const Tiled2dMapZoomInfo zoomInfo;
+    std::vector<Tiled2dMapZoomLevelGeometry> zoomLevelGeometryWithVirtual;
+    Tiled2dMapZoomInfo zoomInfo;
+    bool maskTileGeometryTileSelectionOptimizationEnabled = false;
     int topMostZoomLevel;
 
     std::optional<int32_t> minZoomLevelIdentifier;
@@ -212,24 +238,39 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
     double curZoom;
 
     std::unordered_set<Tiled2dMapTileInfo> currentVisibleTiles;
+    std::unordered_set<Tiled2dMapTileInfo> retainedFallbackTiles;
 
     std::vector<VisibleTilesLayer> currentPyramid;
     int currentKeepZoomLevelOffset;
-    std::vector<std::vector<Tiled2dMapTileInfo>> loadingQueues;
+    std::vector<std::deque<Tiled2dMapTileInfo>> loadingQueues;
+    std::unique_ptr<Tiled2dMap3dTileSelection<Tiled2dMapSource<L, R>>> tileSelection;
+    Tiled2dMap3dScreenSpaceEdgeLengthSelector tileDetailSelector;
+    size_t maxConcurrentTileLoads = 24;
 
-    std::vector<PolygonCoord> currentViewBounds = {};
     std::optional<RectCoord> currentViewBoundsRect = std::nullopt;
 
     std::atomic<bool> isPaused;
+    // Debug pause, kept separate from the lifecycle isPaused so backgrounding/foregrounding the layer
+    // does not cancel it (and vice versa). Tile selection runs only when both flags are cleared.
+    std::atomic<bool> isTileLoadingPaused = false;
 
     float screenDensityPpi;
     std::set<Tiled2dMapTileInfo> readyTiles;
 
     size_t lastVisibleTilesHash = -1;
 
-    void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels, int keepZoomLevelOffset = 0);
+    // Hash of the camera inputs to onCameraChange. When unchanged the visible tile set cannot change,
+    // so the whole selection walk is skipped.
+    size_t lastCameraInputHash = -1;
+
+    virtual void onVisibleTilesChanged(const std::vector<VisibleTilesLayer> &pyramid, bool keepMultipleLevels,
+                                       int keepZoomLevelOffset = 0);
 
   protected:
+    bool shouldRetainTileUntilReplacementReady(const Tiled2dMapTileInfo &tileInfo,
+                                               const std::vector<VisibleTilesLayer> &pyramid) const;
+    void initializeZoomLevelGeometryWithVirtual();
+    void pruneRetainedFallbackTiles();
     void scheduleFixedNumberOfLoadingTasks();
     void performLoadingTask(Tiled2dMapTileInfo tile, size_t loaderIndex);
 
@@ -251,4 +292,10 @@ class Tiled2dMapSource : public Tiled2dMapSourceInterface,
     std::unordered_set<Tiled2dMapTileInfo> notFoundTiles;
 
     std::string layerName;
+
+  private:
+    std::vector<PolygonCoord> currentViewBounds = {};
+
+    template <class Source> friend class DefaultTiled2dMap3dTileSelection;
+    template <class Source> friend class DisplacedTerrainTiled2dMap3dTileSelection;
 };

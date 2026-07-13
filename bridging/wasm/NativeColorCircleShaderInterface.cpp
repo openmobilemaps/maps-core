@@ -9,6 +9,7 @@ namespace djinni_generated {
 em::val NativeColorCircleShaderInterface::cppProxyMethods() {
     static const em::val methods = em::val::array(std::vector<std::string> {
         "setColor",
+        "setCircleStyle",
         "asShaderProgramInterface",
     });
     return methods;
@@ -20,6 +21,22 @@ void NativeColorCircleShaderInterface::setColor(const CppType& self, float w_red
                  ::djinni::F32::toCpp(w_green),
                  ::djinni::F32::toCpp(w_blue),
                  ::djinni::F32::toCpp(w_alpha));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeColorCircleShaderInterface::setCircleStyle(const CppType& self, float w_fillRed,float w_fillGreen,float w_fillBlue,float w_fillAlpha,float w_strokeRed,float w_strokeGreen,float w_strokeBlue,float w_strokeAlpha,float w_innerRadius) {
+    try {
+        self->setCircleStyle(::djinni::F32::toCpp(w_fillRed),
+                       ::djinni::F32::toCpp(w_fillGreen),
+                       ::djinni::F32::toCpp(w_fillBlue),
+                       ::djinni::F32::toCpp(w_fillAlpha),
+                       ::djinni::F32::toCpp(w_strokeRed),
+                       ::djinni::F32::toCpp(w_strokeGreen),
+                       ::djinni::F32::toCpp(w_strokeBlue),
+                       ::djinni::F32::toCpp(w_strokeAlpha),
+                       ::djinni::F32::toCpp(w_innerRadius));
     }
     catch(const std::exception& e) {
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
@@ -40,6 +57,7 @@ EMSCRIPTEN_BINDINGS(_color_circle_shader_interface) {
         .smart_ptr<std::shared_ptr<::ColorCircleShaderInterface>>("ColorCircleShaderInterface")
         .function("nativeDestroy", &NativeColorCircleShaderInterface::nativeDestroy)
         .function("setColor", NativeColorCircleShaderInterface::setColor)
+        .function("setCircleStyle", NativeColorCircleShaderInterface::setCircleStyle)
         .function("asShaderProgramInterface", NativeColorCircleShaderInterface::asShaderProgramInterface)
         ;
 }

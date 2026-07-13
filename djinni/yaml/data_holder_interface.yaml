@@ -8,6 +8,9 @@ cpp:
   typename: '::DataHolderInterface'
   header: '"DataHolderInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCDataHolderInterface'
   pointer: true

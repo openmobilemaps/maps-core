@@ -10,17 +10,19 @@
 
 #pragma once
 
+#include "BaseGraphicsObjectOpenGl.h"
 #include "GraphicsObjectInterface.h"
 #include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
 #include "Quad2dInterface.h"
 #include "ShaderProgramInterface.h"
 #include "BaseShaderProgramOpenGl.h"
+#include "TextureAttachment.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 #include <vector>
 
-class Quad2dTessellatedOpenGl : public GraphicsObjectInterface,
+class Quad2dTessellatedOpenGl : public BaseGraphicsObjectOpenGl,
                                 public MaskingObjectInterface,
                                 public Quad2dInterface,
                                 public std::enable_shared_from_this<Quad2dTessellatedOpenGl> {
@@ -32,8 +34,10 @@ class Quad2dTessellatedOpenGl : public GraphicsObjectInterface,
     virtual bool isReady() override;
 
     virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context) override;
-
     virtual void clear() override;
+
+    virtual void pause() override;
+    virtual void resume(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                               int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor,
@@ -52,6 +56,15 @@ class Quad2dTessellatedOpenGl : public GraphicsObjectInterface,
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
 
+    virtual void loadDualTexture(const std::shared_ptr<::RenderingContextInterface> &context,
+                                 const std::shared_ptr<TextureHolderInterface> &textureHolder,
+                                 const std::shared_ptr<TextureHolderInterface> &elevationHolder) override;
+
+    virtual void loadTextures(const std::shared_ptr<::RenderingContextInterface> &context,
+                              const std::shared_ptr<TextureHolderInterface> &textureHolder,
+                              const std::shared_ptr<TextureHolderInterface> &lookupHolder,
+                              const std::shared_ptr<TextureHolderInterface> &elevationHolder) override;
+
     virtual void removeTexture() override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
@@ -65,17 +78,23 @@ class Quad2dTessellatedOpenGl : public GraphicsObjectInterface,
 protected:
     void computeGeometry(bool texCoordsOnly);
 
-    void prepareGlData(int program);
+	virtual void prepareGlData(int program);
 
-    void prepareTextureCoordsGlData(int program);
+	void prepareTextureCoordsGlData(int program);
 
-    void removeGlBuffers();
+	void removeGlBuffers();
 
-    void removeTextureCoordsGlBuffers();
+	void removeTextureCoordsGlBuffers();
 
-    virtual void prepareTextureDraw(int mProgram);
+	virtual void prepareTextureDraw(int mProgram);
 
-    std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
+    // Texture unit the lookup sprite is bound to. Elevation-displaced quads use unit 1 for the elevation
+    // heightmap, so they override this to move the lookup sprite to a free unit.
+    virtual int getLookupTextureUnit() const { return 1; }
+
+    virtual bool disablesDepthTestBeforeRender() const;
+
+	std::shared_ptr<BaseShaderProgramOpenGl> shaderProgram;
     std::string programName;
     int program;
 
@@ -100,16 +119,15 @@ protected:
     bool is3d = false;
     int32_t subdivisionFactor = 0;
 
-    std::shared_ptr<TextureHolderInterface> textureHolder;
-    int texturePointer;
+    TextureAttachment textureAttachment;
+    TextureAttachment lookupTextureAttachment;
+    int lookupTextureUniformHandle = -1;
     std::optional<TextureFilterType> textureFilterType = std::nullopt;
 
     bool usesTextureCoords = false;
 
     Quad3dD frame = Quad3dD(Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0));
     RectD textureCoordinates = RectD(0.0, 0.0, 0.0, 0.0);
-    double factorHeight = 1.0;
-    double factorWidth = 1.0;
 
     bool ready = false;
     bool textureCoordsReady = false;

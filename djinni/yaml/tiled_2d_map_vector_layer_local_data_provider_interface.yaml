@@ -8,7 +8,11 @@ cpp:
   typename: '::Tiled2dMapVectorLayerLocalDataProviderInterface'
   header: '"Tiled2dMapVectorLayerLocalDataProviderInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCTiled2dMapVectorLayerLocalDataProviderInterface'
   pointer: true
   hash: '%s.hash'

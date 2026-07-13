@@ -18,6 +18,16 @@ export interface Tiled2dMapRasterLayerInterface {
     setStyle(style: RasterShaderStyle): void;
     getStyle(): RasterShaderStyle;
     setMinMagFilter(filterType: TextureFilterType): void;
+    /**
+     * When enabled and the layer config's zoom info has mask_tile set, tiles are built from
+     * the tile mask polygons themselves (earcut-tessellated geometry) instead of a rectangular
+     * quad clipped via the stencil buffer. Has no effect when zoom_info.mask_tile is false.
+     */
+    setUseMaskTileGeometry(enabled: boolean): void;
+    /** Debug helper: pauses tile-source selection/loading/removal without pausing rendered tile graphics. */
+    setTileLoadingPaused(paused: boolean): void;
+    /** Runtime LOD control. Higher values request more detailed tiles earlier; lower values request coarser tiles. */
+    setZoomLevelScaleFactor(value: number): void;
     setMinZoomLevelIdentifier(value: number | undefined): void;
     getMinZoomLevelIdentifier(): number | undefined;
     setMaxZoomLevelIdentifier(value: number | undefined): void;
@@ -35,6 +45,8 @@ export interface Tiled2dMapRasterLayerInterface_statics {
     createWithShader(layerConfig: Tiled2dMapLayerConfig, loaders: Array<LoaderInterface>, shader: ShaderProgramInterface): Tiled2dMapRasterLayerInterface;
     /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
     create(layerConfig: Tiled2dMapLayerConfig, loaders: Array<LoaderInterface>): Tiled2dMapRasterLayerInterface;
+    /** the loaders are tried in their respective order, if the first loader returns the error code NOOP the second will be tried and so on */
+    createDisplaced(layerConfig: Tiled2dMapLayerConfig, elevationConfig: Tiled2dMapLayerConfig, loaders: Array<LoaderInterface>): Tiled2dMapRasterLayerInterface;
 }
 
 export interface Tiled2dMapRasterLayerCallbackInterface {

@@ -8,6 +8,9 @@ cpp:
   typename: '::RenderVertexDescription'
   header: '"RenderVertexDescription.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCRenderVertexDescription'
   pointer: true

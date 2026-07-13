@@ -122,7 +122,9 @@ std::string BaseShaderProgramOpenGl::getVertexShader() {
                                       out vec2 v_texcoord;
 
                                       void main() {
-                                          gl_Position = uFrameUniforms.vpMatrix * ((umMatrix * vPosition) + uOriginOffset);
+                                          mat4 modelToWorldCameraCentric = umMatrix;
+                                          modelToWorldCameraCentric[3] += uOriginOffset;
+                                          gl_Position = uFrameUniforms.vpMatrix * (modelToWorldCameraCentric * vPosition);
                                           v_texcoord = texCoordinate;
                                       }
     );
@@ -158,7 +160,7 @@ void BaseShaderProgramOpenGl::preRender(const std::shared_ptr<::RenderingContext
         }
     }
 
-    std::shared_ptr<OpenGlContext> openGlContext = std::dynamic_pointer_cast<OpenGlContext>(context);
+    OpenGlContext *openGlContext = static_cast<OpenGlContext*>(context.get());
     if (openGlContext) {
         if (program == GL_INVALID_INDEX) {
             program = openGlContext->getProgram(getProgramName());

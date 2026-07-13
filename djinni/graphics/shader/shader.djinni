@@ -65,6 +65,7 @@ shader_factory_interface = interface +c +j +o {
     create_sphere_effect_shader(): sphere_effect_shader_interface;
 
     create_sky_sphere_shader(): sky_sphere_shader_interface;
+    create_sky_sphere_local_shader(): sky_sphere_shader_interface;
 
     create_elevation_interpolation_shader(): elevation_interpolation_shader_interface;
 }
@@ -155,6 +156,7 @@ line_group_shader_interface = interface +c +o {
 
 color_circle_shader_interface = interface +c +o {
     set_color(red: f32, green: f32, blue: f32, alpha: f32);
+    set_circle_style(fill_red: f32, fill_green: f32, fill_blue: f32, fill_alpha: f32, stroke_red: f32, stroke_green: f32, stroke_blue: f32, stroke_alpha: f32, inner_radius: f32);
     as_shader_program_interface() : shader_program_interface;
 }
 

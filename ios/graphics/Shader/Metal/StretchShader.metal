@@ -15,7 +15,7 @@ using namespace metal;
 
 vertex VertexOut
 stretchVertexShader(const VertexIn vertexIn [[stage_in]],
-                    constant float4x4 &mvpMatrix [[buffer(1)]])
+                    constant float4x4 &mvpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]])
 {
     VertexOut out {
         .position = mvpMatrix * float4(vertexIn.position.xy, 0.0, 1.0),

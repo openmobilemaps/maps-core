@@ -67,5 +67,7 @@ public:
 
     std::shared_ptr<SkySphereShaderInterface> createSkySphereShader() override;
 
+    std::shared_ptr<SkySphereShaderInterface> createSkySphereLocalShader() override;
+
     std::shared_ptr<ElevationInterpolationShaderInterface> createElevationInterpolationShader() override;
 };

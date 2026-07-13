@@ -8,7 +8,11 @@ cpp:
   typename: '::Font'
   header: '"Font.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCFont'
   pointer: true
   hash: '%s.hash'

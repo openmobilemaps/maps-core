@@ -1,5 +1,18 @@
 # Changelog for Open Mobile Maps
 
+## Version 4.0.0
+- Updated to AGP 9.2.1 and Kotlin 2.4.0
+- Added KMP library version
+- Added web bindings
+- Added support for CRS specification in vector layer styles
+- Support added for rotated icons in IconLayer
+- Added configuration options for animated dashed lines in vector layer styles
+- Added support for circles for point features in the tiled vector layer
+- Moved to GPU tessellation for Android and iOS
+- Extended the MapCamera3d modes with additional modes and options for custom view/projection matrices
+- Experimental: Added a displaced raster layer for utilizing elevation-data and raster tile pyramids to display 3D-displaced terrain
+- Numerous fixes and performance improvements
+
 ## Version 3.8.0
 - Add support for multiple sprite sources, breaking change in LocalDataProvider interface
 

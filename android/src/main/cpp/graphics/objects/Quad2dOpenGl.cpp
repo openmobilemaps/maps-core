@@ -12,12 +12,13 @@
 #include "TextureHolderInterface.h"
 #include "TextureFilterType.h"
 #include <cmath>
+#include <cstring>
 #include "Logger.h"
 
 Quad2dOpenGl::Quad2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader)
     : shaderProgram(shader) {}
 
-bool Quad2dOpenGl::isReady() { return ready && (!usesTextureCoords || textureHolder); }
+bool Quad2dOpenGl::isReady() { return ready && (!usesTextureCoords || textureAttachment.isAttached()); }
 
 std::shared_ptr<GraphicsObjectInterface> Quad2dOpenGl::asGraphicsObject() { return shared_from_this(); }
 
@@ -31,10 +32,30 @@ void Quad2dOpenGl::clear() {
     if (textureCoordsReady) {
         removeTextureCoordsGlBuffers();
     }
-    if (textureHolder) {
-        removeTexture();
-    }
+    textureAttachment.clear();
+    lookupTextureAttachment.clear();
     ready = false;
+}
+
+void Quad2dOpenGl::pause() {
+    if (!clearOnPause) {
+        return;
+    }
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    removeGlBuffers();
+    removeTextureCoordsGlBuffers();
+    textureAttachment.detach();
+    lookupTextureAttachment.detach();
+    ready = false;
+}
+
+void Quad2dOpenGl::resume(const std::shared_ptr<::RenderingContextInterface> &context) {
+    if (!clearOnPause) {
+        return;
+    }
+    textureAttachment.attach();
+    lookupTextureAttachment.attach();
+    setup(context);
 }
 
 void Quad2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed; }
@@ -42,10 +63,54 @@ void Quad2dOpenGl::setIsInverseMasked(bool inversed) { isMaskInversed = inversed
 void Quad2dOpenGl::setFrame(const Quad3dD &frame, const RectD &textureCoordinates, const Vec3D &origin, bool is3d) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     ready = false;
+    usesCustomGeometry = false;
     this->frame = frame;
     this->textureCoordinates = textureCoordinates;
     this->quadOrigin = origin;
     this->is3d = is3d;
+}
+
+void Quad2dOpenGl::setCustomGeometry(const ::SharedBytes &vertices_, const ::SharedBytes &indices_, const ::Vec3D &origin, bool is3d) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    ready = false;
+    textureCoordsReady = false;
+    usesCustomGeometry = true;
+    this->quadOrigin = origin;
+    this->is3d = is3d;
+
+    if (indices_.elementCount > 0) {
+        indices.resize(indices_.elementCount);
+        std::memcpy(indices.data(), reinterpret_cast<void *>(indices_.address), indices_.elementCount * indices_.bytesPerElement);
+    } else {
+        indices.clear();
+    }
+
+    int vertexCount = 0;
+    for (auto index : indices) {
+        vertexCount = std::max(vertexCount, static_cast<int>(index) + 1);
+    }
+
+    const auto *source = reinterpret_cast<const float *>(vertices_.address);
+    const int stride = vertexCount > 0 ? vertices_.elementCount / vertexCount : 0;
+    const int uvOffset = stride >= 12 ? 6 : 4;
+
+    vertices.clear();
+    unscaledTextureCoords.clear();
+    if (vertexCount == 0 || source == nullptr || (stride != 8 && stride != 12)) {
+        return;
+    }
+
+    vertices.reserve(vertexCount * 3);
+    unscaledTextureCoords.reserve(vertexCount * 2);
+    for (int i = 0; i < vertexCount; ++i) {
+        const int base = i * stride;
+        vertices.push_back(source[base]);
+        vertices.push_back(source[base + 1]);
+        vertices.push_back(source[base + 2]);
+        unscaledTextureCoords.push_back(source[base + uvOffset]);
+        unscaledTextureCoords.push_back(source[base + uvOffset + 1]);
+    }
+    updateCustomTextureCoords();
 }
 
 void Quad2dOpenGl::setSubdivisionFactor(int32_t factor) {
@@ -84,6 +149,13 @@ void Quad2dOpenGl::setup(const std::shared_ptr<::RenderingContextInterface> &con
 
 void Quad2dOpenGl::computeGeometry(bool texCoordsOnly) {
     // Data mutex covered by caller Quad2dOpenGL::setup()
+    if (usesCustomGeometry) {
+        if (texCoordsOnly) {
+            updateCustomTextureCoords();
+        }
+        return;
+    }
+
     if (subdivisionFactor == 0) {
         if (!texCoordsOnly) {
             if (is3d) {
@@ -117,10 +189,10 @@ void Quad2dOpenGl::computeGeometry(bool texCoordsOnly) {
             };
         }
 
-        float tMinX = factorWidth * textureCoordinates.x;
-        float tMaxX = factorWidth * (textureCoordinates.x + textureCoordinates.width);
-        float tMinY = factorHeight * textureCoordinates.y;
-        float tMaxY = factorHeight * (textureCoordinates.y + textureCoordinates.height);
+        float tMinX = textureAttachment.widthFactor() * textureCoordinates.x;
+        float tMaxX = textureAttachment.widthFactor() * (textureCoordinates.x + textureCoordinates.width);
+        float tMinY = textureAttachment.heightFactor() * textureCoordinates.y;
+        float tMaxY = textureAttachment.heightFactor() * (textureCoordinates.y + textureCoordinates.height);
 
         textureCoords = {tMinX, tMinY, tMinX, tMaxY, tMaxX, tMaxY, tMaxX, tMinY};
 
@@ -181,13 +253,22 @@ void Quad2dOpenGl::computeGeometry(bool texCoordsOnly) {
                         indices.push_back(baseIndNextCol);
                     }
                 }
-                float u = factorWidth * (textureCoordinates.x + pcR * textureCoordinates.width);
-                float v = factorHeight * (textureCoordinates.y + pcD * textureCoordinates.height);
+                float u = textureAttachment.widthFactor() * (textureCoordinates.x + pcR * textureCoordinates.width);
+                float v = textureAttachment.heightFactor() * (textureCoordinates.y + pcD * textureCoordinates.height);
                 textureCoords.push_back(u);
                 textureCoords.push_back(v);
 
             }
         }
+    }
+}
+
+void Quad2dOpenGl::updateCustomTextureCoords() {
+    textureCoords.clear();
+    textureCoords.reserve(unscaledTextureCoords.size());
+    for (size_t i = 0; i + 1 < unscaledTextureCoords.size(); i += 2) {
+        textureCoords.push_back(textureAttachment.widthFactor() * unscaledTextureCoords[i]);
+        textureCoords.push_back(textureAttachment.heightFactor() * unscaledTextureCoords[i + 1]);
     }
 }
 
@@ -239,6 +320,7 @@ void Quad2dOpenGl::prepareTextureCoordsGlData(int program) {
     }
 
     textureUniformHandle = glGetUniformLocation(program, "textureSampler");
+    lookupTextureUniformHandle = glGetUniformLocation(program, "lookupTextureSampler");
 
     if (!texCoordBufferGenerated) {
         glGenBuffers(1, &textureCoordsBuffer);
@@ -280,38 +362,44 @@ void Quad2dOpenGl::removeTextureCoordsGlBuffers() {
 void Quad2dOpenGl::loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                                const std::shared_ptr<TextureHolderInterface> &textureHolder) {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (this->textureHolder == textureHolder) {
-        return;
-    }
-
-    if (this->textureHolder != nullptr) {
-        removeTexture();
-    }
-
-    if (textureHolder != nullptr) {
-        texturePointer = textureHolder->attachToGraphics();
-
-        factorHeight = textureHolder->getImageHeight() * 1.0f / textureHolder->getTextureHeight();
-        factorWidth = textureHolder->getImageWidth() * 1.0f / textureHolder->getTextureWidth();
+    const bool newlyAttached = textureAttachment.attach(textureHolder);
+    if (newlyAttached) {
         computeGeometry(true);
-
         if (ready) {
             prepareTextureCoordsGlData(program);
         }
-        this->textureHolder = textureHolder;
     }
+    lookupTextureAttachment.clear();
+}
+
+void Quad2dOpenGl::loadDualTexture(const std::shared_ptr<::RenderingContextInterface> &context,
+                                   const std::shared_ptr<TextureHolderInterface> &textureHolder,
+                                   const std::shared_ptr<TextureHolderInterface> &elevationHolder) {
+    loadTexture(context, textureHolder);
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    lookupTextureAttachment.attach(elevationHolder);
+}
+
+void Quad2dOpenGl::loadTextures(const std::shared_ptr<::RenderingContextInterface> &context,
+                                const std::shared_ptr<TextureHolderInterface> &textureHolder,
+                                const std::shared_ptr<TextureHolderInterface> &lookupHolder,
+                                const std::shared_ptr<TextureHolderInterface> &elevationHolder) {
+    std::lock_guard<std::recursive_mutex> lock(dataMutex);
+    const bool newlyAttached = textureAttachment.attach(textureHolder);
+    if (newlyAttached) {
+        computeGeometry(true);
+        if (ready) {
+            prepareTextureCoordsGlData(program);
+        }
+    }
+    lookupTextureAttachment.attach(lookupHolder);
 }
 
 void Quad2dOpenGl::removeTexture() {
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
-    if (textureHolder) {
-        textureHolder->clearFromGraphics();
-        textureHolder = nullptr;
-        texturePointer = -1;
-        if (textureCoordsReady) {
-            removeTextureCoordsGlBuffers();
-        }
-    }
+    textureAttachment.clear();
+    lookupTextureAttachment.clear();
+    removeTextureCoordsGlBuffers();
 }
 
 void Quad2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
@@ -325,6 +413,8 @@ void Quad2dOpenGl::renderAsMask(const std::shared_ptr<::RenderingContextInterfac
 void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &context, const RenderPassConfig &renderPass,
                           int64_t vpMatrix, int64_t mMatrix, const ::Vec3D &origin, bool isMasked,
                           double screenPixelAsRealMeterFactor, bool isScreenSpaceCoords) {
+    disableDepthTest();
+
     std::lock_guard<std::recursive_mutex> lock(dataMutex);
     if (!ready || (usesTextureCoords && !textureCoordsReady) || !shaderProgram->isRenderable())
         return;
@@ -333,15 +423,21 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
     GLuint validTarget = 0;
     GLenum zpass = GL_KEEP;
     if (isMasked) {
-        stencilMask += 128;
-        validTarget = isMaskInversed ? 0 : 128;
+        if (renderPass.stencilReadMask != 0) {
+            stencilMask = static_cast<GLuint>(renderPass.stencilReadMask);
+            validTarget = static_cast<GLuint>(renderPass.stencilReadReference);
+        } else {
+            stencilMask += 128;
+            validTarget = isMaskInversed ? 0 : 128;
+        }
     }
     if (renderPass.isPassMasked) {
-        stencilMask += 127;
+        stencilMask |= 127;
         zpass = GL_INCR;
     }
 
     if (stencilMask != 0) {
+        glStencilMask(0xFF);
         glStencilFunc(GL_EQUAL, validTarget, stencilMask);
         glStencilOp(GL_KEEP, GL_KEEP, zpass);
     }
@@ -370,7 +466,7 @@ void Quad2dOpenGl::render(const std::shared_ptr<::RenderingContextInterface> &co
 }
 
 void Quad2dOpenGl::prepareTextureDraw(int program) {
-    if (!textureHolder) {
+    if (!textureAttachment.isAttached()) {
         return;
     }
 
@@ -378,7 +474,7 @@ void Quad2dOpenGl::prepareTextureDraw(int program) {
     glActiveTexture(GL_TEXTURE0);
 
     // Bind the texture to this unit.
-    glBindTexture(GL_TEXTURE_2D, (unsigned int)texturePointer);
+    glBindTexture(GL_TEXTURE_2D, textureAttachment.texture());
     if (textureFilterType.has_value()) {
         GLint filterParam = *textureFilterType == TextureFilterType::LINEAR ? GL_LINEAR : GL_NEAREST;
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
@@ -387,6 +483,17 @@ void Quad2dOpenGl::prepareTextureDraw(int program) {
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
     glUniform1i(textureUniformHandle, 0);
+
+    if (lookupTextureAttachment.isAttached() && lookupTextureUniformHandle >= 0) {
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, lookupTextureAttachment.texture());
+        if (textureFilterType.has_value()) {
+            GLint filterParam = *textureFilterType == TextureFilterType::LINEAR ? GL_LINEAR : GL_NEAREST;
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterParam);
+            glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterParam);
+        }
+        glUniform1i(lookupTextureUniformHandle, 1);
+    }
 }
 
 void Quad2dOpenGl::setDebugLabel(const std::string &label) {

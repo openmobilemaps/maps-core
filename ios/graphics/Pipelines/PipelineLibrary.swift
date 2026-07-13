@@ -8,9 +8,9 @@
  *  SPDX-License-Identifier: MPL-2.0
  */
 
+import MapCoreSharedModule
 @preconcurrency import Metal
 import OSLog
-import MapCoreSharedModule
 
 public enum PipelineDescriptorFactory {
     public static func pipelineDescriptor(
@@ -19,9 +19,13 @@ public enum PipelineDescriptorFactory {
         vertexShader: String,
         fragmentShader: String,
         blendMode: MCBlendMode,
+        device: MTLDevice,
         library: MTLLibrary,
         constants: MTLFunctionConstantValues? = nil,
-        tessellation: MCTessellationMode = MCTessellationMode.NONE
+        tessellation: MCTessellationMode = MCTessellationMode.NONE,
+        tessellationControlPointIndexType: MTLTessellationControlPointIndexType = .none,
+        tessellationOutputWindingOrder: MTLWinding = .clockwise,
+        colorWriteMask: PipelineColorWriteMask = .all
     ) -> MTLRenderPipelineDescriptor {
         let pipelineDescriptor = MTLRenderPipelineDescriptor()
         pipelineDescriptor.colorAttachments[0].pixelFormat = MetalContext.colorPixelFormat
@@ -32,6 +36,7 @@ public enum PipelineDescriptorFactory {
         let renderbufferAttachment = pipelineDescriptor.colorAttachments[0]
         renderbufferAttachment?.pixelFormat = MetalContext.colorPixelFormat
         renderbufferAttachment?.isBlendingEnabled = true
+        renderbufferAttachment?.writeMask = colorWriteMask.metalMask
 
         switch blendMode {
             case .NORMAL:
@@ -54,7 +59,8 @@ public enum PipelineDescriptorFactory {
                 fatalError("blendMode not implemented")
         }
 
-        pipelineDescriptor.stencilAttachmentPixelFormat = .stencil8
+        pipelineDescriptor.stencilAttachmentPixelFormat = MetalContext.depthPixelFormat
+        pipelineDescriptor.depthAttachmentPixelFormat = MetalContext.depthPixelFormat
         pipelineDescriptor.label = label
 
         if let constants = constants {
@@ -76,72 +82,107 @@ public enum PipelineDescriptorFactory {
             pipelineDescriptor.vertexFunction = vertexFunction
             pipelineDescriptor.fragmentFunction = fragmentFunction
         }
-        
+
         if tessellation != MCTessellationMode.NONE {
-            pipelineDescriptor.maxTessellationFactor = 64
+            pipelineDescriptor.maxTessellationFactor = maxSupportedTessellationFactor(for: device)
             pipelineDescriptor.tessellationPartitionMode = .pow2
             pipelineDescriptor.tessellationFactorFormat = .half
             pipelineDescriptor.tessellationFactorStepFunction = .constant
-            pipelineDescriptor.tessellationOutputWindingOrder = .clockwise
+            pipelineDescriptor.tessellationOutputWindingOrder = tessellationOutputWindingOrder
             pipelineDescriptor.tessellationControlPointIndexType = .none
             pipelineDescriptor.isTessellationFactorScaleEnabled = false
-            
+
             if tessellation == MCTessellationMode.TRIANGLE {
-                pipelineDescriptor.tessellationOutputWindingOrder = .counterClockwise
-                pipelineDescriptor.tessellationControlPointIndexType = .uint16
+                pipelineDescriptor.tessellationControlPointIndexType = tessellationControlPointIndexType
             }
         }
         return pipelineDescriptor
     }
+
+    private static func maxSupportedTessellationFactor(for device: MTLDevice) -> Int {
+        if #available(iOS 13.0, macOS 10.15, tvOS 13.0, *) {
+            if device.supportsFamily(.apple5) || device.supportsFamily(.mac2) {
+                return 64
+            }
+        }
+        return 16
+    }
 }
 
 extension PipelineDescriptorFactory {
-    static func pipelineDescriptor(pipeline: Pipeline, library: MTLLibrary) -> MTLRenderPipelineDescriptor {
+    static func pipelineDescriptor(pipeline: Pipeline, device: MTLDevice, library: MTLLibrary) -> MTLRenderPipelineDescriptor {
         pipelineDescriptor(
             vertexDescriptor: pipeline.type.vertexDescriptor,
             label: pipeline.type.label,
             vertexShader: pipeline.type.vertexShader,
             fragmentShader: pipeline.type.fragmentShader,
             blendMode: pipeline.blendMode,
+            device: device,
             library: library,
-            tessellation: pipeline.type.tessellation
+            tessellation: pipeline.type.tessellation,
+            tessellationControlPointIndexType: pipeline.type.tessellationControlPointIndexType,
+            tessellationOutputWindingOrder: pipeline.type.tessellationOutputWindingOrder,
+            colorWriteMask: pipeline.colorWriteMask
         )
+    }
+}
+
+public enum PipelineColorWriteMask: String, Codable, CaseIterable, Hashable, Sendable {
+    case all
+    case none
+
+    var metalMask: MTLColorWriteMask {
+        switch self {
+            case .all:
+                return .all
+            case .none:
+                return []
+        }
     }
 }
 
 public struct Pipeline: Codable, CaseIterable, Hashable, Sendable {
     let type: PipelineType
     let blendMode: MCBlendMode
+    let colorWriteMask: PipelineColorWriteMask
 
-    init(type: PipelineType, blendMode: MCBlendMode) {
+    init(type: PipelineType, blendMode: MCBlendMode, colorWriteMask: PipelineColorWriteMask = .all) {
         self.type = type
         self.blendMode = blendMode
+        self.colorWriteMask = colorWriteMask
     }
 
     // Conform to `Hashable` by implementing the `hash(into:)` method
     public func hash(into hasher: inout Hasher) {
         hasher.combine(type)
         hasher.combine(blendMode)
+        hasher.combine(colorWriteMask)
     }
 
     // Conform to `Equatable` (needed for `Hashable`)
     public static func == (lhs: Pipeline, rhs: Pipeline) -> Bool {
-        return lhs.type == rhs.type && lhs.blendMode == rhs.blendMode
+        return lhs.type == rhs.type && lhs.blendMode == rhs.blendMode && lhs.colorWriteMask == rhs.colorWriteMask
     }
 
     public static var allCases: [Pipeline] {
-        let allPipelines = PipelineType.allCases.flatMap { type in
+        let colorPipelines = PipelineType.allCases.flatMap { type in
             MCBlendMode.allCases.map { blendMode in
                 Pipeline(type: type, blendMode: blendMode)
             }
         }
-    #if targetEnvironment(simulator)
-        return allPipelines.filter {
-            $0.type.tessellation == MCTessellationMode.NONE
+        let maskPipelines = PipelineType.maskColorWriteDisabledTypes.flatMap { type in
+            MCBlendMode.allCases.map { blendMode in
+                Pipeline(type: type, blendMode: blendMode, colorWriteMask: .none)
+            }
         }
-    #else
-        return allPipelines
-    #endif
+        let allPipelines = colorPipelines + maskPipelines
+        #if targetEnvironment(simulator)
+            return allPipelines.filter {
+                $0.type.tessellation == MCTessellationMode.NONE
+            }
+        #else
+            return allPipelines
+        #endif
     }
 }
 
@@ -161,6 +202,8 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     case colorShader
     case polygonTessellatedShader
     case polygonTessellatedWireframeShader
+    case texturedPolygonTessellatedShader
+    case texturedPolygonTessellatedDisplacedShader
     case roundColorShader
     case clearStencilShader
     case textShader
@@ -168,6 +211,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     case rasterShader
     case quadTessellatedShader
     case quadTessellatedWireframeShader
+    case quadTessellatedDisplaced
     case stretchShader
     case stretchInstancedShader
     case unitSphereAlphaShader
@@ -176,7 +220,28 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     case unitSphereTextInstancedShader
     case sphereEffectShader
     case skySphereShader
+    case skySphereLocalShader
     case elevationInterpolation
+
+    static let maskColorWriteDisabledTypes: [PipelineType] = [
+        .alphaShader,
+        .alphaInstancedShader,
+        .colorShader,
+        .maskShader,
+        .maskTessellatedShader,
+        .polygonGroupShader,
+        .polygonStripedGroupShader,
+        .polygonTessellatedShader,
+        .quadTessellatedShader,
+        .quadTessellatedDisplaced,
+        .rasterShader,
+        .roundColorShader,
+        .stretchShader,
+        .stretchInstancedShader,
+        .unitSphereAlphaShader,
+        .unitSphereAlphaInstancedShader,
+        .unitSphereRoundColorShader,
+    ]
 
     var label: String {
         switch self {
@@ -195,6 +260,8 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .colorShader: return "Color shader"
             case .polygonTessellatedShader: return "Polygon Tessellated shader"
             case .polygonTessellatedWireframeShader: return "Polygon Tessellated Wireframe shader"
+            case .texturedPolygonTessellatedShader: return "Textured Polygon Tessellated shader"
+            case .texturedPolygonTessellatedDisplacedShader: return "Textured Polygon Tessellated Displaced shader"
             case .roundColorShader: return "Round color shader"
             case .clearStencilShader: return "Clear stencil shader"
             case .textShader: return "Text shader"
@@ -202,6 +269,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .rasterShader: return "Raster shader"
             case .quadTessellatedShader: return "Quad Tessellated shader"
             case .quadTessellatedWireframeShader: return "Quad Tessellated Wireframe shader"
+            case .quadTessellatedDisplaced: return "Quad Tessellated Displaced shader"
             case .stretchShader: return "Stretch shader"
             case .stretchInstancedShader: return "Stretch Instanced shader"
             case .unitSphereAlphaShader: return "Unit Sphere Alpha shader with texture"
@@ -210,6 +278,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .unitSphereTextInstancedShader: return "Unit Sphere Text Instanced shader"
             case .sphereEffectShader: return "Sphere Effect Shader"
             case .skySphereShader: return "Sky Effect Shader"
+            case .skySphereLocalShader: return "Sky Effect Local Shader"
             case .elevationInterpolation: return "Elevation Interpolation"
         }
     }
@@ -217,14 +286,18 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
     var vertexShaderUsesModelMatrix: Bool {
         switch self {
             case .rasterShader,
+                .texturedPolygonTessellatedShader,
+                .texturedPolygonTessellatedDisplacedShader,
                 .quadTessellatedShader,
                 .quadTessellatedWireframeShader,
+                .quadTessellatedDisplaced,
                 .roundColorShader,
                 .unitSphereRoundColorShader,
                 .alphaShader,
                 .unitSphereAlphaShader,
                 .sphereEffectShader,
                 .skySphereShader,
+                .skySphereLocalShader,
                 .elevationInterpolation:
                 return true
             default:
@@ -249,21 +322,25 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .colorShader: return "colorVertexShader"
             case .polygonTessellatedShader: return "polygonTessellationVertexShader"
             case .polygonTessellatedWireframeShader: return "polygonTessellationVertexShader"
-            case .roundColorShader: return "baseVertexShaderModel"
+            case .texturedPolygonTessellatedShader: return "texturedPolygonTessellationVertexShader"
+            case .texturedPolygonTessellatedDisplacedShader: return "texturedPolygonTessellationDisplacementVertexShader"
+            case .roundColorShader: return "roundColorVertexShader"
             case .clearStencilShader: return "stencilClearVertexShader"
             case .textShader: return "textVertexShader"
             case .textInstancedShader: return "textInstancedVertexShader"
             case .rasterShader: return "baseVertexShaderModel"
             case .quadTessellatedShader: return "quadTessellationVertexShader"
             case .quadTessellatedWireframeShader: return "quadTessellationVertexShader"
+            case .quadTessellatedDisplaced: return "quadTessellationDisplacementVertexShader"
             case .stretchShader: return "stretchVertexShader"
             case .stretchInstancedShader: return "stretchInstancedVertexShader"
             case .unitSphereAlphaShader: return "baseVertexShader"
-            case .unitSphereRoundColorShader: return "baseVertexShaderModel"
+            case .unitSphereRoundColorShader: return "unitSphereRoundColorVertexShader"
             case .unitSphereAlphaInstancedShader: return "unitSphereAlphaInstancedVertexShader"
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedVertexShader"
             case .sphereEffectShader: return "baseVertexShader"
             case .skySphereShader: return "baseVertexShader"
+            case .skySphereLocalShader: return "baseVertexShader"
             case .elevationInterpolation: return "baseVertexShaderModel"
         }
     }
@@ -285,6 +362,8 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .colorShader: return "colorFragmentShader"
             case .polygonTessellatedShader: return "colorFragmentShader"
             case .polygonTessellatedWireframeShader: return "wireframeFragmentShader"
+            case .texturedPolygonTessellatedShader: return "rasterFragmentShader"
+            case .texturedPolygonTessellatedDisplacedShader: return "rasterFragmentShader"
             case .roundColorShader: return "roundColorFragmentShader"
             case .clearStencilShader: return "stencilClearFragmentShader"
             case .textShader: return "textFragmentShader"
@@ -292,6 +371,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .rasterShader: return "rasterFragmentShader"
             case .quadTessellatedShader: return "rasterFragmentShader"
             case .quadTessellatedWireframeShader: return "wireframeFragmentShader"
+            case .quadTessellatedDisplaced: return "rasterFragmentShader"
             case .stretchShader: return "stretchFragmentShader"
             case .stretchInstancedShader: return "stretchInstancedFragmentShader"
             case .unitSphereAlphaShader: return "baseFragmentShader"
@@ -300,6 +380,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
             case .unitSphereTextInstancedShader: return "unitSphereTextInstancedFragmentShader"
             case .sphereEffectShader: return "sphereEffectFragmentShader"
             case .skySphereShader: return "skySphereFragmentShader"
+            case .skySphereLocalShader: return "skySphereLocalFragmentShader"
             case .elevationInterpolation: return "elevationInterpolationFragmentShader"
         }
     }
@@ -323,6 +404,7 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .unitSphereRoundColorShader,
                 .sphereEffectShader,
                 .skySphereShader,
+                .skySphereLocalShader,
                 .roundColorShader,
                 .elevationInterpolation:
                 return Vertex3DTexture.descriptor
@@ -331,25 +413,56 @@ public enum PipelineType: String, CaseIterable, Codable, Sendable {
                 .polygonTessellatedWireframeShader:
                 return Vertex3DTessellated.descriptor
             case .quadTessellatedShader,
-                .quadTessellatedWireframeShader:
+                .texturedPolygonTessellatedShader,
+                .texturedPolygonTessellatedDisplacedShader,
+                .quadTessellatedWireframeShader,
+                .quadTessellatedDisplaced:
                 return Vertex3DTextureTessellated.descriptor
             default:
                 return Vertex.descriptor
         }
     }
-    
+
     var tessellation: MCTessellationMode {
         switch self {
-            case .quadTessellatedShader:
+            case .quadTessellatedShader,
+                .quadTessellatedWireframeShader,
+                .quadTessellatedDisplaced:
                 return MCTessellationMode.QUAD
             case .maskTessellatedShader,
                 .polygonTessellatedShader,
+                .texturedPolygonTessellatedShader,
+                .texturedPolygonTessellatedDisplacedShader,
                 .polygonTessellatedWireframeShader:
-               return MCTessellationMode.TRIANGLE
-            case .quadTessellatedWireframeShader:
-                return MCTessellationMode.QUAD
+                return MCTessellationMode.TRIANGLE
             default:
                 return MCTessellationMode.NONE
+        }
+    }
+
+    var tessellationControlPointIndexType: MTLTessellationControlPointIndexType {
+        switch self {
+            case .maskTessellatedShader,
+                .polygonTessellatedShader,
+                .texturedPolygonTessellatedShader,
+                .texturedPolygonTessellatedDisplacedShader,
+                .polygonTessellatedWireframeShader:
+                return .uint16
+            default:
+                return .none
+        }
+    }
+
+    var tessellationOutputWindingOrder: MTLWinding {
+        switch self {
+            case .maskTessellatedShader,
+                .polygonTessellatedShader,
+                .texturedPolygonTessellatedShader,
+                .texturedPolygonTessellatedDisplacedShader,
+                .polygonTessellatedWireframeShader:
+                return .counterClockwise
+            default:
+                return .clockwise
         }
     }
 }
@@ -363,18 +476,18 @@ extension PipelineLibrary {
                 Pipeline.allCases.map(\.self)
             ) { pipeline -> MTLRenderPipelineState in
                 do {
-                    let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline, library: library)
+                    let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline, device: device, library: library)
                     return try device.makeRenderPipelineState(descriptor: pipelineDescriptor)
                 } catch {
                     // Log the JSON (key) and the error
-                    Logger().error("Error creating pipeline for: \(pipeline.type.rawValue, privacy: .public), \(pipeline.blendMode.rawValue, privacy: .public) error: \(error, privacy: .public)")
+                    Logger().error("Error creating pipeline for: \(pipeline.type.rawValue, privacy: .public), \(pipeline.blendMode.rawValue, privacy: .public), \(pipeline.colorWriteMask.rawValue, privacy: .public) error: \(error, privacy: .public)")
                     throw error
                 }
             }
     }
 }
 
-extension MCBlendMode: Codable, @retroactive CaseIterable {
+extension MCBlendMode: @retroactive Codable, @retroactive CaseIterable {
     public static var allCases: [MCBlendMode] {
         [.NORMAL, .MULTIPLY]
     }

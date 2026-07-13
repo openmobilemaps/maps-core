@@ -8,6 +8,9 @@ cpp:
   typename: '::VectorTileOrigin'
   header: '"VectorTileOrigin.h"'
   byValue: true
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCVectorTileOrigin'
   pointer: false

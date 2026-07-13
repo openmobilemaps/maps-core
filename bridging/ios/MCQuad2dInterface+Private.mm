@@ -71,6 +71,28 @@ textureCoordinates:(nonnull MCRectD *)textureCoordinates
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
+- (void)loadDualTexture:(nullable id<MCRenderingContextInterface>)context
+          textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder
+        elevationHolder:(nullable id<MCTextureHolderInterface>)elevationHolder {
+    try {
+        _cppRefHandle.get()->loadDualTexture(::djinni_generated::RenderingContextInterface::toCpp(context),
+                                             ::djinni_generated::TextureHolderInterface::toCpp(textureHolder),
+                                             ::djinni::Optional<std::optional, ::djinni_generated::TextureHolderInterface>::toCpp(elevationHolder));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
+- (void)loadTextures:(nullable id<MCRenderingContextInterface>)context
+       textureHolder:(nullable id<MCTextureHolderInterface>)textureHolder
+        lookupHolder:(nullable id<MCTextureHolderInterface>)lookupHolder
+     elevationHolder:(nullable id<MCTextureHolderInterface>)elevationHolder {
+    try {
+        _cppRefHandle.get()->loadTextures(::djinni_generated::RenderingContextInterface::toCpp(context),
+                                          ::djinni_generated::TextureHolderInterface::toCpp(textureHolder),
+                                          ::djinni::Optional<std::optional, ::djinni_generated::TextureHolderInterface>::toCpp(lookupHolder),
+                                          ::djinni::Optional<std::optional, ::djinni_generated::TextureHolderInterface>::toCpp(elevationHolder));
+    } DJINNI_TRANSLATE_EXCEPTIONS()
+}
+
 - (void)removeTexture {
     try {
         _cppRefHandle.get()->removeTexture();
@@ -126,6 +148,23 @@ public:
         @autoreleasepool {
             [djinni_private_get_proxied_objc_object() loadTexture:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
                                                     textureHolder:(::djinni_generated::TextureHolderInterface::fromCpp(c_textureHolder))];
+        }
+    }
+    void loadDualTexture(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder, const /*nullable*/ std::shared_ptr<::TextureHolderInterface> & c_elevationHolder) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() loadDualTexture:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
+                                                        textureHolder:(::djinni_generated::TextureHolderInterface::fromCpp(c_textureHolder))
+                                                      elevationHolder:(::djinni::Optional<std::optional, ::djinni_generated::TextureHolderInterface>::fromCpp(c_elevationHolder))];
+        }
+    }
+    void loadTextures(const /*not-null*/ std::shared_ptr<::RenderingContextInterface> & c_context, const /*not-null*/ std::shared_ptr<::TextureHolderInterface> & c_textureHolder, const /*nullable*/ std::shared_ptr<::TextureHolderInterface> & c_lookupHolder, const /*nullable*/ std::shared_ptr<::TextureHolderInterface> & c_elevationHolder) override
+    {
+        @autoreleasepool {
+            [djinni_private_get_proxied_objc_object() loadTextures:(::djinni_generated::RenderingContextInterface::fromCpp(c_context))
+                                                     textureHolder:(::djinni_generated::TextureHolderInterface::fromCpp(c_textureHolder))
+                                                      lookupHolder:(::djinni::Optional<std::optional, ::djinni_generated::TextureHolderInterface>::fromCpp(c_lookupHolder))
+                                                   elevationHolder:(::djinni::Optional<std::optional, ::djinni_generated::TextureHolderInterface>::fromCpp(c_elevationHolder))];
         }
     }
     void removeTexture() override

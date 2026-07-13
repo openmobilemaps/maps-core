@@ -75,6 +75,8 @@
 
 - (nullable id<MCSkySphereShaderInterface>)createSkySphereShader;
 
+- (nullable id<MCSkySphereShaderInterface>)createSkySphereLocalShader;
+
 - (nullable id<MCElevationInterpolationShaderInterface>)createElevationInterpolationShader;
 
 @end

@@ -11,6 +11,11 @@
 #include <metal_stdlib>
 using namespace metal;
 
+#define MC_GLOBAL_VP_MATRIX_BUFFER_INDEX 20
+#define MC_GLOBAL_ORIGIN_BUFFER_INDEX 21
+#define MC_GLOBAL_SCREEN_PIXEL_FACTOR_BUFFER_INDEX 22
+#define MC_GLOBAL_TIME_BUFFER_INDEX 23
+
 struct VertexIn {
     float2 position [[attribute(0)]];
     float2 uv [[attribute(1)]];
@@ -36,6 +41,7 @@ struct Vertex3DTextureTessellatedIn {
     float4 position [[attribute(0)]];
     float2 frameCoord [[attribute(1)]];
     float2 uv [[attribute(2)]];
+    float skirtOffset [[attribute(3)]];
 };
 
 struct VertexOut {

@@ -8,7 +8,11 @@ cpp:
   typename: '::Vec2D'
   header: '"Vec2D.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCVec2D'
   pointer: true
   hash: '%s.hash'

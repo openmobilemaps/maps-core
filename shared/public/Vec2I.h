@@ -10,6 +10,9 @@ struct Vec2I final {
     int32_t x;
     int32_t y;
 
+    friend bool operator==(const Vec2I& lhs, const Vec2I& rhs);
+    friend bool operator!=(const Vec2I& lhs, const Vec2I& rhs);
+
     Vec2I(int32_t x_,
           int32_t y_)
     : x(std::move(x_))

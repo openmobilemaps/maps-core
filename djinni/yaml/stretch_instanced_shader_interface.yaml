@@ -8,7 +8,11 @@ cpp:
   typename: '::StretchInstancedShaderInterface'
   header: '"StretchInstancedShaderInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCStretchInstancedShaderInterface'
   pointer: true
   hash: '%s.hash'

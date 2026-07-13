@@ -77,5 +77,7 @@ public:
 
     virtual /*not-null*/ std::shared_ptr<SkySphereShaderInterface> createSkySphereShader() = 0;
 
+    virtual /*not-null*/ std::shared_ptr<SkySphereShaderInterface> createSkySphereLocalShader() = 0;
+
     virtual /*not-null*/ std::shared_ptr<ElevationInterpolationShaderInterface> createElevationInterpolationShader() = 0;
 };

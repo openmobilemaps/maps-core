@@ -10,20 +10,25 @@
 
 #pragma once
 
+#include "BaseGraphicsObjectOpenGl.h"
 #include "GraphicsObjectInterface.h"
 #include "MaskingObjectInterface.h"
 #include "OpenGlContext.h"
 #include "Quad2dInterface.h"
 #include "ShaderProgramInterface.h"
 #include "BaseShaderProgramOpenGl.h"
+#include "SharedBytes.h"
+#include "TextureAttachment.h"
 #include "opengl_wrapper.h"
 #include <mutex>
 #include <vector>
 
-class Quad2dOpenGl : public GraphicsObjectInterface,
+class Quad2dOpenGl : public BaseGraphicsObjectOpenGl,
                      public MaskingObjectInterface,
                      public Quad2dInterface,
                      public std::enable_shared_from_this<Quad2dOpenGl> {
+    friend class TexturedPolygonOpenGl;
+
   public:
     Quad2dOpenGl(const std::shared_ptr<::BaseShaderProgramOpenGl> &shader);
 
@@ -32,8 +37,10 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     virtual bool isReady() override;
 
     virtual void setup(const std::shared_ptr<::RenderingContextInterface> &context) override;
-
     virtual void clear() override;
+
+    virtual void pause() override;
+    virtual void resume(const std::shared_ptr<::RenderingContextInterface> &context) override;
 
     virtual void renderAsMask(const std::shared_ptr<::RenderingContextInterface> &context, const ::RenderPassConfig &renderPass,
                               int64_t vpMatrix, int64_t mMatrix, const ::Vec3D & origin, double screenPixelAsRealMeterFactor,
@@ -52,6 +59,15 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     virtual void loadTexture(const std::shared_ptr<::RenderingContextInterface> &context,
                              const std::shared_ptr<TextureHolderInterface> &textureHolder) override;
 
+    virtual void loadDualTexture(const std::shared_ptr<::RenderingContextInterface> &context,
+                                 const std::shared_ptr<TextureHolderInterface> &textureHolder,
+                                 const std::shared_ptr<TextureHolderInterface> &elevationHolder) override;
+
+    virtual void loadTextures(const std::shared_ptr<::RenderingContextInterface> &context,
+                              const std::shared_ptr<TextureHolderInterface> &textureHolder,
+                              const std::shared_ptr<TextureHolderInterface> &lookupHolder,
+                              const std::shared_ptr<TextureHolderInterface> &elevationHolder) override;
+
     virtual void removeTexture() override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
@@ -63,7 +79,11 @@ class Quad2dOpenGl : public GraphicsObjectInterface,
     void setDebugLabel(const std::string &label) override;
 
 protected:
+    void setCustomGeometry(const ::SharedBytes &vertices, const ::SharedBytes &indices, const ::Vec3D &origin, bool is3d);
+
     void computeGeometry(bool texCoordsOnly);
+
+    void updateCustomTextureCoords();
 
     void prepareGlData(int program);
 
@@ -91,6 +111,7 @@ protected:
     int textureCoordinateHandle;
     GLuint textureCoordsBuffer;
     std::vector<GLfloat> textureCoords;
+    std::vector<GLfloat> unscaledTextureCoords;
     GLuint indexBuffer;
     std::vector<GLushort> indices;
     Vec3D quadOrigin = Vec3D(0.0, 0.0, 0.0);
@@ -98,16 +119,16 @@ protected:
     bool is3d = false;
     int32_t subdivisionFactor = 0;
 
-    std::shared_ptr<TextureHolderInterface> textureHolder;
-    int texturePointer;
+    TextureAttachment textureAttachment;
+    TextureAttachment lookupTextureAttachment;
+    int lookupTextureUniformHandle = -1;
     std::optional<TextureFilterType> textureFilterType = std::nullopt;
 
     bool usesTextureCoords = false;
+    bool usesCustomGeometry = false;
 
     Quad3dD frame = Quad3dD(Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0), Vec3D(0.0, 0.0, 0.0));
     RectD textureCoordinates = RectD(0.0, 0.0, 0.0, 0.0);
-    double factorHeight = 1.0;
-    double factorWidth = 1.0;
 
     bool ready = false;
     bool textureCoordsReady = false;

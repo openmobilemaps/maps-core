@@ -28,6 +28,10 @@
 #include "Actor.h"
 #include "VectorSet.h"
 
+class GraphicsObjectFactoryInterface;
+class RasterShaderInterface;
+class RenderingContextInterface;
+
 
 class Tiled2dMapRasterLayer : public Tiled2dMapLayer,
                               public SimpleTouchInterface,
@@ -115,12 +119,33 @@ public:
 
     void setMinMagFilter(TextureFilterType filterType) override;
 
+    void setUseMaskTileGeometry(bool enabled) override;
+
+    void setTileLoadingPaused(bool paused) override;
+
+    void setZoomLevelScaleFactor(float value) override;
+
 private:
     virtual void enableAnimations(bool enabled) override;
 
     virtual LayerReadyState isReadyToRenderOffscreen() override;
 
 protected:
+    virtual std::shared_ptr<Quad2dInterface> createQuadForTile(
+        const std::shared_ptr<GraphicsObjectFactoryInterface> &graphicsFactory,
+        const std::shared_ptr<RasterShaderInterface> &rasterShader,
+        bool is3D);
+
+    virtual void loadTileTextures(const std::shared_ptr<Textured2dLayerObject> &tileObject,
+                                  const std::shared_ptr<RenderingContextInterface> &renderingContext,
+                                  const Tiled2dMapRasterTileInfo &tileInfo);
+
+    virtual bool useRenderPassMaskingFor3d() const;
+    virtual void setSourceMaskTileGeometryTileSelectionOptimization(bool enabled);
+
+    bool usesMaskTileGeometry() const;
+    bool usesStencilTileMasking() const;
+
     const std::shared_ptr<Tiled2dMapLayerConfig> layerConfig;
 
     std::optional<::RectI> scissorRect = std::nullopt;
@@ -135,6 +160,7 @@ protected:
     std::recursive_mutex updateMutex;
     std::map<Tiled2dMapRasterTileInfo, std::shared_ptr<Textured2dLayerObject>> tileObjectMap;
     std::unordered_map<Tiled2dMapVersionedTileInfo, Tiled2dMapLayerMaskWrapper> tileMaskMap;
+    std::unordered_map<Tiled2dMapVersionedTileInfo, size_t> tileGeometryMaskHashes;
     std::recursive_mutex renderPassMutex;
     std::vector<std::shared_ptr<RenderPassInterface>> renderPasses;
 
@@ -157,9 +183,10 @@ protected:
     std::shared_ptr<::Tiled2dMapReadyStateListener> readyStateListener;
 
 private:
-    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 3;
+    const static int32_t SUBDIVISION_FACTOR_3D_DEFAULT = 5;
 
     int32_t subdivisionFactor = SUBDIVISION_FACTOR_3D_DEFAULT;
 
     TextureFilterType textureFilterType = TextureFilterType::LINEAR;
+    bool useMaskTileGeometry = false;
 };

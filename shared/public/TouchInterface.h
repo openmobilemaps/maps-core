@@ -20,6 +20,10 @@ public:
 
     virtual bool onLongPress(const ::Vec2F & posScreen) = 0;
 
+    virtual bool onHover(const ::Vec2F & posScreen) = 0;
+
+    virtual bool onHoverComplete() = 0;
+
     virtual bool onMove(const ::Vec2F & deltaScreen, bool confirmed, bool doubleClick) = 0;
 
     virtual bool onMoveComplete() = 0;

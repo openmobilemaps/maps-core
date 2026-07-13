@@ -12,6 +12,7 @@
 #include "ReverseGeocoder.h"
 #include "CoordinateConversionHelperInterface.h"
 #include "DataLoaderResult.h"
+#include "GeoDistanceHelper.h"
 #include "VectorTileGeometryHandler.h"
 #include "Value.h"
 #include "Vec2DHelper.h"
@@ -22,22 +23,6 @@
 #include "Logger.h"
 
 ReverseGeocoder::ReverseGeocoder(const /*not-null*/ std::shared_ptr<::LoaderInterface> & loader, const std::string & tileUrlTemplate, int32_t zoomLevel): loader(loader), tileUrlTemplate(tileUrlTemplate), zoomLevel(zoomLevel) {}
-
-
-double ReverseGeocoder::distance(const Coord &c1, const Coord &c2) {
-    const auto coordinateConverter = CoordinateConversionHelperInterface::independentInstance();
-    Coord wgsC1 = coordinateConverter->convert(CoordinateSystemIdentifiers::EPSG4326(), c1);
-    Coord wgsC2 = coordinateConverter->convert(CoordinateSystemIdentifiers::EPSG4326(), c2);
-
-    const double R = 6371000; // Radius of the earth in meters
-    double latDistance = (wgsC2.y - wgsC1.y) * M_PI / 180.0;
-    double lonDistance = (wgsC2.x - wgsC1.x) * M_PI / 180.0;
-    double a = std::sin(latDistance / 2) * std::sin(latDistance / 2) +
-               std::cos(wgsC1.y * M_PI / 180.0) * std::cos(wgsC2.y * M_PI / 180.0) *
-               std::sin(lonDistance / 2) * std::sin(lonDistance / 2);
-    double c = 2 * std::atan2(std::sqrt(a), std::sqrt(1 - a));
-    return R * c;
-}
 
 
 std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const ::Coord & coord, int64_t thresholdMeters) {
@@ -99,8 +84,6 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
         vtzero::vector_tile tileData((char*)result.data->buf(), result.data->len());
 
         while (auto layer = tileData.next_layer()) {
-            std::string sourceLayerName = std::string(layer.name());
-
             while (const auto &feature = layer.next_feature()) {
                 if (feature.geometry_type() != vtzero::GeomType::POINT) {
                     continue;
@@ -114,7 +97,7 @@ std::vector<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocode(const
                     for (auto points: geometryHandler->getPointCoordinates()) {
                         for (auto point: points) {
                             auto coord = Coord(CoordinateSystemIdentifiers::EPSG3857(), point.x, point.y, 0.0);
-                            auto d = distance(converted4326, coord);
+                            auto d = GeoDistanceHelper::distanceMeters(converted4326, coord);
                             if (d < thresholdMeters) {
                                 resultVector.push_back(VectorLayerFeatureCoordInfo(featureContext->getFeatureInfo(stringTable), coord));
                             }
@@ -145,7 +128,7 @@ std::optional<::VectorLayerFeatureCoordInfo> ReverseGeocoder::reverseGeocodeClos
     std::optional<::VectorLayerFeatureCoordInfo> closestFeature = std::nullopt;
 
     for(const auto& r : results) {
-        const auto d = distance(coord, r.coordinates);
+        const auto d = GeoDistanceHelper::distanceMeters(coord, r.coordinates);
 
         if(d < minDistance) {
             closestFeature = r;

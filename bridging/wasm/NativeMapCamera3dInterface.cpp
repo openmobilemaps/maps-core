@@ -4,6 +4,7 @@
 #include "NativeMapCamera3dInterface.h"  // my header
 #include "NativeCamera3dConfig.h"
 #include "NativeCoord.h"
+#include "NativeMapCamera3dMode.h"
 
 namespace djinni_generated {
 
@@ -11,6 +12,15 @@ em::val NativeMapCamera3dInterface::cppProxyMethods() {
     static const em::val methods = em::val::array(std::vector<std::string> {
         "getCameraConfig",
         "setCameraConfig",
+        "getCameraMode",
+        "setCameraMode",
+        "isPoseCameraActive",
+        "setPoseCamera",
+        "clearPoseCamera",
+        "setCustomViewMatrix",
+        "clearCustomViewMatrix",
+        "setCustomProjectionMatrix",
+        "clearCustomProjectionMatrix",
     });
     return methods;
 }
@@ -35,6 +45,86 @@ void NativeMapCamera3dInterface::setCameraConfig(const CppType& self, const em::
         return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
     }
 }
+int32_t NativeMapCamera3dInterface::getCameraMode(const CppType& self) {
+    try {
+        auto r = self->getCameraMode();
+        return ::djinni_generated::NativeMapCamera3dMode::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni_generated::NativeMapCamera3dMode>::handleNativeException(e);
+    }
+}
+void NativeMapCamera3dInterface::setCameraMode(const CppType& self, int32_t w_mode) {
+    try {
+        self->setCameraMode(::djinni_generated::NativeMapCamera3dMode::toCpp(w_mode));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+bool NativeMapCamera3dInterface::isPoseCameraActive(const CppType& self) {
+    try {
+        auto r = self->isPoseCameraActive();
+        return ::djinni::Bool::fromCpp(r);
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<::djinni::Bool>::handleNativeException(e);
+    }
+}
+void NativeMapCamera3dInterface::setPoseCamera(const CppType& self, const em::val& w_position,float w_yawDegrees,float w_pitchDegrees,float w_rollDegrees,float w_verticalFovDegrees,float w_nearPlaneMeters,float w_farPlaneMeters) {
+    try {
+        self->setPoseCamera(::djinni_generated::NativeCoord::toCpp(w_position),
+                      ::djinni::F32::toCpp(w_yawDegrees),
+                      ::djinni::F32::toCpp(w_pitchDegrees),
+                      ::djinni::F32::toCpp(w_rollDegrees),
+                      ::djinni::F32::toCpp(w_verticalFovDegrees),
+                      ::djinni::F32::toCpp(w_nearPlaneMeters),
+                      ::djinni::F32::toCpp(w_farPlaneMeters));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeMapCamera3dInterface::clearPoseCamera(const CppType& self) {
+    try {
+        self->clearPoseCamera();
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeMapCamera3dInterface::setCustomViewMatrix(const CppType& self, const em::val& w_viewMatrix) {
+    try {
+        self->setCustomViewMatrix(::djinni::List<::djinni::F32>::toCpp(w_viewMatrix));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeMapCamera3dInterface::clearCustomViewMatrix(const CppType& self) {
+    try {
+        self->clearCustomViewMatrix();
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeMapCamera3dInterface::setCustomProjectionMatrix(const CppType& self, const em::val& w_projectionMatrix) {
+    try {
+        self->setCustomProjectionMatrix(::djinni::List<::djinni::F32>::toCpp(w_projectionMatrix));
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
+void NativeMapCamera3dInterface::clearCustomProjectionMatrix(const CppType& self) {
+    try {
+        self->clearCustomProjectionMatrix();
+    }
+    catch(const std::exception& e) {
+        return ::djinni::ExceptionHandlingTraits<void>::handleNativeException(e);
+    }
+}
 
 EMSCRIPTEN_BINDINGS(_map_camera_3d_interface) {
     em::class_<::MapCamera3dInterface>("MapCamera3dInterface")
@@ -42,6 +132,15 @@ EMSCRIPTEN_BINDINGS(_map_camera_3d_interface) {
         .function("nativeDestroy", &NativeMapCamera3dInterface::nativeDestroy)
         .function("getCameraConfig", NativeMapCamera3dInterface::getCameraConfig)
         .function("setCameraConfig", NativeMapCamera3dInterface::setCameraConfig)
+        .function("getCameraMode", NativeMapCamera3dInterface::getCameraMode)
+        .function("setCameraMode", NativeMapCamera3dInterface::setCameraMode)
+        .function("isPoseCameraActive", NativeMapCamera3dInterface::isPoseCameraActive)
+        .function("setPoseCamera", NativeMapCamera3dInterface::setPoseCamera)
+        .function("clearPoseCamera", NativeMapCamera3dInterface::clearPoseCamera)
+        .function("setCustomViewMatrix", NativeMapCamera3dInterface::setCustomViewMatrix)
+        .function("clearCustomViewMatrix", NativeMapCamera3dInterface::clearCustomViewMatrix)
+        .function("setCustomProjectionMatrix", NativeMapCamera3dInterface::setCustomProjectionMatrix)
+        .function("clearCustomProjectionMatrix", NativeMapCamera3dInterface::clearCustomProjectionMatrix)
         ;
 }
 

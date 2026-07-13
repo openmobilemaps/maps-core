@@ -10,4 +10,6 @@ typedef NS_ENUM(NSInteger, MCTouchAction)
     MCTouchActionUP = 2,
     MCTouchActionSCROLL = 3,
     MCTouchActionCANCEL = 4,
+    MCTouchActionHOVER = 5,
+    MCTouchActionHOVER_EXIT = 6,
 };

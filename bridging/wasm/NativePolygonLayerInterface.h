@@ -35,6 +35,7 @@ struct NativePolygonLayerInterface : ::djinni::JsInterface<::PolygonLayerInterfa
     static void resetSelection(const CppType& self);
     static void setLayerClickable(const CppType& self, bool w_isLayerClickable);
     static void setRenderPassIndex(const CppType& self, int32_t w_index);
+    static void setBlendMode(const CppType& self, int32_t w_blendMode);
 
 };
 

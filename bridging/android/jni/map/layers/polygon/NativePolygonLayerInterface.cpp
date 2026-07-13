@@ -3,6 +3,7 @@
 
 #include "NativePolygonLayerInterface.h"  // my header
 #include "Marshal.hpp"
+#include "NativeBlendMode.h"
 #include "NativeLayerInterface.h"
 #include "NativePolygonInfo.h"
 #include "NativePolygonLayerCallbackInterface.h"
@@ -118,6 +119,14 @@ CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_polygo
     try {
         const auto& ref = ::djinni::objectFromHandleAddress<::PolygonLayerInterface>(nativeRef);
         ref->setRenderPassIndex(::djinni::I32::toCpp(jniEnv, j_index));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+}
+
+CJNIEXPORT void JNICALL Java_io_openmobilemaps_mapscore_shared_map_layers_polygon_PolygonLayerInterface_00024CppProxy_native_1setBlendMode(JNIEnv* jniEnv, jobject /*this*/, jlong nativeRef, ::djinni_generated::NativeBlendMode::JniType j_blendMode)
+{
+    try {
+        const auto& ref = ::djinni::objectFromHandleAddress<::PolygonLayerInterface>(nativeRef);
+        ref->setBlendMode(::djinni_generated::NativeBlendMode::toCpp(jniEnv, j_blendMode));
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
 }
 

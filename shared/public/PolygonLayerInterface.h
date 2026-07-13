@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "BlendMode.h"
 #include "LayerInterface.h"
 #include "Vec3D.h"
 #include <cstdint>
@@ -39,4 +40,6 @@ public:
     virtual void setLayerClickable(bool isLayerClickable) = 0;
 
     virtual void setRenderPassIndex(int32_t index) = 0;
+
+    virtual void setBlendMode(::BlendMode blendMode) = 0;
 };

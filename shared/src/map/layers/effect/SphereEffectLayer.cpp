@@ -45,7 +45,7 @@ void SphereEffectLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterfac
 
     renderObjects.push_back(std::make_shared<RenderObject>(this->quad->asGraphicsObject(), true));
 
-    auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, false, renderTarget), renderObjects);
+    auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none), renderObjects);
     renderPasses = {
         renderPass
     };
@@ -62,8 +62,7 @@ void SphereEffectLayer::onAdded(const std::shared_ptr<MapInterface> &mapInterfac
                                                             return;
                                                         }
                                                         auto mapInterface = selfPtr->mapInterface;
-
-                                                        if (mapInterface && !selfPtr->quad->asGraphicsObject()->isReady()) {
+                                                        if (mapInterface) {
                                                             selfPtr->quad->asGraphicsObject()->setup(mapInterface->getRenderingContext());
                                                         }
                                                     }));

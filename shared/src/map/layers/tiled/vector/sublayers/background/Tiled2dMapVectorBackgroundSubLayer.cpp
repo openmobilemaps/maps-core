@@ -110,7 +110,7 @@ void Tiled2dMapVectorBackgroundSubLayer::onAdded(const std::shared_ptr<MapInterf
         renderObjects.push_back(std::make_shared<RenderObject>(patternObject->getPolygonObject(), !is3d));
     }
 
-    auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, false, renderTarget), renderObjects);
+    auto renderPass = std::make_shared<RenderPass>(RenderPassConfig(0, false, renderTarget, StencilBits::none, StencilBits::none, StencilBits::none, StencilBits::none), renderObjects);
     renderPasses = {
         renderPass
     };
@@ -149,15 +149,21 @@ std::vector<std::shared_ptr<RenderPassInterface>> Tiled2dMapVectorBackgroundSubL
 
 void Tiled2dMapVectorBackgroundSubLayer::onRemoved() {
     Tiled2dMapVectorSubLayer::onRemoved();
-}
-
-void Tiled2dMapVectorBackgroundSubLayer::pause() {
-    Tiled2dMapVectorSubLayer::pause();
     if (polygonObject) {
         polygonObject->getPolygonObject()->clear();
     }
     if (patternObject) {
         patternObject->getPolygonObject()->clear();
+    }
+}
+
+void Tiled2dMapVectorBackgroundSubLayer::pause() {
+    Tiled2dMapVectorSubLayer::pause();
+    if (polygonObject) {
+        polygonObject->getPolygonObject()->pause();
+    }
+    if (patternObject) {
+        patternObject->getPolygonObject()->pause();
     }
 }
 
@@ -171,13 +177,10 @@ void Tiled2dMapVectorBackgroundSubLayer::resume() {
     }
 
     if (polygonObject && !polygonObject->getPolygonObject()->isReady()) {
-        polygonObject->getPolygonObject()->setup(renderingContext);
+        polygonObject->getPolygonObject()->resume(renderingContext);
     }
     if (patternObject && !patternObject->getPolygonObject()->isReady()) {
-        patternObject->getPolygonObject()->setup(renderingContext);
-        if (spriteTexture) {
-            patternObject->loadTexture(renderingContext, spriteTexture);
-        }
+        patternObject->getPolygonObject()->resume(renderingContext);
     }
 }
 

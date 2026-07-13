@@ -10,15 +10,31 @@ NS_SWIFT_SENDABLE
 + (nonnull instancetype)new NS_UNAVAILABLE;
 - (nonnull instancetype)initWithRenderPassIndex:(int32_t)renderPassIndex
                                    isPassMasked:(BOOL)isPassMasked
-                                   renderTarget:(nullable id<MCRenderTargetInterface>)renderTarget NS_DESIGNATED_INITIALIZER;
+                                   renderTarget:(nullable id<MCRenderTargetInterface>)renderTarget
+                                stencilReadMask:(int32_t)stencilReadMask
+                           stencilReadReference:(int32_t)stencilReadReference
+                               stencilWriteMask:(int32_t)stencilWriteMask
+                          stencilWriteReference:(int32_t)stencilWriteReference NS_DESIGNATED_INITIALIZER;
 + (nonnull instancetype)renderPassConfigWithRenderPassIndex:(int32_t)renderPassIndex
                                                isPassMasked:(BOOL)isPassMasked
-                                               renderTarget:(nullable id<MCRenderTargetInterface>)renderTarget;
+                                               renderTarget:(nullable id<MCRenderTargetInterface>)renderTarget
+                                            stencilReadMask:(int32_t)stencilReadMask
+                                       stencilReadReference:(int32_t)stencilReadReference
+                                           stencilWriteMask:(int32_t)stencilWriteMask
+                                      stencilWriteReference:(int32_t)stencilWriteReference;
 
 @property (nonatomic, readonly) int32_t renderPassIndex;
 
 @property (nonatomic, readonly) BOOL isPassMasked;
 
 @property (nonatomic, readonly, nullable) id<MCRenderTargetInterface> renderTarget;
+
+@property (nonatomic, readonly) int32_t stencilReadMask;
+
+@property (nonatomic, readonly) int32_t stencilReadReference;
+
+@property (nonatomic, readonly) int32_t stencilWriteMask;
+
+@property (nonatomic, readonly) int32_t stencilWriteReference;
 
 @end

@@ -14,7 +14,7 @@
 #include "Vec2F.h"
 
 class EvaluationContext;
-class SpriteIconId;
+struct SpriteIconId;
 
 enum class ReevaluationPolicy : int {
     NEVER,

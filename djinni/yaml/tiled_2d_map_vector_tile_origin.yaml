@@ -8,7 +8,11 @@ cpp:
   typename: '::Tiled2dMapVectorTileOrigin'
   header: '"Tiled2dMapVectorTileOrigin.h"'
   byValue: true
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
+  module: 'swiftPMImport.io.openmobilemaps.mapscore.kmp'
   typename: 'MCTiled2dMapVectorTileOrigin'
   pointer: false
   hash: '%s.hash'

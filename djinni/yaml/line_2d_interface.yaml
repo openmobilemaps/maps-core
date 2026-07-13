@@ -8,6 +8,9 @@ cpp:
   typename: '::Line2dInterface'
   header: '"Line2dInterface.h"'
   byValue: false
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCLine2dInterface'
   pointer: true

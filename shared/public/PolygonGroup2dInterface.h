@@ -8,6 +8,7 @@
 #include <memory>
 
 class GraphicsObjectInterface;
+class MaskingObjectInterface;
 
 class PolygonGroup2dInterface {
 public:
@@ -16,4 +17,6 @@ public:
     virtual void setVertices(const ::SharedBytes & vertices, const ::SharedBytes & indices, const ::Vec3D & origin) = 0;
 
     virtual /*not-null*/ std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() = 0;
+
+    virtual /*not-null*/ std::shared_ptr<MaskingObjectInterface> asMaskingObject() = 0;
 };

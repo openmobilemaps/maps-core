@@ -16,6 +16,10 @@ class ShaderFactory: MCShaderFactoryInterface {
         SkySphereShader()
     }
 
+    func createSkySphereLocalShader() -> (any MCSkySphereShaderInterface)? {
+        SkySphereShader(useLocal: true)
+    }
+
     func createStretchInstancedShader(_ unitSphere: Bool) -> (any MCStretchInstancedShaderInterface)? {
         StretchInstancedShader()
     }
@@ -23,7 +27,7 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createUnitSphereRasterShader() -> MCRasterShaderInterface? {
         RasterShader()
     }
-    
+
     func createQuadTessellatedShader() -> MCRasterShaderInterface? {
         RasterShader(shader: .quadTessellatedShader)
     }
@@ -87,7 +91,7 @@ class ShaderFactory: MCShaderFactoryInterface {
     func createColorShader() -> MCColorShaderInterface? {
         ColorShader()
     }
-    
+
     func createPolygonTessellatedShader(_ unitSphere: Bool) -> MCColorShaderInterface? {
         ColorShader(shader: .polygonTessellatedShader)
     }

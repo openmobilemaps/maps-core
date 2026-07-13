@@ -10,6 +10,7 @@
 
 #pragma once
 
+#include "BaseGraphicsObjectOpenGl.h"
 #include "GraphicsObjectInterface.h"
 #include "LineGroup2dInterface.h"
 #include "OpenGlContext.h"
@@ -20,7 +21,7 @@
 #include "opengl_wrapper.h"
 #include <mutex>
 
-class LineGroup2dOpenGl : public GraphicsObjectInterface,
+class LineGroup2dOpenGl : public BaseGraphicsObjectOpenGl,
                           public LineGroup2dInterface,
                           public std::enable_shared_from_this<GraphicsObjectInterface> {
   public:
@@ -30,7 +31,7 @@ class LineGroup2dOpenGl : public GraphicsObjectInterface,
 
     // LineGroup2dInterface
 
-    virtual void setLines(const ::SharedBytes & lines, const ::SharedBytes & indices, const Vec3D &origin, bool is3d) override;
+    virtual void setLines(const ::OwnedBytes & lines, const ::OwnedBytes & indices, const Vec3D &origin, bool is3d) override;
 
     virtual std::shared_ptr<GraphicsObjectInterface> asGraphicsObject() override;
 
@@ -65,20 +66,23 @@ protected:
 
     int positionHandle = -1;
     int extrudeHandle = -1;
-    int lineSideHandle = -1;
     int lengthPrefixHandle = -1;
     int lengthCorrectionHandle = -1;
     int stylingIndexHandle = -1;
 
     GLuint vao;
     GLuint vertexAttribBuffer = -1;
-    std::vector<GLfloat> lineAttributes;
+    size_t lineAttributesSize;
+    std::unique_ptr<GLfloat> lineAttributes;
     GLuint indexBuffer = -1;
-    std::vector<GLuint> lineIndices;
+    size_t indexBufferSize;
+    size_t lineIndicesSize;
+    std::unique_ptr<GLuint> lineIndices;
     bool glDataBuffersGenerated = false;
     Vec3D lineOrigin = Vec3D(0.0, 0.0, 0.0);
 
     bool ready = false;
+    bool dataUpdated = false;
     bool dataReady = false;
     std::recursive_mutex dataMutex;
 

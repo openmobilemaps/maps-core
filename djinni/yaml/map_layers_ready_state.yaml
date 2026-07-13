@@ -8,6 +8,9 @@ cpp:
   typename: '::MapLayersReadyState'
   header: '"MapLayersReadyState.h"'
   byValue: true
+kmp:
+  package: 'io.openmobilemaps.mapscore.kmp'
+  bridgePrefix: 'KM'
 objc:
   typename: 'MCMapLayersReadyState'
   pointer: false

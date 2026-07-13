@@ -9,11 +9,19 @@
 - (nonnull instancetype)initWithRenderPassIndex:(int32_t)renderPassIndex
                                    isPassMasked:(BOOL)isPassMasked
                                    renderTarget:(nullable id<MCRenderTargetInterface>)renderTarget
+                                stencilReadMask:(int32_t)stencilReadMask
+                           stencilReadReference:(int32_t)stencilReadReference
+                               stencilWriteMask:(int32_t)stencilWriteMask
+                          stencilWriteReference:(int32_t)stencilWriteReference
 {
     if (self = [super init]) {
         _renderPassIndex = renderPassIndex;
         _isPassMasked = isPassMasked;
         _renderTarget = renderTarget;
+        _stencilReadMask = stencilReadMask;
+        _stencilReadReference = stencilReadReference;
+        _stencilWriteMask = stencilWriteMask;
+        _stencilWriteReference = stencilWriteReference;
     }
     return self;
 }
@@ -21,16 +29,24 @@
 + (nonnull instancetype)renderPassConfigWithRenderPassIndex:(int32_t)renderPassIndex
                                                isPassMasked:(BOOL)isPassMasked
                                                renderTarget:(nullable id<MCRenderTargetInterface>)renderTarget
+                                            stencilReadMask:(int32_t)stencilReadMask
+                                       stencilReadReference:(int32_t)stencilReadReference
+                                           stencilWriteMask:(int32_t)stencilWriteMask
+                                      stencilWriteReference:(int32_t)stencilWriteReference
 {
     return [[self alloc] initWithRenderPassIndex:renderPassIndex
                                     isPassMasked:isPassMasked
-                                    renderTarget:renderTarget];
+                                    renderTarget:renderTarget
+                                 stencilReadMask:stencilReadMask
+                            stencilReadReference:stencilReadReference
+                                stencilWriteMask:stencilWriteMask
+                           stencilWriteReference:stencilWriteReference];
 }
 
 #ifndef DJINNI_DISABLE_DESCRIPTION_METHODS
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<%@ %p renderPassIndex:%@ isPassMasked:%@ renderTarget:%@>", self.class, (void *)self, @(self.renderPassIndex), @(self.isPassMasked), self.renderTarget];
+    return [NSString stringWithFormat:@"<%@ %p renderPassIndex:%@ isPassMasked:%@ renderTarget:%@ stencilReadMask:%@ stencilReadReference:%@ stencilWriteMask:%@ stencilWriteReference:%@>", self.class, (void *)self, @(self.renderPassIndex), @(self.isPassMasked), self.renderTarget, @(self.stencilReadMask), @(self.stencilReadReference), @(self.stencilWriteMask), @(self.stencilWriteReference)];
 }
 
 #endif

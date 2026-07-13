@@ -12,7 +12,7 @@
 #include "DataStructures.metal"
 using namespace metal;
 
-const constant float BlendScale = 1000;
+const constant float BlendScale = 100.0;
 const constant float BlendOffset = 0.01;
 
 template <typename T>
@@ -48,16 +48,16 @@ inline float4 transform(float2 coordinate, float4 origin) {
     float x = 1.0 * sin(coordinate.y) * cos(coordinate.x) - origin.x;
     float y = 1.0 * cos(coordinate.y) - origin.y;
     float z = -1.0 * sin(coordinate.y) * sin(coordinate.x) - origin.z;
-    return float4(x, y, z, 0);
+    return float4(x, y, z, 0.0);
 }
 
 [[patch(quad, 4)]] vertex VertexOut
 quadTessellationVertexShader(const patch_control_point<Vertex3DTextureTessellatedIn> controlPoints [[stage_in]],
                              const float2 positionInPatch [[position_in_patch]],
-                             constant float4x4 &vpMatrix [[buffer(1)]],
+                             constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
                              constant float4x4 &mMatrix [[buffer(2)]],
                              constant float4 &originOffset [[buffer(3)]],
-                             constant float4 &origin [[buffer(4)]],
+                             constant float4 &origin [[buffer(MC_GLOBAL_ORIGIN_BUFFER_INDEX)]],
                              constant bool &is3d [[buffer(5)]])
 {
     Vertex3DTextureTessellatedIn vA = controlPoints[0];
@@ -76,7 +76,7 @@ quadTessellationVertexShader(const patch_control_point<Vertex3DTextureTessellate
     float2 uv = bilerp_fast(vA.uv, vB.uv, vC.uv, vD.uv, p);
     
     VertexOut out {
-        .position = vpMatrix * ((mMatrix * float4(position.xyz, 1)) + originOffset),
+        .position = vpMatrix * ((mMatrix * float4(position.xyz, 1.0)) + originOffset),
         .uv = uv
     };
   
@@ -84,12 +84,42 @@ quadTessellationVertexShader(const patch_control_point<Vertex3DTextureTessellate
 }
 
 [[patch(triangle, 3)]] vertex VertexOut
+texturedPolygonTessellationVertexShader(const patch_control_point<Vertex3DTextureTessellatedIn> controlPoints [[stage_in]],
+                                        const float3 positionInPatch [[position_in_patch]],
+                                        constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
+                                        constant float4x4 &mMatrix [[buffer(2)]],
+                                        constant float4 &originOffset [[buffer(3)]],
+                                        constant float4 &origin [[buffer(MC_GLOBAL_ORIGIN_BUFFER_INDEX)]],
+                                        constant bool &is3d [[buffer(5)]])
+{
+    Vertex3DTextureTessellatedIn vA = controlPoints[0];
+    Vertex3DTextureTessellatedIn vB = controlPoints[1];
+    Vertex3DTextureTessellatedIn vC = controlPoints[2];
+
+    float4 position = baryinterp(vA.position, vB.position, vC.position, positionInPatch);
+    if (is3d) {
+        float2 frameCoord = baryinterp(vA.frameCoord, vB.frameCoord, vC.frameCoord, positionInPatch);
+        float4 bent = transform(frameCoord, origin) - originOffset;
+        float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
+        position = mix(position, bent, blend);
+    }
+    float2 uv = baryinterp(vA.uv, vB.uv, vC.uv, positionInPatch);
+
+    VertexOut out {
+        .position = vpMatrix * ((mMatrix * float4(position.xyz, 1.0)) + originOffset),
+        .uv = uv
+    };
+
+    return out;
+}
+
+[[patch(triangle, 3)]] vertex VertexOut
 polygonTessellationVertexShader(const patch_control_point<Vertex3DTessellatedIn> controlPoints [[stage_in]],
                                 const float3 positionInPatch [[position_in_patch]],
-                                constant float4x4 &vpMatrix [[buffer(1)]],
+                                constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
                                 constant float4x4 &mMatrix [[buffer(2)]],
                                 constant float4 &originOffset [[buffer(3)]],
-                                constant float4 &origin [[buffer(4)]],
+                                constant float4 &origin [[buffer(MC_GLOBAL_ORIGIN_BUFFER_INDEX)]],
                                 constant bool &is3d [[buffer(5)]])
 {
     Vertex3DTessellatedIn vA = controlPoints[0];
@@ -105,7 +135,101 @@ polygonTessellationVertexShader(const patch_control_point<Vertex3DTessellatedIn>
     }
     
     VertexOut out {
-        .position = vpMatrix * (float4(position.xyz, 1) + originOffset),
+        .position = vpMatrix * (float4(position.xyz, 1.0) + originOffset),
+    };
+
+    return out;
+}
+
+const constant float ElevationOffset = 8.4 * 1000.0 * 1000.0;
+const constant float ElevationScale = 1.0 / (1.5 * 1000.0 * 1000.0 * 1000.0);
+
+float decodeElevation(float3 rgbSample) {
+    return rgbSample.r * 256.0 * 256.0 * 255.0 +
+           rgbSample.g * 256.0 * 255.0 +
+           rgbSample.b * 255.0;
+}
+
+[[patch(quad, 4)]] vertex VertexOut
+quadTessellationDisplacementVertexShader(const patch_control_point<Vertex3DTextureTessellatedIn> controlPoints [[stage_in]],
+                                         const float2 positionInPatch [[position_in_patch]],
+                                         constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
+                                         constant float4x4 &mMatrix [[buffer(2)]],
+                                         constant float4 &originOffset [[buffer(3)]],
+                                         constant float4 &origin [[buffer(MC_GLOBAL_ORIGIN_BUFFER_INDEX)]],
+                                         constant bool &is3d [[buffer(5)]],
+                                         constant bool &hasElevationTexture [[buffer(6)]],
+                                         texture2d<float> elevationTexture0 [[ texture(0)]],
+                                         sampler sampler0 [[sampler(0)]])
+{
+    Vertex3DTextureTessellatedIn vA = controlPoints[0];
+    Vertex3DTextureTessellatedIn vB = controlPoints[1];
+    Vertex3DTextureTessellatedIn vC = controlPoints[2];
+    Vertex3DTextureTessellatedIn vD = controlPoints[3];
+    half2 p = half2(positionInPatch);
+    
+    float4 position = bilerp_fast(vA.position, vB.position, vC.position, vD.position, p);
+    float2 uv = bilerp_fast(vA.uv, vB.uv, vC.uv, vD.uv, p);
+    
+    if (is3d) {
+        float2 frameCoord = bilerp_fast(vA.frameCoord, vB.frameCoord, vC.frameCoord, vD.frameCoord, p);
+        float4 bent = transform(frameCoord, origin) - originOffset;
+        float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
+        position = mix(position, bent, blend);
+
+        if (hasElevationTexture) {
+            float3 surfaceNormal = normalize(position.xyz + origin.xyz + originOffset.xyz);
+            float3 elevationSample = elevationTexture0.sample(sampler0, uv).rgb;
+            float elevation = (decodeElevation(elevationSample) - ElevationOffset) * ElevationScale;
+            position.xyz += surfaceNormal * elevation;
+        }
+    }
+    
+    VertexOut out {
+        .position = vpMatrix * ((mMatrix * float4(position.xyz, 1)) + originOffset),
+        .uv = uv
+    };
+
+    return out;
+}
+
+[[patch(triangle, 3)]] vertex VertexOut
+texturedPolygonTessellationDisplacementVertexShader(const patch_control_point<Vertex3DTextureTessellatedIn> controlPoints [[stage_in]],
+                                                    const float3 positionInPatch [[position_in_patch]],
+                                                    constant float4x4 &vpMatrix [[buffer(MC_GLOBAL_VP_MATRIX_BUFFER_INDEX)]],
+                                                    constant float4x4 &mMatrix [[buffer(2)]],
+                                                    constant float4 &originOffset [[buffer(3)]],
+                                                    constant float4 &origin [[buffer(MC_GLOBAL_ORIGIN_BUFFER_INDEX)]],
+                                                    constant bool &is3d [[buffer(5)]],
+                                                    constant bool &hasElevationTexture [[buffer(6)]],
+                                                    texture2d<float> elevationTexture0 [[ texture(0)]],
+                                                    sampler sampler0 [[sampler(0)]])
+{
+    Vertex3DTextureTessellatedIn vA = controlPoints[0];
+    Vertex3DTextureTessellatedIn vB = controlPoints[1];
+    Vertex3DTextureTessellatedIn vC = controlPoints[2];
+
+    float4 position = baryinterp(vA.position, vB.position, vC.position, positionInPatch);
+    float2 uv = baryinterp(vA.uv, vB.uv, vC.uv, positionInPatch);
+
+    if (is3d) {
+        float2 frameCoord = baryinterp(vA.frameCoord, vB.frameCoord, vC.frameCoord, positionInPatch);
+        float4 bent = transform(frameCoord, origin) - originOffset;
+        float blend = saturate(length(originOffset) * BlendScale - BlendOffset);
+        position = mix(position, bent, blend);
+
+        if (hasElevationTexture) {
+            float3 surfaceNormal = normalize(position.xyz + origin.xyz + originOffset.xyz);
+            float3 elevationSample = elevationTexture0.sample(sampler0, uv).rgb;
+            float elevation = (decodeElevation(elevationSample) - ElevationOffset) * ElevationScale;
+            float skirtOffset = baryinterp(vA.skirtOffset, vB.skirtOffset, vC.skirtOffset, positionInPatch);
+            position.xyz += surfaceNormal * (elevation - skirtOffset);
+        }
+    }
+
+    VertexOut out {
+        .position = vpMatrix * ((mMatrix * float4(position.xyz, 1.0)) + originOffset),
+        .uv = uv
     };
 
     return out;

@@ -26,8 +26,18 @@ abstract class RenderingContextInterface {
 
     abstract fun postRenderStencilMask()
 
+    abstract fun clearStencilMask(clearMask: Int)
+
+    abstract fun setupStencilWriteMask(writeMask: Int, reference: Int)
+
     /** optional rectangle, remove scissoring when not set */
     abstract fun applyScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
+
+    abstract fun getCreateOffscreenRenderTarget(name: String): RenderTargetInterface
+
+    abstract fun deleteOffscreenRenderTarget(name: String)
+
+    abstract fun getOffscreenRenderTargets(): ArrayList<RenderTargetInterface>
 
     abstract fun asOpenGlRenderingContext(): OpenGlRenderingContextInterface?
 
@@ -94,11 +104,41 @@ abstract class RenderingContextInterface {
         }
         private external fun native_postRenderStencilMask(_nativeRef: Long)
 
+        override fun clearStencilMask(clearMask: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_clearStencilMask(this.nativeRef, clearMask)
+        }
+        private external fun native_clearStencilMask(_nativeRef: Long, clearMask: Int)
+
+        override fun setupStencilWriteMask(writeMask: Int, reference: Int) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_setupStencilWriteMask(this.nativeRef, writeMask, reference)
+        }
+        private external fun native_setupStencilWriteMask(_nativeRef: Long, writeMask: Int, reference: Int)
+
         override fun applyScissorRect(scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?) {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
             native_applyScissorRect(this.nativeRef, scissorRect)
         }
         private external fun native_applyScissorRect(_nativeRef: Long, scissorRect: io.openmobilemaps.mapscore.shared.graphics.common.RectI?)
+
+        override fun getCreateOffscreenRenderTarget(name: String): RenderTargetInterface {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getCreateOffscreenRenderTarget(this.nativeRef, name)
+        }
+        private external fun native_getCreateOffscreenRenderTarget(_nativeRef: Long, name: String): RenderTargetInterface
+
+        override fun deleteOffscreenRenderTarget(name: String) {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            native_deleteOffscreenRenderTarget(this.nativeRef, name)
+        }
+        private external fun native_deleteOffscreenRenderTarget(_nativeRef: Long, name: String)
+
+        override fun getOffscreenRenderTargets(): ArrayList<RenderTargetInterface> {
+            assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
+            return native_getOffscreenRenderTargets(this.nativeRef)
+        }
+        private external fun native_getOffscreenRenderTargets(_nativeRef: Long): ArrayList<RenderTargetInterface>
 
         override fun asOpenGlRenderingContext(): OpenGlRenderingContextInterface? {
             assert(!this.destroyed.get()) { error("trying to use a destroyed object") }
