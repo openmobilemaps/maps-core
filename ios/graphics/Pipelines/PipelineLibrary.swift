@@ -371,7 +371,9 @@ extension PipelineLibrary {
     init(device: MTLDevice, library: MTLLibrary) throws {
         try self
             .init(
-                Pipeline.allCases.map(\.self)
+                Pipeline.allCases.filter {
+                    $0.type.tessellation == MCTessellationMode.NONE || device.supportsFamily(.apple3)
+                }
             ) { pipeline -> MTLRenderPipelineState in
                 do {
                     let pipelineDescriptor = PipelineDescriptorFactory.pipelineDescriptor(pipeline: pipeline, device: device, library: library)
