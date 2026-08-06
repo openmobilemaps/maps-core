@@ -1041,6 +1041,16 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolO
         return std::nullopt;
     }
 
+    const auto boundingCircles = getMapAlignedBoundingCircles(zoomIdentifier, false, false);
+    if (boundingCircles) {
+        for (const auto &circle : *boundingCircles) {
+            const auto projectedCircle = CollisionUtil::getProjectedCircle(circle, collisionEnvironment);
+            if (projectedCircle && CollisionUtil::checkCircleCollision(*projectedCircle, clickHitCircle)) {
+                return std::make_tuple(Coord(systemIdentifier, coordinate.x, coordinate.y, 0.0), featureContext->getFeatureInfo(stringTable));
+            }
+        }
+    }
+
     if (boundingBoxRotationAlignment == SymbolAlignment::VIEWPORT) {
         
         std::optional<CollisionRectD> boundingRect = getViewportAlignedBoundingBox(zoomIdentifier, false, false);
@@ -1051,22 +1061,6 @@ std::optional<std::tuple<Coord, VectorLayerFeatureInfo>> Tiled2dMapVectorSymbolO
             }
         }
 
-    } else {
-        const bool labelHit = labelObject && labelObject->boundingBoxCircles.has_value() &&
-                              CollisionUtil::checkProjectedCirclesCollision(*labelObject->boundingBoxCircles, clickHitCircle, collisionEnvironment);
-        if (labelHit) {
-            return std::make_tuple(Coord(systemIdentifier, coordinate.x, coordinate.y, 0.0), featureContext->getFeatureInfo(stringTable));
-        }
-
-        const bool iconHit = iconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(iconBoundingBoxViewportAligned, clickHitCircle);
-        if (iconHit) {
-            return std::make_tuple(Coord(systemIdentifier, coordinate.x, coordinate.y, 0.0), featureContext->getFeatureInfo(stringTable));
-        }
-
-        const bool stretchIconHit = stretchIconBoundingBoxViewportAligned.width != 0 && CollisionUtil::checkRectCircleCollision(stretchIconBoundingBoxViewportAligned, clickHitCircle);
-        if (stretchIconHit) {
-            return std::make_tuple(Coord(systemIdentifier, coordinate.x, coordinate.y, 0.0), featureContext->getFeatureInfo(stringTable));
-        }
     }
 
     return std::nullopt;
