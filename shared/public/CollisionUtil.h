@@ -218,8 +218,8 @@ public:
 
             return RectD {originX , originY - h, std::abs(w), std::abs(h)};
         } else {
-            env.temp2.x = (rectangle.x - env.origin.x) - rectangle.anchorX;
-            env.temp2.y = (rectangle.y - env.origin.y) - rectangle.anchorY;
+            env.temp2.x = rectangle.x - rectangle.anchorX;
+            env.temp2.y = rectangle.y - rectangle.anchorY;
             env.temp2.z = 0.0;
             env.temp2.w = 1.0;
 
@@ -227,8 +227,8 @@ public:
             double rotatedX = env.temp2.x * env.cosNegGridAngle - env.temp2.y * env.sinNegGridAngle;
             double rotatedY = env.temp2.x * env.sinNegGridAngle + env.temp2.y * env.cosNegGridAngle;
 
-            env.temp2.x = rotatedX + rectangle.anchorX;
-            env.temp2.y = rotatedY + rectangle.anchorY;
+            env.temp2.x = rotatedX + rectangle.anchorX - env.origin.x;
+            env.temp2.y = rotatedY + rectangle.anchorY - env.origin.y;
 
             MatrixD::multiply(env.vpMatrix, env.temp2, env.temp1);
 
