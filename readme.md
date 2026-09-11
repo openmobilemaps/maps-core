@@ -58,5 +58,8 @@ Get started using Open Mobiles Maps by integrating a map into an Android or iOS 
 
 [Architecture](./docs/architecture.md) describes, how C++ is used to shared most of the codebase between the two platforms.
 
+## Testing
+This project is tested with BrowserStack.
+
 ## License
 This project is licensed under the terms of the MPL 2 license. See the [LICENSE](LICENSE) file.
