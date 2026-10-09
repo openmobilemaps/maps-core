@@ -89,6 +89,26 @@ void Textured2dLayerObject::setRectCoord(const ::RectCoord &rectCoord) {
 }
 
 void Textured2dLayerObject::setRectCoord(const ::RectCoord &rectCoord, double overlapFactor) {
+    setRectCoord(rectCoord, overlapFactor, false);
+}
+
+void Textured2dLayerObject::setRectCoord(const ::RectCoord &rectCoord, double overlapFactor, bool preserveTextureScale) {
+    if (preserveTextureScale) {
+        const double width = rectCoord.bottomRight.x - rectCoord.topLeft.x;
+        const double height = rectCoord.bottomRight.y - rectCoord.topLeft.y;
+        const double x = rectCoord.topLeft.x - width * overlapFactor;
+        const double y = rectCoord.topLeft.y - height * overlapFactor;
+        const double w = width * (1.0 + 2.0 * overlapFactor);
+        const double h = height * (1.0 + 2.0 * overlapFactor);
+        const auto system = rectCoord.topLeft.systemIdentifier;
+        const auto z = rectCoord.topLeft.z;
+        // Expand UVs with the geometry: the image inside the original bounds
+        // keeps its mapping, while CLAMP_TO_EDGE covers subpixel raster gaps.
+        setPositions(QuadCoord(Coord(system, x, y, z), Coord(system, x + w, y, z),
+                               Coord(system, x + w, y + h, z), Coord(system, x, y + h, z)),
+                     RectD(-overlapFactor, -overlapFactor, 1.0 + 2.0 * overlapFactor, 1.0 + 2.0 * overlapFactor));
+        return;
+    }
     auto width = rectCoord.bottomRight.x - rectCoord.topLeft.x;
     auto height = rectCoord.bottomRight.y - rectCoord.topLeft.y;
     const double xOverlap = width * overlapFactor;
@@ -106,6 +126,10 @@ void Textured2dLayerObject::setPosition(const ::Coord &coord, double width, doub
 }
 
 void Textured2dLayerObject::setPositions(const ::QuadCoord &coords) {
+    setPositions(coords, RectD(0, 0, 1, 1));
+}
+
+void Textured2dLayerObject::setPositions(const ::QuadCoord &coords, const RectD &textureCoordinates) {
     QuadCoord renderCoords = conversionHelper->convertQuadToRenderSystem(coords);
 
     const double cx = (renderCoords.bottomRight.x + renderCoords.topLeft.x) / 2.0;
@@ -127,10 +151,9 @@ void Textured2dLayerObject::setPositions(const ::QuadCoord &coords) {
         return Vec3D(x, y, z);
     };
 
-    setFrame(Quad3dD(transform(renderCoords.topLeft),
-                     transform(renderCoords.topRight),
-                     transform(renderCoords.bottomRight),
-                     transform(renderCoords.bottomLeft)), origin);
+    quad->setFrame(Quad3dD(transform(renderCoords.topLeft), transform(renderCoords.topRight),
+                          transform(renderCoords.bottomRight), transform(renderCoords.bottomLeft)),
+                   textureCoordinates, origin, is3d);
 }
 
 void Textured2dLayerObject::setFrame(const ::Quad3dD &frame, const ::Vec3D & origin) {

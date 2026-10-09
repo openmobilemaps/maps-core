@@ -369,13 +369,10 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, VectorS
                                             is3D ? RASTER_TILE_RENDER_OVERLAP_FACTOR : 0.0);
                     tileGeometryMaskHashes[tile.tileInfo] = hash;
                 } else {
-                    // A stencil mask clips the expanded texture at the original
-                    // tile boundary. Adjacent tiles then overlap different image
-                    // rows, compressing labels that cross the seam. Keep the
-                    // texture aligned with the mask for flat masked layers.
-                    const double overlap = (!is3D && usesStencilTileMasking())
-                                               ? 0.0 : RASTER_TILE_RENDER_OVERLAP_FACTOR;
-                    tileObject->setRectCoord(tile.tileInfo.tileInfo.bounds, overlap);
+                    // Preserve the texture mapping inside the tile while still
+                    // covering subpixel gaps at adjacent stencil/quad edges.
+                    tileObject->setRectCoord(tile.tileInfo.tileInfo.bounds, RASTER_TILE_RENDER_OVERLAP_FACTOR,
+                                             !is3D && usesStencilTileMasking());
                 }
                 tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
 
