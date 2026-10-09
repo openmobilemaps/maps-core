@@ -71,6 +71,7 @@ class Textured2dLayerObject : public LayerObjectInterface, public std::enable_sh
 
     void setRectCoord(const ::RectCoord &rectCoord);
     void setRectCoord(const ::RectCoord &rectCoord, double overlapFactor);
+    void setRectCoord(const ::RectCoord &rectCoord, double overlapFactor, bool preserveTextureScale);
     void setPolygons(const std::vector<::PolygonCoord> &polygons, const ::RectCoord &textureBounds);
     void setPolygons(const std::vector<::PolygonCoord> &polygons, const ::RectCoord &textureBounds, double overlapFactor);
 
@@ -110,6 +111,7 @@ class Textured2dLayerObject : public LayerObjectInterface, public std::enable_sh
 
   protected:
     void setFrame(const ::Quad3dD &frame, const ::Vec3D & origin);
+    void setPositions(const ::QuadCoord &coords, const RectD &textureCoordinates);
 
   private:
     std::shared_ptr<Quad2dInterface> quad;

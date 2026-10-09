@@ -369,7 +369,10 @@ void Tiled2dMapRasterLayer::onTilesUpdated(const std::string &layerName, VectorS
                                             is3D ? RASTER_TILE_RENDER_OVERLAP_FACTOR : 0.0);
                     tileGeometryMaskHashes[tile.tileInfo] = hash;
                 } else {
-                    tileObject->setRectCoord(tile.tileInfo.tileInfo.bounds, RASTER_TILE_RENDER_OVERLAP_FACTOR);
+                    // Preserve the texture mapping inside the tile while still
+                    // covering subpixel gaps at adjacent stencil/quad edges.
+                    tileObject->setRectCoord(tile.tileInfo.tileInfo.bounds, RASTER_TILE_RENDER_OVERLAP_FACTOR,
+                                             !is3D && usesStencilTileMasking());
                 }
                 tilesToSetup.emplace_back(std::make_pair(tile, tileObject));
 
