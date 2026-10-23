@@ -5,6 +5,7 @@
 //  Created by Nicolas Märki on 14.02.2024.
 //
 
+import Combine
 import Foundation
 import MapCoreSharedModule
 
